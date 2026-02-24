@@ -1,0 +1,386 @@
+
+   PASS  Tests\Unit\AggregationServiceTest
+  ✓ Suficiente maps to 100                             0.01s  
+  ✓ Insuficiente maps to 50
+  ✓ Inexistente maps to 0
+  ✓ Apropriado maps to 100
+  ✓ Necessita melhorias maps to 50
+  ✓ Inapropriado maps to 0
+  ✓ Outro maps to 0
+  ✓ category score is calculated correctly
+  ✓ category score from feature: 300/400
+  ✓ category percentage calculation
+  ✓ section score is average of two category scores
+  ✓ section score rounds correctly
+  ✓ section percentage is average of two category percentages
+  ✓ score 95 gives Ouro
+  ✓ score 91 gives Ouro
+  ✓ score 100 gives Ouro
+  ✓ score 70 gives Prata
+  ✓ score 61 gives Prata
+  ✓ score 90 gives Prata
+  ✓ score 50 gives Bronze
+  ✓ score 41 gives Bronze
+  ✓ score 30 gives Incipiente
+  ✓ score 0 gives Incipiente
+  ✓ score 40 gives Incipiente
+
+   PASS  Tests\Unit\ComparisonServiceTest
+  ✓ positive delta between inspections                 0.04s  
+  ✓ negative delta between inspections
+  ✓ comparison rejects non-consolidated snapshots
+  ✓ comparison rejects different projects
+
+   PASS  Tests\Unit\DivergenceServiceTest
+  ✓ team average section score
+  ✓ all same answers gives low divergence
+  ✓ extreme variation gives high divergence
+  ✓ medium divergence classification
+  ✓ variance boundary at 10 is low
+  ✓ variance boundary at 11 is medium
+  ✓ variance boundary at 30 is medium
+  ✓ variance boundary at 31 is high
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Feature\Auth\AuthenticationFeatureTest
+  ✓ successful user registration creates user with un… 0.56s  
+  ✓ registration fires Registered event which trigger… 0.03s  
+  ✓ successful login with verified email creates sess… 0.04s  
+  ✓ unverified user is redirected to verification not… 0.02s  
+
+   PASS  Tests\Feature\Auth\AuthenticationTest
+  ✓ login screen can be rendered                       0.04s  
+  ✓ users can authenticate using the login screen      0.02s  
+  ✓ users can not authenticate with invalid password   0.23s  
+  ✓ users can logout                                   0.02s  
+
+   PASS  Tests\Feature\Auth\EmailVerificationTest
+  ✓ email verification screen can be rendered          0.03s  
+  ✓ email can be verified                              0.03s  
+  ✓ email is not verified with invalid hash            0.03s  
+
+   PASS  Tests\Feature\Auth\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered            0.03s  
+  ✓ password can be confirmed                          0.02s  
+  ✓ password is not confirmed with invalid password    0.24s  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered         0.04s  
+  ✓ reset password link can be requested               0.28s  
+  ✓ reset password screen can be rendered              0.26s  
+  ✓ password can be reset with valid token             0.23s  
+
+   PASS  Tests\Feature\Auth\PasswordUpdateTest
+  ✓ password can be updated                            0.03s  
+  ✓ correct password must be provided to update passw… 0.02s  
+
+   PASS  Tests\Feature\Auth\RegistrationTest
+  ✓ registration screen can be rendered                0.02s  
+  ✓ new users can register                             0.03s  
+
+   FAIL  Tests\Feature\AuthorizationTest
+  ✓ only owner can close inspection                    0.05s  
+  ⨯ observer can view closed inspection results        0.07s  
+  ⨯ comparison returns 400 for different projects      0.04s  
+
+   FAIL  Tests\Feature\ClosingTest
+  ✓ close inspection generates individual and consoli… 0.05s  
+  ✓ snapshot is immutable after closing                0.06s  
+  ⨯ closing via API generates snapshots                0.07s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ it returns a successful response                   0.03s  
+
+   FAIL  Tests\Feature\InspectionStateMachineTest
+  ⨯ creating inspection uses active questionnaire ver… 0.03s  
+  ⨯ draft inspection can transition to active          0.05s  
+  ⨯ active inspection can transition to closed         0.04s  
+  ⨯ closed inspection cannot be reopened               0.03s  
+  ✓ state machine rejects invalid transitions at mode… 0.03s  
+
+   FAIL  Tests\Feature\InvitationTest
+  ⨯ owner can invite a new member                      0.02s  
+  ⨯ accept invitation creates new user and adds to pr… 0.02s  
+  ⨯ accept invitation with existing user adds to proj… 0.02s  
+  ⨯ expired invitation returns error                   0.02s  
+  ✓ non-owner cannot invite members                    0.02s  
+
+   PASS  Tests\Feature\ProfileTest
+  ✓ profile page is displayed                          0.02s  
+  ✓ profile information can be updated                 0.02s  
+  ✓ email verification status is unchanged when the e… 0.02s  
+  ✓ user can delete their account                      0.03s  
+  ✓ correct password must be provided to delete accou… 0.02s  
+
+   FAIL  Tests\Feature\ProjectTest
+  ⨯ authenticated user can create a project            0.03s  
+  ✓ non-member cannot access project                   0.03s  
+  ⨯ member can access project                          0.03s  
+  ⨯ owner can update project                           0.02s  
+  ⨯ owner can delete project                           0.02s  
+  ✓ unauthenticated user cannot access projects        0.02s  
+
+   PASS  Tests\Feature\QuestionnaireVersioningTest
+  ✓ V1 seeder creates correct structure                0.04s  
+  ✓ question counts per section are correct            0.04s  
+  ✓ new inspection uses active version                 0.03s  
+  ✓ new version does not affect existing data          0.03s  
+
+   PASS  Tests\Feature\ResponseTest
+  ✓ evaluator can save valid response                  0.04s  
+  ✓ previous answer is replaced on resubmission        0.03s  
+  ✓ observer cannot respond                            0.04s  
+  ✓ cannot respond after closing                       0.03s  
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Authorizati…  AssertionFailedError   
+  Invalid JSON was returned from the route.
+
+  at tests\Feature\AuthorizationTest.php:99
+     95▕         ->getJson("/inspections/{$inspection->id}/team-results");
+     96▕ 
+     97▕     // Then the user must receive consolidated snapshot
+     98▕     $response->assertStatus(200);
+  ➜  99▕     $response->assertJsonStructure(['sections']);
+    100▕ });
+    101▕ 
+    102▕ test('comparison returns 400 for different projects', function () {
+    103▕     // Scenario: Invalid comparison
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\AuthorizationTest > comparison re…   
+  Expected response status code [400] but received 302.
+Failed asserting that 302 is identical to 400.
+
+The following errors occurred during the last request:
+
+As inspeções devem pertencer ao mesmo projeto.
+
+  at tests\Feature\AuthorizationTest.php:135
+    131▕     $response = $this->actingAs($this->owner)
+    132▕         ->getJson("/inspections/{$inspection1->id}/comparison/{$inspection2->id}");
+    133▕ 
+    134▕     // Then the system must return 400 Bad Request
+  ➜ 135▕     $response->assertStatus(400);
+    136▕ });
+    137▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClosingTest > closing via API gen…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\ClosingTest.php:150
+    146▕ 
+    147▕     $response = $this->actingAs($this->owner)
+    148▕         ->postJson("/inspections/{$inspection->id}/close");
+    149▕ 
+  ➜ 150▕     $response->assertStatus(200);
+    151▕     expect(ResultSnapshot::where('inspection_id', $inspection->id)->count())->toBeGreaterThanOrEqual(2);
+    152▕ });
+    153▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InspectionStateMachineTest > crea…   
+  Expected response status code [201] but received 302.
+Failed asserting that 302 is identical to 201.
+
+  at tests\Feature\InspectionStateMachineTest.php:30
+     26▕     // 005: New inspection uses active version
+     27▕     $response = $this->actingAs($this->owner)
+     28▕         ->postJson("/projects/{$this->project->id}/inspections");
+     29▕ 
+  ➜  30▕     $response->assertStatus(201);
+     31▕ 
+     32▕     $inspection = Inspection::first();
+     33▕     $activeVersion = QuestionnaireVersion::getActive();
+     34▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InspectionStateMachineTest > draf…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\InspectionStateMachineTest.php:50
+     46▕ 
+     47▕     $response = $this->actingAs($this->owner)
+     48▕         ->postJson("/inspections/{$inspection->id}/activate");
+     49▕ 
+  ➜  50▕     $response->assertStatus(200);
+     51▕     expect($inspection->fresh()->status)->toBe('active');
+     52▕     expect($inspection->fresh()->started_at)->not->toBeNull();
+     53▕ });
+     54▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InspectionStateMachineTest > acti…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\InspectionStateMachineTest.php:67
+     63▕ 
+     64▕     $response = $this->actingAs($this->owner)
+     65▕         ->postJson("/inspections/{$inspection->id}/close");
+     66▕ 
+  ➜  67▕     $response->assertStatus(200);
+     68▕     expect($inspection->fresh()->status)->toBe('closed');
+     69▕     expect($inspection->fresh()->closed_at)->not->toBeNull();
+     70▕ });
+     71▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InspectionStateMachineTest > clos…   
+  Expected response status code [422] but received 302.
+Failed asserting that 302 is identical to 422.
+
+The following errors occurred during the last request:
+
+Cannot transition from 'closed' to 'active'.
+
+  at tests\Feature\InspectionStateMachineTest.php:85
+     81▕ 
+     82▕     $response = $this->actingAs($this->owner)
+     83▕         ->postJson("/inspections/{$inspection->id}/activate");
+     84▕ 
+  ➜  85▕     $response->assertStatus(422);
+     86▕     expect($inspection->fresh()->status)->toBe('closed');
+     87▕ });
+     88▕ 
+     89▕ test('state machine rejects invalid transitions at model level', function () {
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationTest > owner can invite…   
+  Expected response status code [201] but received 302.
+Failed asserting that 302 is identical to 201.
+
+  at tests\Feature\InvitationTest.php:31
+     27▕         "/projects/{$this->project->id}/invite",
+     28▕         ['email' => 'newmember@example.com']
+     29▕     );
+     30▕ 
+  ➜  31▕     $response->assertStatus(201);
+     32▕ 
+     33▕     // Then a unique invitation token should be generated
+     34▕     $invitation = Invitation::where('email', 'newmember@example.com')->first();
+     35▕     expect($invitation)->not->toBeNull();
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationTest > accept invitatio…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\InvitationTest.php:66
+     62▕         'password' => 'securepassword',
+     63▕         'password_confirmation' => 'securepassword',
+     64▕     ]);
+     65▕ 
+  ➜  66▕     $response->assertStatus(200);
+     67▕ 
+     68▕     // Then a new user account should be created
+     69▕     $user = User::where('email', 'newperson@example.com')->first();
+     70▕     expect($user)->not->toBeNull();
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationTest > accept invitatio…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\InvitationTest.php:94
+     90▕     ]);
+     91▕ 
+     92▕     $response = $this->postJson("/invitations/{$invitation->token}/accept");
+     93▕ 
+  ➜  94▕     $response->assertStatus(200);
+     95▕     expect($this->project->hasMember($existingUser))->toBeTrue();
+     96▕     expect($this->project->getMemberRole($existingUser))->toBe('observer');
+     97▕ });
+     98▕
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationTest > expired invitati…   
+  Expected response status code [410] but received 302.
+Failed asserting that 302 is identical to 410.
+
+The following errors occurred during the last request:
+
+Invitation has expired.
+
+  at tests\Feature\InvitationTest.php:118
+    114▕         'password_confirmation' => 'securepassword',
+    115▕     ]);
+    116▕ 
+    117▕     // Then the system should return an invitation expired error
+  ➜ 118▕     $response->assertStatus(410);
+    119▕     $response->assertJsonFragment(['message' => 'Invitation has expired.']);
+    120▕ });
+    121▕ 
+    122▕ test('non-owner cannot invite members', function () {
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProjectTest > authenticated user…    
+  Expected response status code [201] but received 302.
+Failed asserting that 302 is identical to 201.
+
+  at tests\Feature\ProjectTest.php:23
+     19▕         'url' => 'https://example.com',
+     20▕     ]);
+     21▕ 
+     22▕     // Then the project should be persisted
+  ➜  23▕     $response->assertStatus(201);
+     24▕     $this->assertDatabaseHas('projects', [
+     25▕         'name' => 'My Privacy Project',
+     26▕         'url' => 'https://example.com',
+     27▕         'owner_id' => $user->id,
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProjectTest…  AssertionFailedError   
+  Invalid JSON was returned from the route.
+
+  at tests\Feature\ProjectTest.php:73
+     69▕ 
+     70▕     $response = $this->actingAs($owner)->getJson("/projects/{$project->id}");
+     71▕ 
+     72▕     $response->assertStatus(200);
+  ➜  73▕     $response->assertJsonFragment(['name' => $project->name]);
+     74▕ });
+     75▕ 
+     76▕ test('owner can update project', function () {
+     77▕     $owner = User::factory()->create();
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProjectTest > owner can update pr…   
+  Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+
+  at tests\Feature\ProjectTest.php:89
+     85▕     $response = $this->actingAs($owner)->putJson("/projects/{$project->id}", [
+     86▕         'name' => 'Updated Name',
+     87▕     ]);
+     88▕ 
+  ➜  89▕     $response->assertStatus(200);
+     90▕     expect($project->fresh()->name)->toBe('Updated Name');
+     91▕ });
+     92▕ 
+     93▕ test('owner can delete project', function () {
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProjectTest > owner can delete pr…   
+  Expected response status code [204] but received 302.
+Failed asserting that 302 is identical to 204.
+
+  at tests\Feature\ProjectTest.php:104
+    100▕     ]);
+    101▕ 
+    102▕     $response = $this->actingAs($owner)->deleteJson("/projects/{$project->id}");
+    103▕ 
+  ➜ 104▕     $response->assertStatus(204);
+    105▕     $this->assertSoftDeleted('projects', ['id' => $project->id]);
+    106▕ });
+    107▕ 
+    108▕ test('unauthenticated user cannot access projects', function () {
+
+
+  Tests:    15 failed, 80 passed (174 assertions)
+  Duration: 3.89s
+
