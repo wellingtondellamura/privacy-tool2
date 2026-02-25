@@ -1,59 +1,68 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/images/privacy-tool.png" width="200" alt="Privacy Tool Logo">
 </p>
 
-## About Laravel
+# Privacy Tool
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+O **Privacy Tool** é uma plataforma robusta desenvolvida para auxiliar organizações na gestão de privacidade, conformidade e proteção de dados. A ferramenta centraliza o gerenciamento de inspeções, projetos e colaboração em equipe em um único ambiente intuitivo.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Funcionalidades Principais
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Gestão de Projetos**: Organize suas iniciativas de conformidade por projetos dedicados.
+- **Inspeções de Privacidade**: Realize avaliações detalhadas baseadas em questionários estruturados e categorias específicas.
+- **Colaboração em Equipe**: Convide membros para seus projetos e gerencie permissões de acesso.
+- **Resultados e Snapshots**: Visualize o progresso da conformidade através de snapshots históricos e relatórios de resultados.
+- **Questionários Flexíveis**: Suporte a múltiplas versões de questionários e seções organizadas.
 
-## Learning Laravel
+## 💻 Stack Tecnológica
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Backend**: [Laravel 12](https://laravel.com)
+- **Frontend**: [Vue.js 3](https://vuejs.org) com [Inertia.js](https://inertiajs.com)
+- **Estilização**: [Tailwind CSS](https://tailwindcss.com)
+- **Banco de Dados**: MySQL / PostgreSQL / SQLite
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Instalação e Configuração
 
-## Laravel Sponsors
+### Pré-requisitos
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.2 ou superior
+- Node.js & NPM
+- Composer
 
-### Premium Partners
+### Passo a Passo
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/wellingtondellamura/privacy-tool2.git
+   cd privacy_tool2
+   ```
 
-## Contributing
+2. **Instale as dependências do PHP:**
+   ```bash
+   composer install
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. **Instale as dependências do Frontend:**
+   ```bash
+   npm install
+   ```
 
-## Code of Conduct
+4. **Configure o ambiente:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Execute as migrações:**
+   ```bash
+   php artisan migrate
+   ```
 
-## Security Vulnerabilities
+6. **Inicie o servidor de desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 📄 Licença
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Este projeto é um software de código aberto licenciado sob a [MIT license](https://opensource.org/licenses/MIT).
