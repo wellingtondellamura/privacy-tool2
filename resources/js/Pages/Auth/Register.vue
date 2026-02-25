@@ -20,7 +20,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Register" />
+        <Head title="Cadastrar" />
 
         <form @submit.prevent="submit" class="space-y-6">
             <div>

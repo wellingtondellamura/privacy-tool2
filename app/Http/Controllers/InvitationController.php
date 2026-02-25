@@ -42,7 +42,7 @@ class InvitationController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-        Mail::to($invitation->email)->queue(new ProjectInvitationMail($invitation, $project));
+        Mail::to($invitation->email)->send(new ProjectInvitationMail($invitation, $project));
 
         return redirect()->back()->with('success', "Convite enviado com sucesso para {$validated['email']}.");
     }
@@ -132,7 +132,7 @@ class InvitationController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-        Mail::to($invitation->email)->queue(new ProjectInvitationMail($invitation, $invitation->project));
+        Mail::to($invitation->email)->send(new ProjectInvitationMail($invitation, $invitation->project));
 
         return redirect()->back()->with('success', "Convite reenviado com sucesso para {$invitation->email}.");
     }
