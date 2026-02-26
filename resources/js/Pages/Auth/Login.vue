@@ -15,8 +15,8 @@ defineProps({
 });
 
 const form = useForm({
-    email: 'admin@admin.com', // Pre-fill with user email seeded
-    password: 'password',     // Pre-fill with password seeded
+    email: '', // Pre-fill with user email seeded
+    password: '',     // Pre-fill with password seeded
     remember: false,
 });
 

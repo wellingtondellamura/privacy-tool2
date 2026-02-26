@@ -28,8 +28,7 @@ defineProps({
         <!-- Navigation -->
         <header class="w-full px-6 py-4 flex justify-between items-center bg-white border-b border-surface-200 shrink-0 sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
-                <ApplicationLogo class="h-8 w-auto text-brand-600 fill-current" />
-                <span class="font-bold text-lg text-surface-900 tracking-tight hidden sm:block">Privacy Tool v2</span>
+                <ApplicationLogo class="h-8 w-auto text-brand-600 fill-current" />                
             </div>
             <nav v-if="canLogin" class="flex items-center gap-4">
                 <a href="#metodologia" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Metodologia</a>
@@ -275,8 +274,7 @@ defineProps({
                 <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
                     <div>
                         <div class="flex items-center gap-3 mb-6">
-                            <ApplicationLogo class="h-6 w-auto text-brand-400 fill-current" />
-                            <span class="font-bold text-lg text-white">Privacy Tool</span>
+                            <ApplicationLogo class="h-6 w-auto text-brand-400 fill-current" />                            
                         </div>
                         <p class="text-sm max-w-sm leading-relaxed text-surface-400">
                             Uma iniciativa para ampliar a aderência a boas práticas técnicas de dados pessoais e empoderar a transparência.

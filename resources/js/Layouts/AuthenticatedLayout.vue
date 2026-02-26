@@ -25,7 +25,7 @@ const user = usePage().props.auth.user;
                         <div class="flex shrink-0 items-center">
                             <Link :href="route('dashboard')">
                                 <ApplicationLogo
-                                    class="block h-9 w-auto fill-current text-brand-600 transition-transform duration-smooth hover:scale-105"
+                                    class="block h-10 w-auto transition-transform duration-smooth hover:scale-105"
                                 />
                             </Link>
                         </div>

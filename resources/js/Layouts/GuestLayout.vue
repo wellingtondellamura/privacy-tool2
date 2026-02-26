@@ -9,10 +9,8 @@ import { Link } from '@inertiajs/vue3';
     >
         <div class="mb-6 flex flex-col items-center">
             <Link href="/">
-                <ApplicationLogo class="h-16 w-16 fill-current text-brand-600" />
+                <ApplicationLogo class="h-20 w-auto transition-transform duration-smooth hover:scale-105" />
             </Link>
-            <h1 class="mt-4 text-2xl font-semibold text-surface-900 tracking-tight">Privacy Tool</h1>
-            <p class="mt-1 text-surface-500 text-sm">Transparência no uso de dados pessoais</p>
         </div>
 
         <div

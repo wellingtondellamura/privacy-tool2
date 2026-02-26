@@ -1,3 +1,3 @@
 <template>
-    <img src="/images/privacy-logo.png" alt="Privacy Tool Logo" />
+    <img src="/images/privacy-tool.png" alt="Privacy Tool Logo" v-bind="$attrs" />
 </template>
