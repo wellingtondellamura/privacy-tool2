@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuestionnaireVersion extends Model
 {
+    use HasFactory;
     protected $fillable = ['version_number', 'is_active'];
 
     protected function casts(): array
@@ -21,8 +23,22 @@ class QuestionnaireVersion extends Model
         return $this->hasMany(Section::class)->orderBy('order');
     }
 
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
     public static function getActive(): ?self
     {
         return static::where('is_active', true)->first();
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (QuestionnaireVersion $version) {
+            if ($version->is_active) {
+                static::where('id', '!=', $version->id)->update(['is_active' => false]);
+            }
+        });
     }
 }

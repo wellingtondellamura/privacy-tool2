@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Wellington',
             'email' => 'admin@admin.com',
             'password' => bcrypt('password'), // password
+            'is_admin' => true,
             'email_verified_at' => now(), // verified so user can login directly
         ]);
 

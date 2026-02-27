@@ -48,7 +48,7 @@ class Project extends Model
         return $this->hasMany(Inspection::class);
     }
 
-    public function users(): BelongsToMany
+    public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'project_members')
             ->withPivot('role')
