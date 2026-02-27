@@ -7,6 +7,9 @@ import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import Input from '@/Components/Input.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+import ProjectIcon from '@/Components/ProjectIcon.vue';
+import ProjectIconPicker from '@/Components/ProjectIconPicker.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 
 const props = defineProps({
     project: {
@@ -16,11 +19,37 @@ const props = defineProps({
 });
 
 const isInviting = ref(false);
+const isProjectEditing = ref(false);
+const isResendingConfirm = ref(false);
+const resendingInvitationId = ref(null);
 
 const inviteForm = useForm({
     email: '',
     role: 'evaluator',
 });
+
+const projectForm = useForm({
+    name: props.project.name,
+    description: props.project.description,
+    url: props.project.url,
+    icon: props.project.icon,
+    color: props.project.color,
+});
+
+const toggleProjectEdit = () => {
+    isProjectEditing.value = !isProjectEditing.value;
+    if (!isProjectEditing.value) {
+        projectForm.reset();
+    }
+};
+
+const updateProject = () => {
+    projectForm.put(route('projects.update', props.project.id), {
+        onSuccess: () => {
+            isProjectEditing.value = false;
+        },
+    });
+};
 
 const submitInvite = () => {
     inviteForm.post(route('projects.invite', props.project.id), {
@@ -58,11 +87,18 @@ const updateRole = (userId, newRole) => {
 };
 
 const resendInvitation = (invitationId) => {
-    if (confirm('Deseja reenviar este convite? O prazo será estendido por mais 7 dias.')) {
-        router.post(route('invitations.resend', invitationId), {}, {
-            preserveScroll: true
-        });
-    }
+    resendingInvitationId.value = invitationId;
+    isResendingConfirm.value = true;
+};
+
+const confirmResend = () => {
+    router.post(route('invitations.resend', resendingInvitationId.value), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isResendingConfirm.value = false;
+            resendingInvitationId.value = null;
+        }
+    });
 };
 </script>
 
@@ -71,18 +107,76 @@ const resendInvitation = (invitationId) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center gap-4">
+            <div class="flex items-start gap-4">
                 <div class="flex-grow">
                     <Breadcrumbs :items="[
                         { label: 'Workspace', url: route('projects.index') },
                         { label: project.name }
                     ]" />
-                    <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
-                        {{ project.name }}
-                    </h2>
-                    <p class="text-sm text-surface-500 max-w-2xl mt-1">{{ project.description || 'Nenhuma descrição fornecida.' }}</p>
+                    
+                    <div v-if="!isProjectEditing">
+                        <div class="flex items-center gap-3">
+                            <ProjectIcon :icon="project.icon" :color="project.color" size="md" />
+                            <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                                {{ project.name }}
+                            </h2>
+                            <button v-if="canManageMembers" @click="toggleProjectEdit" class="text-surface-400 hover:text-brand-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-sm text-surface-500 max-w-2xl mt-1">{{ project.description || 'Nenhuma descrição fornecida.' }}</p>
+                    </div>
+
+                    <div v-else class="mt-4 space-y-4 max-w-2xl bg-surface-50 p-6 rounded-xl border border-surface-200 shadow-inner">
+                        <div class="space-y-4">
+                            <Input
+                                label="Nome do Projeto"
+                                v-model="projectForm.name"
+                                :error="projectForm.errors.name"
+                                required
+                            />
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-surface-700">Descrição</label>
+                                <textarea
+                                    v-model="projectForm.description"
+                                    rows="3"
+                                    class="block w-full rounded-lg border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                                    placeholder="Breve descrição do projeto..."
+                                ></textarea>
+                                <p v-if="projectForm.errors.description" class="text-xs text-red-600 mt-1">{{ projectForm.errors.description }}</p>
+                            </div>
+                            <Input
+                                label="Website (URL)"
+                                v-model="projectForm.url"
+                                :error="projectForm.errors.url"
+                                placeholder="https://..."
+                            />
+                            <ProjectIconPicker
+                                v-model:icon="projectForm.icon"
+                                v-model:color="projectForm.color"
+                                :error-icon="projectForm.errors.icon"
+                                :error-color="projectForm.errors.color"
+                                class="py-2"
+                            />
+                        </div>
+                        <div class="flex items-center gap-2 pt-2">
+                            <Button size="sm" variant="primary" @click="updateProject" :disabled="projectForm.processing">
+                                Salvar Alterações
+                            </Button>
+                            <Button size="sm" variant="ghost" @click="toggleProjectEdit">
+                                Cancelar
+                            </Button>
+                        </div>
+                    </div>
                 </div>
-                <div>
+                <div class="flex items-center gap-2 mt-2">
+                    <a :href="route('projects.export', project.id)" target="_blank">
+                        <Button variant="outline">
+                            Exportar JSON
+                        </Button>
+                    </a>
                     <Button variant="primary" @click="$inertia.post(route('inspections.store', project.id))">
                         Nova Inspeção
                     </Button>
@@ -112,7 +206,7 @@ const resendInvitation = (invitationId) => {
                                             Inspeção #{{ inspection.id }}
                                         </p>
                                         <p class="text-xs text-surface-500">
-                                            Criada em {{ formatDate(inspection.created_at) }}
+                                            Criada em {{ formatDate(inspection.created_at) }} • <span class="font-medium text-surface-700">Responsável: {{ inspection.user?.name || 'Sistema' }}</span>
                                         </p>
                                     </div>
                                     <div>
@@ -266,4 +360,16 @@ const resendInvitation = (invitationId) => {
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <!-- Modal de Reenvio de Convite -->
+    <ConfirmModal
+        :show="isResendingConfirm"
+        title="Reenviar Convite"
+        message="Deseja reenviar este convite? O prazo será estendido por mais 7 dias."
+        confirm-text="Sim, Reenviar"
+        cancel-text="Cancelar"
+        confirm-variant="brand"
+        @confirm="confirmResend"
+        @close="isResendingConfirm = false"
+    />
 </template>

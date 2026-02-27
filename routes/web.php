@@ -6,6 +6,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\DataExportController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -68,6 +69,12 @@ Route::middleware('auth')->group(function () {
         ->name('results.team');
     Route::get('/inspections/{inspection}/comparison/{other}', [ResultController::class, 'comparison'])
         ->name('results.comparison');
+
+    // Export routes
+    Route::get('/projects/{project}/export', [DataExportController::class, 'exportProject'])
+        ->name('projects.export');
+    Route::get('/profile/export-all', [DataExportController::class, 'exportAll'])
+        ->name('profile.export-all');
 });
 
 require __DIR__.'/auth.php';

@@ -16,7 +16,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden transition-all duration-smooth hover:shadow-tactile-hover">
+    <div class="relative bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden transition-all duration-smooth hover:shadow-tactile-hover">
         <div v-if="title || $slots.header" class="px-6 py-5 border-b border-surface-100 bg-surface-50/50">
             <slot name="header">
                 <h3 class="text-lg font-medium leading-6 text-surface-900">{{ title }}</h3>

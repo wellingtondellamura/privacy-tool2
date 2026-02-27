@@ -13,11 +13,17 @@ class Inspection extends Model
 
     protected $fillable = [
         'project_id',
+        'user_id',
         'questionnaire_version_id',
         'status',
         'started_at',
         'closed_at',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     protected function casts(): array
     {

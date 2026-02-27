@@ -108,6 +108,7 @@ const isDraft = computed(() => props.inspection.status === 'draft');
 const isActive = computed(() => props.inspection.status === 'active');
 const isClosed = computed(() => props.inspection.status === 'closed');
 const isOwner = computed(() => props.inspection.project.owner_id === usePage().props.auth.user.id);
+const isResponsible = computed(() => props.inspection.user_id === usePage().props.auth.user.id);
 
 </script>
 
@@ -179,25 +180,29 @@ const isOwner = computed(() => props.inspection.project.owner_id === usePage().p
                 <div class="space-y-3">
                     <h3 class="text-sm font-medium text-surface-900">Ações</h3>
                     
-                    <div v-if="isDraft" class="p-4 bg-surface-50 rounded-lg border border-surface-200">
-                        <p class="text-xs text-surface-600 mb-3">
+                        <p v-if="isResponsible" class="text-xs text-surface-600 mb-3">
                             A inspeção está em rascunho. Ative para permitir respostas.
                         </p>
-                        <Button variant="primary" size="sm" class="w-full" @click="activateInspection" :disabled="activateForm.processing">
+                        <p v-else class="text-xs text-surface-600 mb-3 italic">
+                            Aguardando o responsável (<span class="font-medium">{{ inspection.user?.name }}</span>) iniciar a inspeção.
+                        </p>
+                        <Button v-if="isResponsible" variant="primary" size="sm" class="w-full" @click="activateInspection" :disabled="activateForm.processing">
                             Ativar Inspeção
                         </Button>
-                    </div>
 
-                    <div v-if="isActive && isOwner" class="p-4 bg-surface-50 rounded-lg border border-surface-200">
+                    <div v-if="isActive" class="p-4 bg-surface-50 rounded-lg border border-surface-200">
                         <p class="text-xs text-surface-600 mb-3">
                             Progresso Global: {{ calculateGlobalProgress() }}%
                         </p>
                         <div class="w-full bg-surface-200 rounded-full h-2 mb-4">
                             <div class="bg-brand-500 h-2 rounded-full transition-all duration-500" :style="`width: ${calculateGlobalProgress()}%`"></div>
                         </div>
-                        <Button variant="danger" size="sm" class="w-full" @click="openCloseConfirm" :disabled="closeForm.processing">
+                        <Button v-if="isResponsible" variant="danger" size="sm" class="w-full" @click="openCloseConfirm" :disabled="closeForm.processing">
                             Finalizar Inspeção
                         </Button>
+                        <p v-else class="text-[10px] text-surface-500 text-center italic">
+                            Apenas o responsável (<span class="font-medium text-surface-700">{{ inspection.user?.name }}</span>) pode finalizar esta inspeção.
+                        </p>
                     </div>
 
                     <div v-if="isClosed" class="p-4 bg-green-50 rounded-lg border border-green-200 text-center">
@@ -213,6 +218,10 @@ const isOwner = computed(() => props.inspection.project.owner_id === usePage().p
                 <!-- Informações -->
                 <div class="space-y-2">
                     <h3 class="text-sm font-medium text-surface-900">Detalhes</h3>
+                    <p class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">Responsável: </span>
+                        {{ inspection.user?.name || 'Sistema' }}
+                    </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">Versão: </span>
                         {{ inspection.questionnaire_version.version }}

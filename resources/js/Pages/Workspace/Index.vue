@@ -5,6 +5,9 @@ import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import ProjectIcon from '@/Components/ProjectIcon.vue';
+import ProjectIconPicker from '@/Components/ProjectIconPicker.vue';
+import { PROJECT_ICONS, PROJECT_COLORS } from '@/Constants/ProjectOptions';
 
 defineProps({
     projects: {
@@ -23,6 +26,8 @@ const form = useForm({
     name: '',
     description: '',
     url: '',
+    icon: PROJECT_ICONS[0],
+    color: PROJECT_COLORS[0].name,
 });
 
 const submit = () => {
@@ -69,53 +74,58 @@ const declineInvitation = (id) => {
                     leave-from-class="transform opacity-100 scale-100"
                     leave-to-class="transform opacity-0 scale-95"
                 >
-                    <Card v-if="isCreatingNode" class="mb-8" title="Criar Novo Projeto" description="Um projeto pode ser um software, aplicativo ou site a ser inspecionado.">
-                        <form @submit.prevent="submit" class="space-y-4">
-                            <div>
-                                <Input
-                                    label="Nome do Projeto"
-                                    id="name"
-                                    type="text"
-                                    v-model="form.name"
-                                    required
-                                    autofocus
-                                    :error="form.errors.name"
-                                    placeholder="Sistema XYZ"
-                                />
-                            </div>
-                            
-                            <div>
-                                <Input
-                                    label="Descrição (Opcional)"
-                                    id="description"
-                                    type="text"
-                                    v-model="form.description"
-                                    :error="form.errors.description"
-                                    placeholder="Breve descrição sobre o contexto..."
-                                />
-                            </div>
+                    <div v-if="isCreatingNode" class="mb-12">
+                        <Card title="Criar Novo Projeto" description="Um projeto pode ser um software, aplicativo ou site a ser inspecionado.">
+                            <div class="mt-4 bg-surface-50 p-6 rounded-xl border border-surface-200 shadow-inner">
+                                <form @submit.prevent="submit" class="space-y-4">
+                                    <Input
+                                        label="Nome do Projeto"
+                                        id="name"
+                                        type="text"
+                                        v-model="form.name"
+                                        required
+                                        autofocus
+                                        :error="form.errors.name"
+                                        placeholder="Ex: Sistema de Gestão Interna"
+                                    />
+                                    
+                                    <div class="space-y-1">
+                                        <label class="block text-sm font-medium text-surface-700">Descrição</label>
+                                        <textarea
+                                            v-model="form.description"
+                                            rows="3"
+                                            class="block w-full rounded-lg border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                                            placeholder="Breve descrição sobre o contexto e finalidade do projeto..."
+                                        ></textarea>
+                                        <p v-if="form.errors.description" class="text-xs text-red-600 mt-1">{{ form.errors.description }}</p>
+                                    </div>
 
-                            <div>
-                                <Input
-                                    label="URL do Produto (Opcional)"
-                                    id="url"
-                                    type="url"
-                                    v-model="form.url"
-                                    :error="form.errors.url"
-                                    placeholder="https://exemplo.com"
-                                />
-                            </div>
+                                    <Input
+                                        label="URL do Produto (Site)"
+                                        id="url"
+                                        type="url"
+                                        v-model="form.url"
+                                        :error="form.errors.url"
+                                    <ProjectIconPicker
+                                        v-model:icon="form.icon"
+                                        v-model:color="form.color"
+                                        :error-icon="form.errors.icon"
+                                        :error-color="form.errors.color"
+                                        class="py-2"
+                                    />
 
-                            <div class="flex justify-end gap-3 pt-4">
-                                <Button type="button" variant="ghost" @click="isCreatingNode = false">
-                                    Cancelar
-                                </Button>
-                                <Button type="submit" variant="primary" :disabled="form.processing">
-                                    Criar Projeto
-                                </Button>
+                                    <div class="flex justify-end gap-3 pt-4 border-t border-surface-100 mt-6">
+                                        <Button type="button" variant="ghost" @click="isCreatingNode = false">
+                                            Cancelar
+                                        </Button>
+                                        <Button type="submit" variant="primary" :disabled="form.processing">
+                                            Criar Projeto
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
-                    </Card>
+                        </Card>
+                    </div>
                 </transition>
 
                 <!-- Pending Invitations -->
@@ -163,12 +173,15 @@ const declineInvitation = (id) => {
                 <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <Card v-for="project in projects" :key="project.id" class="flex flex-col h-full hover:-translate-y-1 transition-transform duration-smooth">
                         <div class="flex-grow">
-                            <h3 class="text-lg font-medium text-surface-900 group-hover:text-brand-600 transition-colors">
-                                <Link :href="route('projects.show', project.id)" class="focus:outline-none">
-                                    <span class="absolute inset-0" aria-hidden="true" />
-                                    {{ project.name }}
-                                </Link>
-                            </h3>
+                            <div class="flex items-center gap-3 mb-3">
+                                <ProjectIcon :icon="project.icon" :color="project.color" size="sm" />
+                                <h3 class="text-lg font-medium text-surface-900 group-hover:text-brand-600 transition-colors">
+                                    <Link :href="route('projects.show', project.id)" class="focus:outline-none">
+                                        <span class="absolute inset-0" aria-hidden="true" />
+                                        {{ project.name }}
+                                    </Link>
+                                </h3>
+                            </div>
                             <p class="mt-2 text-sm text-surface-500 line-clamp-2">
                                 {{ project.description || 'Sem descrição.' }}
                             </p>

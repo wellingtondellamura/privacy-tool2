@@ -47,6 +47,8 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'url' => 'nullable|url|max:500',
+            'icon' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
         ]);
 
         $user = Auth::user();
@@ -79,7 +81,7 @@ class ProjectController extends Controller
                 $query->orderBy('created_at', 'desc');
             },
             'inspections' => function ($query) {
-                $query->orderBy('created_at', 'desc');
+                $query->with('user')->orderBy('created_at', 'desc');
             }
         ]);
 
@@ -104,6 +106,8 @@ class ProjectController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'url' => 'nullable|url|max:500',
+            'icon' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
         ]);
 
         $project->update($validated);

@@ -18,6 +18,8 @@ class Project extends Model
         'description',
         'url',
         'owner_id',
+        'icon',
+        'color',
     ];
 
     public function owner(): BelongsTo

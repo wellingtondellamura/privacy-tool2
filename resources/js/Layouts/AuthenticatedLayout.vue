@@ -1,15 +1,93 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import AlertModal from '@/Components/AlertModal.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
 
 const user = usePage().props.auth.user;
+const page = usePage();
+
+const flashModal = ref({
+    show: false,
+    title: '',
+    message: '',
+    variant: 'primary'
+});
+
+const closeFlash = () => {
+    flashModal.value.show = false;
+};
+
+watch(() => page.props.flash, (flash) => {
+    if (flash.success) {
+        flashModal.value = {
+            show: true,
+            title: 'Sucesso',
+            message: flash.success,
+            variant: 'success'
+        };
+    } else if (flash.error) {
+        flashModal.value = {
+            show: true,
+            title: 'Erro',
+            message: flash.error,
+            variant: 'danger'
+        };
+    } else if (flash.warning) {
+        flashModal.value = {
+            show: true,
+            title: 'Aviso',
+            message: flash.warning,
+            variant: 'warning'
+        };
+    } else if (flash.info) {
+        flashModal.value = {
+            show: true,
+            title: 'Informação',
+            message: flash.info,
+            variant: 'primary'
+        };
+    }
+}, { deep: true });
+
+// Check on mount for initial flash
+onMounted(() => {
+    if (page.props.flash?.success) {
+        flashModal.value = {
+            show: true,
+            title: 'Sucesso',
+            message: page.props.flash.success,
+            variant: 'success'
+        };
+    } else if (page.props.flash?.error) {
+        flashModal.value = {
+            show: true,
+            title: 'Erro',
+            message: page.props.flash.error,
+            variant: 'danger'
+        };
+    } else if (page.props.flash?.warning) {
+        flashModal.value = {
+            show: true,
+            title: 'Aviso',
+            message: page.props.flash.warning,
+            variant: 'warning'
+        };
+    } else if (page.props.flash?.info) {
+        flashModal.value = {
+            show: true,
+            title: 'Informação',
+            message: page.props.flash.info,
+            variant: 'primary'
+        };
+    }
+});
 </script>
 
 <template>
@@ -194,5 +272,13 @@ const user = usePage().props.auth.user;
         <main>
             <slot />
         </main>
+        <!-- Flash Alert Modal -->
+        <AlertModal
+            :show="flashModal.show"
+            :title="flashModal.title"
+            :message="flashModal.message"
+            :variant="flashModal.variant"
+            @close="closeFlash"
+        />
     </div>
 </template>
