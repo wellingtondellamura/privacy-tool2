@@ -203,7 +203,7 @@ const confirmResend = () => {
                                 <li v-for="inspection in project.inspections" :key="inspection.id" class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg cursor-pointer" @click="$inertia.get(route('inspections.show', inspection.id))">
                                     <div>
                                         <p class="text-sm font-medium text-surface-900">
-                                            Inspeção #{{ inspection.id }}
+                                            Inspeção #{{ inspection.sequential_id }}
                                         </p>
                                         <p class="text-xs text-surface-500">
                                             Criada em {{ formatDate(inspection.created_at) }} • <span class="font-medium text-surface-700">Responsável: {{ inspection.user?.name || 'Sistema' }}</span>

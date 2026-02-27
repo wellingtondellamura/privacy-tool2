@@ -11,6 +11,8 @@ class InspectionInfolist
     {
         return $schema
             ->components([
+                TextEntry::make('sequential_id')
+                    ->label('#'),
                 TextEntry::make('project.name')
                     ->numeric(),
                 TextEntry::make('user.name')

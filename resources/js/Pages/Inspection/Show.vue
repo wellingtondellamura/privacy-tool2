@@ -110,10 +110,34 @@ const isClosed = computed(() => props.inspection.status === 'closed');
 const isOwner = computed(() => props.inspection.project.owner_id === usePage().props.auth.user.id);
 const isResponsible = computed(() => props.inspection.user_id === usePage().props.auth.user.id);
 
+const toRoman = (num) => {
+    if (isNaN(num)) return '';
+    const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+    let result = '';
+    for (let key in map) {
+        while (num >= map[key]) {
+            result += key;
+            num -= map[key];
+        }
+    }
+    return result;
+};
+
+const toAlpha = (index) => String.fromCharCode(65 + index);
+
+const activeSectionIndex = computed(() => {
+    return sections.value.findIndex(s => s.categories.some(c => c.id === activeCategoryId.value));
+});
+
+const activeCategoryIndex = computed(() => {
+    const section = sections.value[activeSectionIndex.value];
+    return section ? section.categories.findIndex(c => c.id === activeCategoryId.value) : -1;
+});
+
 </script>
 
 <template>
-    <Head :title="`Inspeção #${inspection.id}`" />
+    <Head :title="`Inspeção #${inspection.sequential_id}`" />
 
     <InspectionLayout>
 
@@ -122,12 +146,12 @@ const isResponsible = computed(() => props.inspection.user_id === usePage().prop
             <div>
                 <h3 class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">Seções</h3>
                 <nav class="space-y-4">
-                    <div v-for="section in sections" :key="section.id" class="space-y-1">
+                    <div v-for="(section, sIndex) in sections" :key="section.id" class="space-y-1">
                         <div class="px-2 font-medium text-surface-900 text-sm mb-2">
-                            {{ section.name }}
+                            {{ toRoman(sIndex + 1) }}. {{ section.name }}
                         </div>
                         <button
-                            v-for="cat in section.categories"
+                            v-for="(cat, cIndex) in section.categories"
                             :key="cat.id"
                             @click="activeCategoryId = cat.id"
                             :class="[
@@ -138,7 +162,7 @@ const isResponsible = computed(() => props.inspection.user_id === usePage().prop
                             ]"
                         >
                             <div class="flex justify-between items-center w-full">
-                                <span class="truncate pr-2">{{ cat.name }}</span>
+                                <span class="truncate pr-2">{{ toAlpha(cIndex) }}. {{ cat.name }}</span>
                                 <span v-if="calculateCategoryProgress(cat) === 100" class="text-brand-600">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                                 </span>
@@ -160,10 +184,10 @@ const isResponsible = computed(() => props.inspection.user_id === usePage().prop
                     <Breadcrumbs :items="[
                         { label: 'Workspace', url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
-                        { label: `Inspeção #${inspection.id}` }
+                        { label: `Inspeção #${inspection.sequential_id}` }
                     ]" />
                     <h1 class="text-2xl font-semibold text-surface-900 truncate mt-1">
-                        Inspeção #{{ inspection.id }}
+                        {{ toRoman(activeSectionIndex + 1) }}.{{ toAlpha(activeCategoryIndex) }} - {{ activeCategory.name }}
                     </h1>
                 </div>
                 <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')" class="ml-2 shrink-0">
@@ -257,9 +281,10 @@ const isResponsible = computed(() => props.inspection.user_id === usePage().prop
                     leave-active-class="hidden"
                 >
                     <QuestionCard
-                        v-for="question in activeCategory.questions"
+                        v-for="(question, qIndex) in activeCategory.questions"
                         :key="question.id"
                         :question="question"
+                        :index="qIndex + 1"
                         :inspection-id="inspection.id"
                         :existing-response="responseMap[question.id]"
                         :disabled="!isActive"

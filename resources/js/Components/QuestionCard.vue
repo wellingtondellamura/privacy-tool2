@@ -19,6 +19,10 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false,
+    },
+    index: {
+        type: Number,
+        required: true,
     }
 });
 
@@ -89,8 +93,8 @@ const getOptions = () => {
             <span class="text-xs text-brand-500 font-medium">Salvando...</span>
         </div>
 
-        <h4 class="text-lg font-medium text-surface-900 leading-relaxed max-w-2xl pr-20">
-            {{ question.text }}
+        <h4 class="text-lg font-medium text-surface-900 leading-relaxed">
+            {{ index }}. {{ question.text }}
         </h4>
 
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

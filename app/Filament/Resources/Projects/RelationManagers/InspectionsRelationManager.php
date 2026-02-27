@@ -15,7 +15,7 @@ class InspectionsRelationManager extends RelationManager
 
     protected static ?string $title = 'Inspeções';
 
-    protected static ?string $recordTitleAttribute = 'id';
+    protected static ?string $recordTitleAttribute = 'sequential_id';
 
     public function form(Schema $schema): Schema
     {
@@ -28,8 +28,8 @@ class InspectionsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
+                TextColumn::make('sequential_id')
+                    ->label('#')
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('Status')

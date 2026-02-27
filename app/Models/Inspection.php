@@ -11,8 +11,18 @@ class Inspection extends Model
 {
     use HasFactory;
 
+    protected static function booted()
+    {
+        static::creating(function (Inspection $inspection) {
+            if (!$inspection->sequential_id) {
+                $inspection->sequential_id = (static::where('project_id', $inspection->project_id)->max('sequential_id') ?? 0) + 1;
+            }
+        });
+    }
+
     protected $fillable = [
         'project_id',
+        'sequential_id',
         'user_id',
         'questionnaire_version_id',
         'status',

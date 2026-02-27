@@ -19,6 +19,9 @@ class InspectionsTable
     {
         return $table
             ->columns([
+                TextColumn::make('sequential_id')
+                    ->label('#')
+                    ->sortable(),
                 TextColumn::make('project.name')
                     ->label('Projeto')
                     ->numeric()

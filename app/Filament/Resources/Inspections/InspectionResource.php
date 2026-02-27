@@ -44,7 +44,7 @@ class InspectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMagnifyingGlass;
 
-    protected static ?string $recordTitleAttribute = 'id';
+    protected static ?string $recordTitleAttribute = 'sequential_id';
 
     public static function getNavigationBadge(): ?string
     {

@@ -40,7 +40,7 @@ const globalDelta = totalCompScore - totalBaseScore;
 </script>
 
 <template>
-    <Head :title="`Comparação - Inspeção #${baseInspection.id} vs #${otherInspection.id}`" />
+    <Head :title="`Comparação - Inspeção #${baseInspection.sequential_id} vs #${otherInspection.sequential_id}`" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -55,9 +55,9 @@ const globalDelta = totalCompScore - totalBaseScore;
                         Evolução / Comparação
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">
-                        Inspeção Base: #{{ baseInspection.id }}
+                        Inspeção Base: #{{ baseInspection.sequential_id }}
                         <span class="mx-2 text-surface-300">|</span>
-                        Inspeção Atual: #{{ otherInspection.id }}
+                        Inspeção Atual: #{{ otherInspection.sequential_id }}
                     </p>
                 </div>
             </div>
@@ -69,7 +69,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                 <!-- Global Metrics Comparison -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card class="text-center py-6">
-                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Base (#{{ baseInspection.id }})</h4>
+                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Base (#{{ baseInspection.sequential_id }})</h4>
                         <div class="text-4xl font-bold text-surface-800">{{ totalBaseScore }}</div>
                     </Card>
                     
@@ -81,7 +81,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                     </Card>
 
                     <Card class="text-center py-6">
-                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Atual (#{{ otherInspection.id }})</h4>
+                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Atual (#{{ otherInspection.sequential_id }})</h4>
                         <div class="text-4xl font-bold text-surface-800">{{ totalCompScore }}</div>
                     </Card>
                 </div>
