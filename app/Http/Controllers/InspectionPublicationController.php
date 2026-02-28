@@ -29,12 +29,12 @@ class InspectionPublicationController extends Controller
 
         $visibility = Visibility::from($validated['visibility']);
         
-        $publication = $this->publicationService->publish($inspection, $visibility, $request->user());
-
-        return response()->json([
-            'message' => 'Inspection published successfully.',
-            'publication' => $publication,
-        ], 201);
+        try {
+            $this->publicationService->publish($inspection, $visibility, $request->user());
+            return redirect()->back()->with('success', 'Inspeção publicada com sucesso no diretório.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -45,7 +45,7 @@ class InspectionPublicationController extends Controller
         $publication = $inspection->publication;
         
         if (!$publication) {
-            return response()->json(['message' => 'No publication found.'], 404);
+            return redirect()->back()->withErrors(['publication' => 'Publicação não encontrada.']);
         }
 
         Gate::authorize('update', $publication);
@@ -56,12 +56,12 @@ class InspectionPublicationController extends Controller
 
         $visibility = Visibility::from($validated['visibility']);
         
-        $publication = $this->publicationService->updateVisibility($inspection, $visibility);
-
-        return response()->json([
-            'message' => 'Visibility updated successfully.',
-            'publication' => $publication,
-        ]);
+        try {
+            $this->publicationService->updateVisibility($inspection, $visibility);
+            return redirect()->back()->with('success', 'Visibilidade da publicação atualizada.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -72,15 +72,16 @@ class InspectionPublicationController extends Controller
         $publication = $inspection->publication;
         
         if (!$publication) {
-            return response()->json(['message' => 'No publication found.'], 404);
+            return redirect()->back();
         }
 
         Gate::authorize('delete', $publication);
 
-        $this->publicationService->revoke($inspection);
-
-        return response()->json([
-            'message' => 'Publication revoked successfully.',
-        ], 204);
+        try {
+            $this->publicationService->revoke($inspection);
+            return redirect()->back()->with('success', 'Publicação removida do diretório.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
+        }
     }
 }

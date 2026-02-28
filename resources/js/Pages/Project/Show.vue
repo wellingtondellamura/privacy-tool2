@@ -104,6 +104,44 @@ const confirmResend = () => {
 const latestClosedInspection = computed(() => {
     return props.project.inspections.find(i => i.status === 'closed');
 });
+
+// Publication Logic
+const isPublishingModalOpen = ref(false);
+const currentInspectionToPublish = ref(null);
+
+const publishForm = useForm({
+    visibility: 'private',
+});
+
+const openPublishModal = (inspection) => {
+    currentInspectionToPublish.value = inspection;
+    publishForm.visibility = inspection.publication?.visibility || 'private';
+    isPublishingModalOpen.value = true;
+};
+
+const closePublishModal = () => {
+    isPublishingModalOpen.value = false;
+    currentInspectionToPublish.value = null;
+    publishForm.reset();
+};
+
+const submitPublication = () => {
+    if (currentInspectionToPublish.value.publication) {
+        publishForm.put(route('inspections.publications.update', currentInspectionToPublish.value.id), {
+            onSuccess: () => closePublishModal(),
+        });
+    } else {
+        publishForm.post(route('inspections.publish', currentInspectionToPublish.value.id), {
+            onSuccess: () => closePublishModal(),
+        });
+    }
+};
+
+const revokePublication = () => {
+    publishForm.delete(route('inspections.publications.destroy', currentInspectionToPublish.value.id), {
+        onSuccess: () => closePublishModal(),
+    });
+};
 </script>
 
 <template>
@@ -221,11 +259,31 @@ const latestClosedInspection = computed(() => {
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <div v-if="inspection.status === 'closed'" class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button size="xs" variant="outline" @click.stop="$inertia.get(route('results.individual', inspection.id))">
-                                                Meu Resultado
+                                            <Button 
+                                                size="xs" 
+                                                variant="outline" 
+                                                @click.stop="$inertia.get(route('results.individual', inspection.id))"
+                                                title="Meu Resultado"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                             </Button>
-                                            <Button size="xs" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click.stop="$inertia.get(route('results.team', inspection.id))">
-                                                Consolidado
+                                            <Button 
+                                                size="xs" 
+                                                variant="outline" 
+                                                class="!bg-brand-50 !text-brand-700 !border-brand-100" 
+                                                @click.stop="$inertia.get(route('results.team', inspection.id))"
+                                                title="Resultado Consolidado"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                                            </Button>
+                                            <Button 
+                                                size="xs" 
+                                                :variant="inspection.publication ? 'primary' : 'outline'"
+                                                @click.stop="openPublishModal(inspection)"
+                                                v-if="canManageMembers"
+                                                :title="inspection.publication ? (inspection.publication.visibility === 'private' ? 'Ajustar Publicação' : 'Ver/Editar Publicação') : 'Publicar no Diretório'"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                                             </Button>
                                         </div>
                                         <Badge :variant="inspection.status === 'closed' ? 'success' : (inspection.status === 'active' ? 'brand' : 'surface')">
@@ -390,4 +448,55 @@ const latestClosedInspection = computed(() => {
         @confirm="confirmResend"
         @close="isResendingConfirm = false"
     />
+
+    <!-- Modal de Publicação -->
+    <ConfirmModal
+        :show="isPublishingModalOpen"
+        title="Publicar no Diretório"
+        :message="currentInspectionToPublish?.publication 
+            ? 'Atualize a visibilidade da publicação ou remova-a do diretório público.' 
+            : 'Esta inspeção será publicada no diretório público. Escolha o nível de visibilidade.'"
+        :confirm-text="currentInspectionToPublish?.publication ? 'Atualizar' : 'Publicar'"
+        cancel-text="Cancelar"
+        :confirm-variant="currentInspectionToPublish?.publication ? 'brand' : 'primary'"
+        @confirm="submitPublication"
+        @close="closePublishModal"
+    >
+        <template #default>
+            <div class="mt-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-surface-700 mb-2">Engajamento (Visibilidade)</label>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'private'}">
+                            <input type="radio" value="private" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                            <div>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">Privado</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">Visível apenas para membros do projeto.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'score_public'}">
+                            <input type="radio" value="score_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                            <div>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">Apenas Score</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">Exibe a pontuação e medalha, mas mantém detalhes ocultos.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'full_public'}">
+                            <input type="radio" value="full_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                            <div>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">Relatório Completo</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">Torna o relatório consolidado visível para qualquer pessoa com o link.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div v-if="currentInspectionToPublish?.publication" class="pt-4 border-t border-surface-100 flex justify-center">
+                    <button type="button" @click="revokePublication" class="text-xs text-red-600 hover:text-red-800 font-medium underline">
+                        Remover do Diretório Público
+                    </button>
+                </div>
+            </div>
+        </template>
+    </ConfirmModal>
 </template>

@@ -81,7 +81,7 @@ class ProjectController extends Controller
                 $query->orderBy('created_at', 'desc');
             },
             'inspections' => function ($query) {
-                $query->with('user')->orderBy('created_at', 'desc');
+                $query->with(['user', 'publication'])->orderBy('created_at', 'desc');
             }
         ]);
 
