@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Models\User;
+use App\Models\InspectionPublication;
+use App\Policies\PublicationPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-        
+
+        Gate::policy(InspectionPublication::class, PublicationPolicy::class);
+
         Event::listen(
             Registered::class,
             SendEmailVerificationNotification::class,

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import Card from '@/Components/Card.vue';
@@ -100,6 +100,10 @@ const confirmResend = () => {
         }
     });
 };
+
+const latestClosedInspection = computed(() => {
+    return props.project.inspections.find(i => i.status === 'closed');
+});
 </script>
 
 <template>
@@ -177,6 +181,10 @@ const confirmResend = () => {
                             Exportar JSON
                         </Button>
                     </a>
+                    <Button v-if="latestClosedInspection" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click="$inertia.get(route('results.team', latestClosedInspection.id))">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        Resultado Consolidado
+                    </Button>
                     <Button variant="primary" @click="$inertia.post(route('inspections.store', project.id))">
                         Nova Inspeção
                     </Button>
@@ -200,8 +208,10 @@ const confirmResend = () => {
                             </div>
                             
                             <ul v-else class="divide-y divide-surface-100">
-                                <li v-for="inspection in project.inspections" :key="inspection.id" class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg cursor-pointer" @click="$inertia.get(route('inspections.show', inspection.id))">
-                                    <div>
+                                <li v-for="inspection in project.inspections" :key="inspection.id" 
+                                    class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
+                                >
+                                    <div class="cursor-pointer flex-grow" @click="$inertia.get(route('inspections.show', inspection.id))">
                                         <p class="text-sm font-medium text-surface-900">
                                             Inspeção #{{ inspection.sequential_id }}
                                         </p>
@@ -209,7 +219,15 @@ const confirmResend = () => {
                                             Criada em {{ formatDate(inspection.created_at) }} • <span class="font-medium text-surface-700">Responsável: {{ inspection.user?.name || 'Sistema' }}</span>
                                         </p>
                                     </div>
-                                    <div>
+                                    <div class="flex items-center gap-3">
+                                        <div v-if="inspection.status === 'closed'" class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button size="xs" variant="outline" @click.stop="$inertia.get(route('results.individual', inspection.id))">
+                                                Meu Resultado
+                                            </Button>
+                                            <Button size="xs" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click.stop="$inertia.get(route('results.team', inspection.id))">
+                                                Consolidado
+                                            </Button>
+                                        </div>
                                         <Badge :variant="inspection.status === 'closed' ? 'success' : (inspection.status === 'active' ? 'brand' : 'surface')">
                                             {{ inspection.status === 'closed' ? 'Concluída' : (inspection.status === 'active' ? 'Ativa' : 'Rascunho') }}
                                         </Badge>

@@ -7,6 +7,8 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\DataExportController;
+use App\Http\Controllers\InspectionPublicationController;
+use App\Http\Controllers\PublicDirectoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,9 +26,14 @@ Route::get('/dashboard', function () {
     return redirect()->route('projects.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Public: Accept invitation via token
 Route::post('/invitations/{token}/accept', [InvitationController::class, 'accept'])
     ->name('invitations.accept');
+
+// Public Directory routes (spec.md 4.2)
+Route::get('/tools', [PublicDirectoryController::class, 'index'])
+    ->name('public.tools.index');
+Route::get('/tools/{slug}', [PublicDirectoryController::class, 'show'])
+    ->name('public.tools.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -75,6 +82,14 @@ Route::middleware('auth')->group(function () {
         ->name('projects.export');
     Route::get('/profile/export-all', [DataExportController::class, 'exportAll'])
         ->name('profile.export-all');
+
+    // Publication routes (spec.md 4.1)
+    Route::post('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'store'])
+        ->name('inspections.publish');
+    Route::put('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'update'])
+        ->name('inspections.publications.update');
+    Route::delete('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'destroy'])
+        ->name('inspections.publications.destroy');
 });
 
 require __DIR__.'/auth.php';

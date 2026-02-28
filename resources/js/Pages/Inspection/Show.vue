@@ -199,11 +199,21 @@ const activeCategoryIndex = computed(() => {
         <!-- Global Status Panel -->
         <template #panel>
             <div class="space-y-6">
+                <!-- Project Shortcut -->
+                <div>
+                    <Button variant="outline" size="xs" class="w-full flex items-center justify-center gap-2" @click="$inertia.get(route('projects.show', inspection.project.id))">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        Voltar ao Projeto
+                    </Button>
+                </div>
+
+                <hr class="border-surface-200" />
                 
                 <!-- Status Actions -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-medium text-surface-900">Ações</h3>
                     
+                    <template v-if="isDraft">
                         <p v-if="isResponsible" class="text-xs text-surface-600 mb-3">
                             A inspeção está em rascunho. Ative para permitir respostas.
                         </p>
@@ -213,6 +223,7 @@ const activeCategoryIndex = computed(() => {
                         <Button v-if="isResponsible" variant="primary" size="sm" class="w-full" @click="activateInspection" :disabled="activateForm.processing">
                             Ativar Inspeção
                         </Button>
+                    </template>
 
                     <div v-if="isActive" class="p-4 bg-surface-50 rounded-lg border border-surface-200">
                         <p class="text-xs text-surface-600 mb-3">
@@ -248,7 +259,7 @@ const activeCategoryIndex = computed(() => {
                     </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">Versão: </span>
-                        {{ inspection.questionnaire_version.version }}
+                        {{ inspection.questionnaire_version.version_number }}
                     </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">Início: </span>
