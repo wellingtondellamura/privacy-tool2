@@ -37,6 +37,17 @@ const getMedalVariant = (medal) => {
     if (name.includes('incipiente')) return 'error';
     return 'primary';
 };
+
+const getMedalImage = (medal) => {
+    if (!medal) return null;
+    const name = (typeof medal === 'string' ? medal : (medal.name || '')).toLowerCase();
+    
+    if (name.includes('ouro') || name.includes('gold')) return '/images/badges-gold.png';
+    if (name.includes('prata') || name.includes('silver')) return '/images/badges-silver.png';
+    if (name.includes('bronze')) return '/images/badges-bronze.png';
+    
+    return null;
+};
 </script>
 
 <template>
@@ -53,7 +64,8 @@ const getMedalVariant = (medal) => {
                         <div>
                             <h1 class="text-3xl font-extrabold text-surface-900 tracking-tight">{{ tool.name }}</h1>
                             <p class="text-xs text-surface-500 font-medium uppercase tracking-widest mt-1">
-                                Versão {{ tool.version }} • Data da Inspeção: {{ tool.inspection_date }}
+                                <a :href="tool.url" target="_blank" class="hover:text-brand-600 transition-colors underline underline-offset-2 capitalize">{{ tool.url }}</a> 
+                                • Data da Inspeção: {{ tool.inspection_date }}
                             </p>
                         </div>
                     </div>
@@ -63,11 +75,7 @@ const getMedalVariant = (medal) => {
                             <p class="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">Score Consolidado</p>
                             <p class="text-2xl font-black text-surface-900 leading-none">{{ tool.report.global_score }}%</p>
                         </div>
-                        <div class="w-12 h-12 bg-brand-600 text-white rounded-xl flex items-center justify-center shadow-brand transform rotate-3">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
+
                     </div>
                 </div>
 
@@ -75,12 +83,18 @@ const getMedalVariant = (medal) => {
                 <div class="grid md:grid-cols-3 gap-6">
                     <Card class="md:col-span-1 p-8 flex flex-col items-center justify-center text-center space-y-4">
                         <div class="text-[10px] font-bold text-surface-400 uppercase tracking-widest">Classificação</div>
-                        <div v-if="tool.report.medal" class="flex flex-col items-center gap-2">
+                        <div v-if="tool.report.medal" class="flex flex-col items-center gap-2 font-medium">
+                            <img v-if="getMedalImage(tool.report.medal)" 
+                                 :src="getMedalImage(tool.report.medal)" 
+                                 class="w-32 h-32 object-contain drop-shadow-md mb-2" 
+                                 :alt="tool.report.medal.name || tool.report.medal" />
+                            
                              <Badge :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
                                 {{ tool.report.medal.name || tool.report.medal }}
                             </Badge>
                             <p class="text-xs text-surface-400 font-medium mt-2 italic">Alcançado através de {{ tool.report.inspection_count }} auditorias</p>
                         </div>
+                        <div v-else class="text-surface-400 italic text-sm">Sem medalha atribuída</div>
                     </Card>
 
                     <Card v-if="tool.report.diagnosis" class="md:col-span-2 p-8 relative overflow-hidden flex flex-col justify-center">

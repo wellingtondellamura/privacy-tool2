@@ -17,6 +17,17 @@ const getMedalVariant = (medal) => {
     if (name.includes('incipiente')) return 'error';
     return 'primary';
 };
+
+const getMedalImage = (medal) => {
+    if (!medal) return null;
+    const name = (typeof medal === 'string' ? medal : (medal.name || '')).toLowerCase();
+    
+    if (name.includes('ouro') || name.includes('gold')) return '/images/badges-gold.png';
+    if (name.includes('prata') || name.includes('silver')) return '/images/badges-silver.png';
+    if (name.includes('bronze')) return '/images/badges-bronze.png';
+    
+    return null;
+};
 </script>
 
 <template>
@@ -46,7 +57,12 @@ const getMedalVariant = (medal) => {
                             <div class="h-16 w-px bg-surface-700 hidden md:block"></div>
                             
                             <div class="text-center" v-if="tool.medal">
-                                <div class="mb-3">
+                                <div class="mb-4 flex flex-col items-center">
+                                    <img v-if="getMedalImage(tool.medal)" 
+                                         :src="getMedalImage(tool.medal)" 
+                                         class="w-32 h-32 object-contain drop-shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-500" 
+                                         :alt="tool.medal.name || tool.medal" />
+                                         
                                     <Badge :variant="getMedalVariant(tool.medal)" size="lg" class="px-8 py-2 text-sm uppercase tracking-widest shadow-lg">
                                         {{ tool.medal.name || tool.medal }}
                                     </Badge>

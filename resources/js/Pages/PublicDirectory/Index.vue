@@ -34,6 +34,17 @@ const getMedalVariant = (medal) => {
     if (name.includes('incipiente')) return 'error';
     return 'primary';
 };
+
+const getMedalImage = (medal) => {
+    if (!medal) return null;
+    const name = (typeof medal === 'string' ? medal : (medal.name || '')).toLowerCase();
+    
+    if (name.includes('ouro') || name.includes('gold')) return '/images/badges-gold.png';
+    if (name.includes('prata') || name.includes('silver')) return '/images/badges-silver.png';
+    if (name.includes('bronze')) return '/images/badges-bronze.png';
+    
+    return null;
+};
 </script>
 
 <template>
@@ -68,7 +79,7 @@ const getMedalVariant = (medal) => {
                             class="rounded-lg border-surface-200 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
                         >
                             <option value="">Todos os Anos</option>
-                            <option v-for="year in [2024, 2025, 2026]" :key="year" :value="year">{{ year }}</option>
+                            <option v-for="year in [2026, 2027, 2028, 2029, 2030]" :key="year" :value="year">{{ year }}</option>
                         </select>
 
                         <select 
@@ -101,10 +112,14 @@ const getMedalVariant = (medal) => {
                                         </div>
                                         <div>
                                             <h2 class="text-xl font-bold text-surface-900 line-clamp-1 decoration-brand-500 group-hover:underline decoration-2 underline-offset-4">{{ tool.project_name }}</h2>
-                                            <p class="text-xs text-surface-400 mt-1 font-medium">{{ tool.year }} • Publicado em {{ tool.published_at }}</p>
+                                            <p class="text-xs text-surface-400 mt-1 font-medium">Publicado em {{ tool.published_at }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col items-end">
+                                    <div class="flex flex-col items-end gap-1.5 whitespace-nowrap">
+                                        <img v-if="getMedalImage(tool.medal)" 
+                                             :src="getMedalImage(tool.medal)" 
+                                             class="w-10 h-10 object-contain drop-shadow-sm bg-white/50 rounded-full p-0.5" 
+                                             :alt="tool.medal.name || tool.medal" />
                                         <Badge v-if="tool.medal" :variant="getMedalVariant(tool.medal)" size="sm">
                                             {{ tool.medal.name || tool.medal }}
                                         </Badge>
