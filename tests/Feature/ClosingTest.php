@@ -55,7 +55,7 @@ test('close inspection generates individual and consolidated snapshots', functio
     }
 
     // Close the inspection
-    $action = new CloseInspectionAction();
+    $action = app(CloseInspectionAction::class);
     $action->execute($inspection);
 
     // Then individual snapshots must be generated
@@ -105,7 +105,7 @@ test('snapshot is immutable after closing', function () {
     ]);
 
     // Close
-    $action = new CloseInspectionAction();
+    $action = app(CloseInspectionAction::class);
     $action->execute($inspection);
 
     // Store the original snapshot payload
@@ -131,6 +131,7 @@ test('closing via API generates snapshots', function () {
     $version = QuestionnaireVersion::getActive();
     $inspection = Inspection::create([
         'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
         'questionnaire_version_id' => $version->id,
         'status' => 'active',
         'started_at' => now(),
@@ -147,6 +148,6 @@ test('closing via API generates snapshots', function () {
     $response = $this->actingAs($this->owner)
         ->postJson("/inspections/{$inspection->id}/close");
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     expect(ResultSnapshot::where('inspection_id', $inspection->id)->count())->toBeGreaterThanOrEqual(2);
 });

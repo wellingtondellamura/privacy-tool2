@@ -1,10 +1,13 @@
 <?php
 
 use App\Enums\Visibility;
+use App\Models\EvaluationRound;
 use App\Models\Inspection;
-use App\Models\InspectionPublication;
+use App\Models\RoundPublication;
+use App\Models\RoundSnapshot;
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Models\ResultSnapshot;
 use App\Models\User;
 
 /*
@@ -24,55 +27,58 @@ beforeEach(function () {
     ]);
 });
 
-test('scenario: publish closed inspection', function () {
-    // Given an inspection with status closed
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $this->project->id]);
+test('scenario: publish closed round', function () {
+    // Given an evaluation round with status closed
+    $round = EvaluationRound::factory()->closed()->create([
+        'project_id' => $this->project->id,
+    ]);
+    RoundSnapshot::factory()->create([
+        'evaluation_round_id' => $round->id,
+        'payload_json' => ['global_score' => 85, 'medal' => ['name' => 'Prata']],
+    ]);
     
     // And the authenticated user is the project owner
-    // When the user publishes the inspection with visibility "score_public"
-    $response = $this->actingAs($this->owner)->postJson("/inspections/{$inspection->id}/publish", [
+    // When the user publishes the round with visibility "score_public"
+    $response = $this->actingAs($this->owner)->postJson("/rounds/{$round->id}/publish", [
         'visibility' => 'score_public',
     ]);
 
     // Then a publication record must be created
-    $response->assertStatus(201);
-    $this->assertDatabaseHas('inspection_publications', [
-        'inspection_id' => $inspection->id,
+    $response->assertStatus(302);
+    $this->assertDatabaseHas('round_publications', [
+        'evaluation_round_id' => $round->id,
         'visibility' => 'score_public',
     ]);
 
     // And published_at must be set
-    $publication = InspectionPublication::where('inspection_id', $inspection->id)->first();
+    $publication = RoundPublication::where('evaluation_round_id', $round->id)->first();
     expect($publication->published_at)->not->toBeNull();
     
-    // And the inspection must appear in the public directory
-    // (This will be truly verified in Phase 5, but we can check if visibility != private)
     expect($publication->visibility)->toBe(Visibility::SCORE_PUBLIC);
 });
 
-test('scenario: cannot publish active inspection', function () {
-    // Given an inspection with status active
-    $inspection = Inspection::factory()->active()->create(['project_id' => $this->project->id]);
+test('scenario: cannot publish active round', function () {
+    // Given an evaluation round with status active
+    $round = EvaluationRound::factory()->create(['project_id' => $this->project->id]);
     
     // When the owner attempts to publish
-    $response = $this->actingAs($this->owner)->postJson("/inspections/{$inspection->id}/publish", [
+    $response = $this->actingAs($this->owner)->postJson("/rounds/{$round->id}/publish", [
         'visibility' => 'score_public',
     ]);
 
-    // Then the system must reject the operation (403 via policy or 422 if handled by validation, spec says 403 usually for forbidden)
-    // Actually our policy returns false for non-closed, so it's a 403.
+    // Then the system must reject the operation (403)
     $response->assertStatus(403);
 });
 
 test('scenario: non-owner cannot publish', function () {
-    // Given a closed inspection
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $this->project->id]);
+    // Given a closed round
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $this->project->id]);
     
     // And the authenticated user is not owner
     $otherUser = User::factory()->create();
     
     // When attempting to publish
-    $response = $this->actingAs($otherUser)->postJson("/inspections/{$inspection->id}/publish", [
+    $response = $this->actingAs($otherUser)->postJson("/rounds/{$round->id}/publish", [
         'visibility' => 'score_public',
     ]);
 
@@ -81,35 +87,47 @@ test('scenario: non-owner cannot publish', function () {
 });
 
 test('scenario: change visibility', function () {
-    // Given a published inspection with visibility "score_public"
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $this->project->id]);
-    InspectionPublication::factory()->scorePublic()->create(['inspection_id' => $inspection->id]);
+    // Given a published round with visibility "score_public"
+    $round = EvaluationRound::factory()->closed()->create([
+        'project_id' => $this->project->id,
+    ]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $round->id]);
+    RoundPublication::factory()->create([
+        'evaluation_round_id' => $round->id,
+        'visibility' => 'score_public',
+    ]);
     
     // When the owner updates visibility to "full_public"
-    $response = $this->actingAs($this->owner)->putJson("/inspections/{$inspection->id}/publish", [
+    $response = $this->actingAs($this->owner)->putJson("/rounds/{$round->id}/publish", [
         'visibility' => 'full_public',
     ]);
 
     // Then the publication must reflect the new visibility
-    $response->assertStatus(200);
-    $this->assertDatabaseHas('inspection_publications', [
-        'inspection_id' => $inspection->id,
+    $response->assertStatus(302);
+    $this->assertDatabaseHas('round_publications', [
+        'evaluation_round_id' => $round->id,
         'visibility' => 'full_public',
     ]);
 });
 
 test('scenario: revoke publication', function () {
-    // Given a published inspection
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $this->project->id]);
-    InspectionPublication::factory()->fullPublic()->create(['inspection_id' => $inspection->id]);
+    // Given a published round
+    $round = EvaluationRound::factory()->closed()->create([
+        'project_id' => $this->project->id,
+    ]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $round->id]);
+    RoundPublication::factory()->create([
+        'evaluation_round_id' => $round->id,
+        'visibility' => 'full_public',
+    ]);
     
     // When the owner revokes publication
-    $response = $this->actingAs($this->owner)->deleteJson("/inspections/{$inspection->id}/publish");
+    $response = $this->actingAs($this->owner)->deleteJson("/rounds/{$round->id}/publish");
 
     // Then visibility must become "private"
-    $response->assertStatus(204);
-    $this->assertDatabaseHas('inspection_publications', [
-        'inspection_id' => $inspection->id,
+    $response->assertStatus(302);
+    $this->assertDatabaseHas('round_publications', [
+        'evaluation_round_id' => $round->id,
         'visibility' => 'private',
     ]);
 });

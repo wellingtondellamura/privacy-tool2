@@ -184,15 +184,24 @@ const activeCategoryIndex = computed(() => {
                     <Breadcrumbs :items="[
                         { label: 'Workspace', url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
+                        { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
                         { label: `Inspeção #${inspection.sequential_id}` }
                     ]" />
-                    <h1 class="text-2xl font-semibold text-surface-900 truncate mt-1">
+                    
+                    <h1 v-if="isActive || isDraft" class="text-2xl font-semibold text-surface-900 truncate mt-1">
                         {{ toRoman(activeSectionIndex + 1) }}.{{ toAlpha(activeCategoryIndex) }} - {{ activeCategory.name }}
                     </h1>
+                    <h2 v-else class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
+                        Inspeção #{{ inspection.sequential_id }}
+                    </h2>
+                    <p class="text-sm text-surface-500 mt-1">Projeto: {{ inspection.project.name }} — {{ inspection.evaluation_round.name }}</p>
                 </div>
-                <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')" class="ml-2 shrink-0">
-                    {{ isActive ? 'Ativa' : (isClosed ? 'Concluída' : 'Rascunho') }}
-                </Badge>
+
+                <div class="flex items-center gap-2 mt-2">
+                    <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')" class="shrink-0">
+                        {{ isActive ? 'Ativa' : (isClosed ? 'Concluída' : 'Rascunho') }}
+                    </Badge>
+                </div>
             </div>
         </template>
 
@@ -201,9 +210,9 @@ const activeCategoryIndex = computed(() => {
             <div class="space-y-6">
                 <!-- Project Shortcut -->
                 <div>
-                    <Button variant="outline" size="xs" class="w-full flex items-center justify-center gap-2" @click="$inertia.get(route('projects.show', inspection.project.id))">
+                    <Button variant="outline" size="xs" class="w-full flex items-center justify-center gap-2" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Voltar ao Projeto
+                        Voltar à Rodada
                     </Button>
                 </div>
 
@@ -253,6 +262,14 @@ const activeCategoryIndex = computed(() => {
                 <!-- Informações -->
                 <div class="space-y-2">
                     <h3 class="text-sm font-medium text-surface-900">Detalhes</h3>
+                    <p v-if="isClosed && inspection.result_snapshots?.length > 0" class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">Score Obtido: </span>
+                        <span class="text-brand-600 font-bold">{{ inspection.result_snapshots[0].payload_json.global_score }}%</span>
+                    </p>
+                    <p class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">Status: </span>
+                        {{ isDraft ? 'Rascunho (Não Iniciada)' : (isActive ? 'Ativa (Em progresso)' : 'Concluída') }}
+                    </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">Responsável: </span>
                         {{ inspection.user?.name || 'Sistema' }}
@@ -263,7 +280,11 @@ const activeCategoryIndex = computed(() => {
                     </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">Início: </span>
-                        {{ new Date(inspection.created_at).toLocaleDateString() }}
+                        {{ inspection.started_at ? new Date(inspection.started_at).toLocaleDateString('pt-BR') : new Date(inspection.created_at).toLocaleDateString('pt-BR') }}
+                    </p>
+                    <p v-if="inspection.closed_at" class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">Conclusão: </span>
+                        {{ new Date(inspection.closed_at).toLocaleDateString('pt-BR') }}
                     </p>
                 </div>
             </div>

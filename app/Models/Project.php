@@ -48,6 +48,11 @@ class Project extends Model
         return $this->hasMany(Inspection::class);
     }
 
+    public function evaluationRounds(): HasMany
+    {
+        return $this->hasMany(EvaluationRound::class);
+    }
+
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'project_members')

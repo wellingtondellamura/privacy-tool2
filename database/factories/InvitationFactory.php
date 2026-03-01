@@ -18,7 +18,7 @@ class InvitationFactory extends Factory
             'project_id' => Project::factory(),
             'email' => $this->faker->safeEmail(),
             'token' => Str::random(32),
-            'role' => 'member',
+            'role' => 'evaluator',
             'expires_at' => now()->addDays(7),
             'accepted_at' => null,
         ];

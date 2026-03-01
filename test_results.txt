@@ -1,0 +1,411 @@
+
+   PASS  Tests\Unit\AggregationServiceTest
+  ✓ Suficiente maps to 100                             0.02s  
+  ✓ Insuficiente maps to 50
+  ✓ Inexistente maps to 0
+  ✓ Apropriado maps to 100
+  ✓ Necessita melhorias maps to 50
+  ✓ Inapropriado maps to 0
+  ✓ Outro maps to 0
+  ✓ category score is calculated correctly
+  ✓ category score from feature: 300/400
+  ✓ category percentage calculation
+  ✓ section score is average of two category scores
+  ✓ section score rounds correctly
+  ✓ section percentage is average of two category percentages
+  ✓ score 95 gives Ouro
+  ✓ score 91 gives Ouro
+  ✓ score 100 gives Ouro
+  ✓ score 70 gives Prata
+  ✓ score 61 gives Prata
+  ✓ score 90 gives Prata
+  ✓ score 50 gives Bronze
+  ✓ score 41 gives Bronze
+  ✓ score 30 gives Incipiente
+  ✓ score 0 gives Incipiente
+  ✓ score 40 gives Incipiente
+
+   PASS  Tests\Unit\ComparisonServiceTest
+  ✓ positive delta between inspections                 0.03s  
+  ✓ negative delta between inspections
+  ✓ comparison rejects non-consolidated snapshots
+  ✓ comparison rejects different projects
+
+   PASS  Tests\Unit\DivergenceServiceTest
+  ✓ team average section score
+  ✓ all same answers gives low divergence
+  ✓ extreme variation gives high divergence
+  ✓ medium divergence classification
+  ✓ variance boundary at 10 is low
+  ✓ variance boundary at 11 is medium
+  ✓ variance boundary at 30 is medium
+  ✓ variance boundary at 31 is high
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Feature\AdminAccessTest
+  ✓ non-admin user cannot access admin panel           0.72s  
+  ✓ admin user can access admin panel                  0.27s  
+  ✓ unauthenticated user is redirected to login        0.18s  
+
+   PASS  Tests\Feature\Auth\AuthenticationFeatureTest
+  ✓ successful user registration creates user with un… 0.28s  
+  ✓ registration fires Registered event which trigger… 0.18s  
+  ✓ successful login with verified email creates sess… 0.19s  
+  ✓ unverified user is redirected to verification not… 0.18s  
+
+   PASS  Tests\Feature\Auth\AuthenticationTest
+  ✓ login screen can be rendered                       0.19s  
+  ✓ users can authenticate using the login screen      0.18s  
+  ✓ users can not authenticate with invalid password   0.40s  
+  ✓ users can logout                                   0.18s  
+
+   PASS  Tests\Feature\Auth\EmailVerificationTest
+  ✓ email verification screen can be rendered          0.18s  
+  ✓ email can be verified                              0.19s  
+  ✓ email is not verified with invalid hash            0.18s  
+
+   PASS  Tests\Feature\Auth\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered            0.19s  
+  ✓ password can be confirmed                          0.18s  
+  ✓ password is not confirmed with invalid password    0.40s  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered         0.18s  
+  ✓ reset password link can be requested               0.40s  
+  ✓ reset password screen can be rendered              0.39s  
+  ✓ password can be reset with valid token             0.39s  
+
+   PASS  Tests\Feature\Auth\PasswordUpdateTest
+  ✓ password can be updated                            0.18s  
+  ✓ correct password must be provided to update passw… 0.18s  
+
+   PASS  Tests\Feature\Auth\RegistrationTest
+  ✓ registration screen can be rendered                0.21s  
+  ✓ new users can register                             0.23s  
+
+   PASS  Tests\Feature\AuthorizationTest
+  ✓ only owner can close inspection                    0.23s  
+  ✓ observer can view closed inspection results        0.24s  
+  ✓ comparison returns 400 for different projects      0.20s  
+
+   PASS  Tests\Feature\ClosingTest
+  ✓ close inspection generates individual and consoli… 0.06s  
+  ✓ snapshot is immutable after closing                0.06s  
+  ✓ closing via API generates snapshots                0.20s  
+
+   FAIL  Tests\Feature\DataExportTest
+  ⨯ user can export owned project json                 0.04s  
+  ⨯ user can export member project json                0.04s  
+  ⨯ user cannot export unauthorized project json       0.03s  
+  ⨯ user can export all projects zip                   0.03s  
+  ⨯ user can update project                            0.03s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ it returns a successful response                   0.18s  
+
+   PASS  Tests\Feature\InspectionImmutabilityTest
+  ✓ closed inspection cannot be edited or deleted      0.03s  
+  ✓ active inspection can be edited                    0.03s  
+  ✓ force close action changes status                  0.03s  
+
+   PASS  Tests\Feature\InspectionStateMachineTest
+  ✓ creating inspection uses active questionnaire ver… 0.19s  
+  ✓ draft inspection can transition to active          0.19s  
+  ✓ active inspection can transition to closed         0.19s  
+  ✓ closed inspection cannot be reopened               0.19s  
+  ✓ state machine rejects invalid transitions at mode… 0.04s  
+
+   FAIL  Tests\Feature\InvitationStatusTest
+  ⨯ invitation status logic works correctly            0.04s  
+  ⨯ invalidating an invitation sets expires_at to now  0.03s  
+
+   PASS  Tests\Feature\InvitationTest
+  ✓ owner can invite a new member                      0.19s  
+  ✓ accept invitation creates new user and adds to pr… 0.19s  
+  ✓ accept invitation with existing user adds to proj… 0.19s  
+  ✓ expired invitation returns error                   0.18s  
+  ✓ non-owner cannot invite members                    0.19s  
+
+   PASS  Tests\Feature\ProfileTest
+  ✓ profile page is displayed                          0.20s  
+  ✓ profile information can be updated                 0.20s  
+  ✓ email verification status is unchanged when the e… 0.19s  
+  ✓ user can delete their account                      0.20s  
+  ✓ correct password must be provided to delete accou… 0.20s  
+
+   PASS  Tests\Feature\ProjectManagementTest
+  ✓ project has an owner                               0.04s  
+  ✓ project can have multiple members                  0.04s  
+  ✓ project can have multiple inspections              0.04s  
+  ✓ project must have an owner_id when updated         0.05s  
+
+   PASS  Tests\Feature\ProjectTest
+  ✓ authenticated user can create a project            0.20s  
+  ✓ non-member cannot access project                   0.20s  
+  ✓ member can access project                          0.20s  
+  ✓ owner can update project                           0.20s  
+  ✓ owner can delete project                           0.20s  
+  ✓ unauthenticated user cannot access projects        0.20s  
+
+   PASS  Tests\Feature\PublicDirectoryScenarioTest
+  ✓ scenario: list public tools                        0.22s  
+  ✓ scenario: access score_public inspection           0.20s  
+  ✓ scenario: access full_public inspection            0.22s  
+  ✓ scenario: access private inspection                0.20s  
+
+   PASS  Tests\Feature\PublicationAuthorizationTest
+  ✓ owner can publish a closed inspection              0.04s  
+  ✓ owner cannot publish an active inspection          0.04s  
+  ✓ non-owner cannot publish even if closed            0.04s  
+  ✓ owner can manage their own publication             0.04s  
+  ✓ other users cannot manage publication              0.04s  
+
+   PASS  Tests\Feature\PublicationIntegrityTest
+  ✓ scenario: snapshot remains immutable after public… 0.04s  
+  ✓ scenario: no recalculation on publication          0.04s  
+  ✓ integrity: slug is deterministic and unique        0.04s  
+
+   PASS  Tests\Feature\PublicationScenarioTest
+  ✓ scenario: publish closed inspection                0.20s  
+  ✓ scenario: cannot publish active inspection         0.20s  
+  ✓ scenario: non-owner cannot publish                 0.21s  
+  ✓ scenario: change visibility                        0.21s  
+  ✓ scenario: revoke publication                       0.20s  
+
+   FAIL  Tests\Feature\PublicationServiceTest
+  ⨯ service can publish a closed inspection            0.04s  
+  ✓ service throws exception when publishing non-clos… 0.04s  
+  ⨯ service can update visibility                      0.04s  
+  ⨯ service can revoke publication                     0.04s  
+  ✓ publishing does not alter existing snapshot        0.04s  
+
+   FAIL  Tests\Feature\QuestionnaireImmutabilityTest
+  ✓ only one questionnaire version can be active       0.04s  
+  ✓ cannot edit or delete questionnaire version with…  0.04s  
+  ⨯ cannot edit or delete question if version has ins… 0.04s  
+
+   PASS  Tests\Feature\QuestionnaireVersioningTest
+  ✓ V1 seeder creates correct structure                0.05s  
+  ✓ question counts per section are correct            0.05s  
+  ✓ new inspection uses active version                 0.05s  
+  ✓ new version does not affect existing data          0.05s  
+
+   PASS  Tests\Feature\ResponseTest
+  ✓ evaluator can save valid response                  0.21s  
+  ✓ previous answer is replaced on resubmission        0.20s  
+  ✓ observer cannot respond                            0.19s  
+  ✓ cannot respond after closing                       0.19s  
+
+   PASS  Tests\Feature\SnapshotReadOnlyTest
+  ✓ result snapshot resource is read-only              0.03s  
+  ✓ result snapshot cannot be edited or deleted        0.03s  
+
+   PASS  Tests\Feature\UserAdminManagementTest
+  ✓ cannot delete the last admin                       0.03s  
+  ✓ can delete admin if there is another admin         0.03s  
+  ✓ non-admin cannot delete anything                   0.03s  
+  ✓ is_admin toggle works                              0.04s  
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DataExpor…  BadMethodCallException   
+  Call to undefined method App\Models\Project::users()
+
+  at vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+     63▕      * @throws \BadMethodCallException
+     64▕      */
+     65▕     protected static function throwBadMethodCallException($method)
+     66▕     {
+  ➜  67▕         throw new BadMethodCallException(sprintf(
+     68▕             'Call to undefined method %s::%s()', static::class, $method
+     69▕         ));
+     70▕     }
+     71▕ }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+  2   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DataExpor…  BadMethodCallException   
+  Call to undefined method App\Models\Project::users()
+
+  at vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+     63▕      * @throws \BadMethodCallException
+     64▕      */
+     65▕     protected static function throwBadMethodCallException($method)
+     66▕     {
+  ➜  67▕         throw new BadMethodCallException(sprintf(
+     68▕             'Call to undefined method %s::%s()', static::class, $method
+     69▕         ));
+     70▕     }
+     71▕ }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+  2   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DataExpor…  BadMethodCallException   
+  Call to undefined method App\Models\Project::users()
+
+  at vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+     63▕      * @throws \BadMethodCallException
+     64▕      */
+     65▕     protected static function throwBadMethodCallException($method)
+     66▕     {
+  ➜  67▕         throw new BadMethodCallException(sprintf(
+     68▕             'Call to undefined method %s::%s()', static::class, $method
+     69▕         ));
+     70▕     }
+     71▕ }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+  2   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DataExpor…  BadMethodCallException   
+  Call to undefined method App\Models\Project::users()
+
+  at vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+     63▕      * @throws \BadMethodCallException
+     64▕      */
+     65▕     protected static function throwBadMethodCallException($method)
+     66▕     {
+  ➜  67▕         throw new BadMethodCallException(sprintf(
+     68▕             'Call to undefined method %s::%s()', static::class, $method
+     69▕         ));
+     70▕     }
+     71▕ }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+  2   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DataExpor…  BadMethodCallException   
+  Call to undefined method App\Models\Project::users()
+
+  at vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+     63▕      * @throws \BadMethodCallException
+     64▕      */
+     65▕     protected static function throwBadMethodCallException($method)
+     66▕     {
+  ➜  67▕         throw new BadMethodCallException(sprintf(
+     68▕             'Call to undefined method %s::%s()', static::class, $method
+     69▕         ));
+     70▕     }
+     71▕ }
+
+  1   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+  2   vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationStatusT…  QueryException   
+  SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: role (Connection: sqlite, Database: :memory:, SQL: insert into "invitations" ("project_id", "email", "token", "role", "expires_at", "accepted_at", "updated_at", "created_at") values (1, edwin.cruickshank@example.net, Fv5TAOwxeGbwgpAiYahx4e3db1WEy8nK, member, 2026-03-07 20:07:19, ?, 2026-02-28 20:07:19, 2026-02-28 20:07:19))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+    580▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    581▕ 
+    582▕             $this->recordsHaveBeenModified();
+    583▕ 
+  ➜ 584▕             return $statement->execute();
+    585▕         });
+    586▕     }
+    587▕ 
+    588▕     /**
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:827
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InvitationStatusT…  QueryException   
+  SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: role (Connection: sqlite, Database: :memory:, SQL: insert into "invitations" ("project_id", "email", "token", "role", "expires_at", "accepted_at", "updated_at", "created_at") values (1, nathanial.kautzer@example.com, ubNDFLmN3W0DjQ7ji2gk8Fe8VxVOPSr7, member, 2026-03-07 20:07:19, ?, 2026-02-28 20:07:19, 2026-02-28 20:07:19))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+    580▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    581▕ 
+    582▕             $this->recordsHaveBeenModified();
+    583▕ 
+  ➜ 584▕             return $statement->execute();
+    585▕         });
+    586▕     }
+    587▕ 
+    588▕     /**
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:584
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:827
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PublicationServ…  RuntimeException   
+  Consolidated snapshot not found for this inspection.
+
+  at app\Services\PublicationService.php:24
+     20▕         }
+     21▕ 
+     22▕         $snapshot = $inspection->resultSnapshots()->whereNull('user_id')->first();
+     23▕         if (!$snapshot) {
+  ➜  24▕             throw new \RuntimeException("Consolidated snapshot not found for this inspection.");
+     25▕         }
+     26▕ 
+     27▕         $payload = $snapshot->payload_json;
+     28▕
+
+  1   app\Services\PublicationService.php:24
+  2   tests\Feature\PublicationServiceTest.php:24
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PublicationServ…  RuntimeException   
+  Consolidated snapshot not found for this inspection.
+
+  at app\Services\PublicationService.php:24
+     20▕         }
+     21▕ 
+     22▕         $snapshot = $inspection->resultSnapshots()->whereNull('user_id')->first();
+     23▕         if (!$snapshot) {
+  ➜  24▕             throw new \RuntimeException("Consolidated snapshot not found for this inspection.");
+     25▕         }
+     26▕ 
+     27▕         $payload = $snapshot->payload_json;
+     28▕
+
+  1   app\Services\PublicationService.php:24
+  2   tests\Feature\PublicationServiceTest.php:46
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PublicationServ…  RuntimeException   
+  Consolidated snapshot not found for this inspection.
+
+  at app\Services\PublicationService.php:24
+     20▕         }
+     21▕ 
+     22▕         $snapshot = $inspection->resultSnapshots()->whereNull('user_id')->first();
+     23▕         if (!$snapshot) {
+  ➜  24▕             throw new \RuntimeException("Consolidated snapshot not found for this inspection.");
+     25▕         }
+     26▕ 
+     27▕         $payload = $snapshot->payload_json;
+     28▕
+
+  1   app\Services\PublicationService.php:24
+  2   tests\Feature\PublicationServiceTest.php:58
+
+  ──────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\QuestionnaireImmutabilityT…  Error   
+  Class "Database\Factories\SectionFactory" not found
+
+  at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:993
+    989▕     public static function factoryForModel(string $modelName)
+    990▕     {
+    991▕         $factory = static::resolveFactoryName($modelName);
+    992▕ 
+  ➜ 993▕         return $factory::new();
+    994▕     }
+    995▕ 
+    996▕     /**
+    997▕      * Specify the callback that should be invoked to guess factory names based on dynamic relationship names.
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:993
+  2   vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\HasFactory.php:21
+
+
+  Tests:    11 failed, 132 passed (271 assertions)
+  Duration: 16.09s
+

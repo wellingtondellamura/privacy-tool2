@@ -36,6 +36,25 @@ const projectForm = useForm({
     color: props.project.color,
 });
 
+const isRoundCreating = ref(false);
+const roundForm = useForm({
+    name: 'Rodada de ' + new Date().toLocaleDateString('pt-BR'),
+});
+
+const openRoundCreateModal = () => {
+    roundForm.reset();
+    roundForm.name = 'Rodada de ' + new Date().toLocaleDateString('pt-BR');
+    isRoundCreating.value = true;
+};
+
+const submitRoundCreate = () => {
+    roundForm.post(route('projects.rounds.store', props.project.id), {
+        onSuccess: () => {
+            isRoundCreating.value = false;
+        },
+    });
+};
+
 const toggleProjectEdit = () => {
     isProjectEditing.value = !isProjectEditing.value;
     if (!isProjectEditing.value) {
@@ -65,6 +84,34 @@ const user = usePage().props.auth.user;
 const canManageMembers = props.project.owner_id === user.id;
 
 // We format dates
+const selectedRounds = ref([]);
+
+const toggleRoundSelection = (roundId) => {
+    const index = selectedRounds.value.indexOf(roundId);
+    if (index > -1) {
+        selectedRounds.value.splice(index, 1);
+    } else {
+        if (selectedRounds.value.length < 2) {
+            selectedRounds.value.push(roundId);
+        } else {
+            // Replace the oldest selection if we already have 2
+            selectedRounds.value.shift();
+            selectedRounds.value.push(roundId);
+        }
+    }
+};
+
+const canCompare = computed(() => selectedRounds.value.length === 2);
+
+const compareSelectedRounds = () => {
+    if (!canCompare.value) return;
+    // Route: rounds.comparison {round} {other}
+    router.get(route('rounds.comparison', {
+        round: selectedRounds.value[0],
+        other: selectedRounds.value[1]
+    }));
+};
+
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
 };
@@ -219,12 +266,15 @@ const revokePublication = () => {
                             Exportar JSON
                         </Button>
                     </a>
-                    <Button v-if="latestClosedInspection" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click="$inertia.get(route('results.team', latestClosedInspection.id))">
+                    <Button v-if="project.evaluation_rounds.find(r => r.status === 'closed')" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click="$inertia.get(route('rounds.results', project.evaluation_rounds.find(r => r.status === 'closed').id))">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         Resultado Consolidado
                     </Button>
-                    <Button variant="primary" @click="$inertia.post(route('inspections.store', project.id))">
-                        Nova Inspeção
+                    <Button v-if="canCompare" variant="outline" class="!border-brand-200 !text-brand-700" @click="compareSelectedRounds">
+                        Comparar Rodadas ({{ selectedRounds.length }})
+                    </Button>
+                    <Button v-if="canManageMembers" variant="outline" @click="openRoundCreateModal">
+                        Nova Rodada
                     </Button>
                 </div>
             </div>
@@ -236,13 +286,68 @@ const revokePublication = () => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <!-- Esquerda: Inspeções e Detalhes da Avaliação -->
                     <div class="md:col-span-2 space-y-6">
-                        <Card title="Inspeções">
+                        <Card title="Rodadas de Avaliação">
+                            <div v-if="project.evaluation_rounds.length === 0" class="py-12 text-center text-surface-500">
+                                Não há rodadas de avaliação criadas para este projeto ainda.
+                                <br><br>
+                                <Button v-if="canManageMembers" variant="outline" size="sm" @click="openRoundCreateModal">
+                                    Criar Primeira Rodada
+                                </Button>
+                            </div>
+                            
+                            <ul v-else class="divide-y divide-surface-100">
+                                <li v-for="round in project.evaluation_rounds" :key="round.id" 
+                                    class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
+                                    :class="{'bg-brand-50/50': selectedRounds.includes(round.id)}"
+                                >
+                                    <div class="flex items-center gap-4 flex-grow">
+                                        <div v-if="round.status === 'closed'" class="shrink-0">
+                                            <input 
+                                                type="checkbox" 
+                                                :checked="selectedRounds.includes(round.id)"
+                                                @click.stop="toggleRoundSelection(round.id)"
+                                                class="rounded border-surface-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                                            />
+                                        </div>
+                                        <div class="cursor-pointer flex-grow" @click="$inertia.get(route('rounds.show', round.id))">
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-medium" :class="selectedRounds.includes(round.id) ? 'text-brand-900' : 'text-surface-900'">
+                                                    {{ round.name }}
+                                                </p>
+                                                <Badge :variant="round.status === 'closed' ? 'success' : (round.status === 'active' ? 'brand' : 'surface')">
+                                                    {{ round.status === 'closed' ? 'Concluída' : (round.status === 'active' ? 'Ativa' : 'Rascunho') }}
+                                                </Badge>
+                                                <Badge v-if="round.public_directory" variant="primary" class="text-[10px]">
+                                                    Publicado ({{ round.public_directory.visibility }})
+                                                </Badge>
+                                            </div>
+                                            <p class="text-xs text-surface-500">
+                                                Criada em {{ formatDate(round.created_at) }} 
+                                                <span v-if="round.closed_at"> • Fechada em {{ formatDate(round.closed_at) }}</span>
+                                                <span v-if="round.snapshots?.[0]" class="ml-2 font-medium text-brand-600">
+                                                    • Score: {{ round.snapshots[0].payload_json.global_score }}%
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            @click.stop="$inertia.get(route('rounds.show', round.id))"
+                                        >
+                                            Abrir
+                                        </Button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </Card>
+
+                        <Card title="Inspeções" collapsible="true" collapsed="true">
                             <div v-if="project.inspections.length === 0" class="py-12 text-center text-surface-500">
                                 Não há inspeções criadas para este projeto ainda.
                                 <br><br>
-                                <Button variant="outline" size="sm" @click="$inertia.post(route('inspections.store', project.id))">
-                                    Criar Primeira Inspeção
-                                </Button>
+                                <p class="text-xs">Crie ou abra uma Rodada de Avaliação para iniciar uma nova inspeção.</p>
                             </div>
                             
                             <ul v-else class="divide-y divide-surface-100">
@@ -275,16 +380,7 @@ const revokePublication = () => {
                                                 title="Resultado Consolidado"
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                                            </Button>
-                                            <Button 
-                                                size="xs" 
-                                                :variant="inspection.publication ? 'primary' : 'outline'"
-                                                @click.stop="openPublishModal(inspection)"
-                                                v-if="canManageMembers"
-                                                :title="inspection.publication ? (inspection.publication.visibility === 'private' ? 'Ajustar Publicação' : 'Ver/Editar Publicação') : 'Publicar no Diretório'"
-                                            >
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                                            </Button>
+                                            </Button>                                            
                                         </div>
                                         <Badge :variant="inspection.status === 'closed' ? 'success' : (inspection.status === 'active' ? 'brand' : 'surface')">
                                             {{ inspection.status === 'closed' ? 'Concluída' : (inspection.status === 'active' ? 'Ativa' : 'Rascunho') }}
@@ -448,6 +544,32 @@ const revokePublication = () => {
         @confirm="confirmResend"
         @close="isResendingConfirm = false"
     />
+
+    <!-- Modal de Criação de Rodada -->
+    <ConfirmModal
+        :show="isRoundCreating"
+        title="Nova Rodada de Avaliação"
+        message="Dê um nome para identificar esta nova rodada de inspeções."
+        confirm-text="Criar Rodada"
+        cancel-text="Cancelar"
+        confirm-variant="primary"
+        :processing="roundForm.processing"
+        @confirm="submitRoundCreate"
+        @close="isRoundCreating = false"
+    >
+        <template #default>
+            <div class="mt-4">
+                <Input
+                    label="Nome da Rodada"
+                    v-model="roundForm.name"
+                    :error="roundForm.errors.name"
+                    required
+                    placeholder="Ex: Rodada Março 2024"
+                    @keyup.enter="submitRoundCreate"
+                />
+            </div>
+        </template>
+    </ConfirmModal>
 
     <!-- Modal de Publicação -->
     <ConfirmModal

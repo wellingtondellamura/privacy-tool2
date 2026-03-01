@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\QuestionnaireVersion;
 use App\Models\User;
+use App\Models\EvaluationRound;
 use Database\Seeders\QuestionnaireV1Seeder;
 
 beforeEach(function () {
@@ -20,14 +21,20 @@ beforeEach(function () {
         'user_id' => $this->owner->id,
         'role' => 'owner',
     ]);
+    $this->round = EvaluationRound::factory()->create([
+        'project_id' => $this->project->id,
+        'status' => 'active',
+    ]);
 });
 
 test('creating inspection uses active questionnaire version', function () {
     // 005: New inspection uses active version
     $response = $this->actingAs($this->owner)
-        ->postJson("/projects/{$this->project->id}/inspections");
+        ->postJson("/projects/{$this->project->id}/inspections", [
+            'evaluation_round_id' => $this->round->id,
+        ]);
 
-    $response->assertStatus(201);
+    $response->assertStatus(302);
 
     $inspection = Inspection::first();
     $activeVersion = QuestionnaireVersion::getActive();
@@ -40,14 +47,16 @@ test('draft inspection can transition to active', function () {
     // 009: Valid transitions (draft → active)
     $inspection = Inspection::create([
         'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
         'questionnaire_version_id' => QuestionnaireVersion::getActive()->id,
+        'evaluation_round_id' => $this->round->id,
         'status' => 'draft',
     ]);
 
     $response = $this->actingAs($this->owner)
         ->postJson("/inspections/{$inspection->id}/activate");
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     expect($inspection->fresh()->status)->toBe('active');
     expect($inspection->fresh()->started_at)->not->toBeNull();
 });
@@ -56,7 +65,9 @@ test('active inspection can transition to closed', function () {
     // 009: Valid transitions (active → closed)
     $inspection = Inspection::create([
         'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
         'questionnaire_version_id' => QuestionnaireVersion::getActive()->id,
+        'evaluation_round_id' => $this->round->id,
         'status' => 'active',
         'started_at' => now(),
     ]);
@@ -64,7 +75,7 @@ test('active inspection can transition to closed', function () {
     $response = $this->actingAs($this->owner)
         ->postJson("/inspections/{$inspection->id}/close");
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     expect($inspection->fresh()->status)->toBe('closed');
     expect($inspection->fresh()->closed_at)->not->toBeNull();
 });
@@ -73,7 +84,9 @@ test('closed inspection cannot be reopened', function () {
     // 009: Invalid transition (closed → anything)
     $inspection = Inspection::create([
         'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
         'questionnaire_version_id' => QuestionnaireVersion::getActive()->id,
+        'evaluation_round_id' => $this->round->id,
         'status' => 'closed',
         'started_at' => now()->subDay(),
         'closed_at' => now(),
@@ -82,14 +95,16 @@ test('closed inspection cannot be reopened', function () {
     $response = $this->actingAs($this->owner)
         ->postJson("/inspections/{$inspection->id}/activate");
 
-    $response->assertStatus(422);
+    $response->assertStatus(302);
     expect($inspection->fresh()->status)->toBe('closed');
 });
 
 test('state machine rejects invalid transitions at model level', function () {
     $inspection = Inspection::create([
         'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
         'questionnaire_version_id' => QuestionnaireVersion::getActive()->id,
+        'evaluation_round_id' => $this->round->id,
         'status' => 'draft',
     ]);
 

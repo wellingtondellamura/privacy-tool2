@@ -65,7 +65,7 @@ class ProjectController extends Controller
             'role' => 'owner',
         ]);
 
-        return redirect()->route('projects.index')->with('success', 'Projeto criado com sucesso.');
+        return redirect()->route('projects.show', $project->id)->with('success', 'Projeto criado com sucesso.');
     }
 
     /**
@@ -82,6 +82,10 @@ class ProjectController extends Controller
             },
             'inspections' => function ($query) {
                 $query->with(['user', 'publication'])->orderBy('created_at', 'desc');
+            },
+            'evaluationRounds' => function ($query) {
+                $query->with(['snapshots' => function($q) { $q->latest(); }, 'publicDirectory'])
+                      ->orderBy('created_at', 'desc');
             }
         ]);
 

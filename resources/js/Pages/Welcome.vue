@@ -33,6 +33,7 @@ defineProps({
             <nav v-if="canLogin" class="flex items-center gap-4">
                 <a href="#metodologia" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Metodologia</a>
                 <a href="#funcionalidades" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Funcionalidades</a>
+                <a href="#diretorio" class="hidden lg:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Diretório Público</a>
                 
                 <div class="w-px h-4 bg-surface-200 hidden md:block mx-2"></div>
 
@@ -261,6 +262,49 @@ defineProps({
 
                         <div class="relative flex justify-center lg:justify-end">
                             <img src="/images/undraw_terms_sx63.svg" alt="Termos e Funcionalidades" class="w-full max-w-sm h-auto drop-shadow-xl" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+ 
+            <!-- Diretório Público (New Section) -->
+            <section id="diretorio" class="py-24 bg-white border-b border-surface-200">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid lg:grid-cols-2 gap-16 items-center">
+                        <div class="relative flex justify-center lg:justify-start order-2 lg:order-1">
+                            <div class="absolute -inset-4 bg-brand-50 rounded-full blur-3xl opacity-50"></div>
+                            <img src="/images/undraw_performance-overview_1b4y.svg" alt="Diretório Público" class="relative z-10 w-full max-w-sm h-auto drop-shadow-xl" />
+                        </div>
+                        
+                        <div class="order-1 lg:order-2">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-6">
+                                Transparência Pública
+                            </div>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-surface-900 mb-6">Diretório Público de Avaliações</h2>
+                            <p class="text-lg text-surface-600 mb-8 leading-relaxed">
+                                Acreditamos que a transparência deve chegar ao usuário final. Por isso, oferecemos um <strong>Diretório Público</strong> onde desenvolvedores podem optar por publicar seus resultados de conformidade.
+                            </p>
+                            
+                            <div class="space-y-4 mb-10">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    </div>
+                                    <p class="text-surface-600 text-sm"><span class="font-semibold text-surface-900">Consulta aberta:</span> Qualquer usuário pode verificar a medalha de transparência de sua ferramenta favorita.</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    </div>
+                                    <p class="text-surface-600 text-sm"><span class="font-semibold text-surface-900">Histórico Evolutivo:</span> Acompanhe a evolução da privacidade de um software ao longo de diferentes rodadas de inspeção.</p>
+                                </div>
+                            </div>
+ 
+                            <Link :href="route('public.tools.index')">
+                                <Button variant="primary" size="lg" class="w-full sm:w-auto px-8 py-4 text-base shadow-brand">
+                                    Navegar pelo Diretório Público
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

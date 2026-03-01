@@ -3,25 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Visibility;
-use App\Models\Inspection;
-use App\Models\InspectionPublication;
-use App\Services\PublicationService;
+use App\Models\EvaluationRound;
+use App\Models\RoundPublication;
+use App\Services\RoundPublicationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Gate;
 
-class InspectionPublicationController extends Controller
+class EvaluationRoundPublicationController extends Controller
 {
     public function __construct(
-        protected PublicationService $publicationService
+        protected RoundPublicationService $publicationService
     ) {}
 
     /**
-     * Publish an inspection.
+     * Publish an evaluation round.
      */
-    public function store(Request $request, Inspection $inspection)
+    public function store(Request $request, EvaluationRound $round)
     {
-        Gate::authorize('create', [InspectionPublication::class, $inspection]);
+        Gate::authorize('create', [RoundPublication::class, $round]);
 
         $validated = $request->validate([
             'visibility' => ['required', new Enum(Visibility::class)],
@@ -30,8 +30,8 @@ class InspectionPublicationController extends Controller
         $visibility = Visibility::from($validated['visibility']);
         
         try {
-            $this->publicationService->publish($inspection, $visibility, $request->user());
-            return redirect()->back()->with('success', 'Inspeção publicada com sucesso no diretório.');
+            $this->publicationService->publish($round, $visibility, $request->user());
+            return redirect()->back()->with('success', 'Rodada publicada com sucesso no diretório.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
         }
@@ -40,9 +40,9 @@ class InspectionPublicationController extends Controller
     /**
      * Update publication visibility.
      */
-    public function update(Request $request, Inspection $inspection)
+    public function update(Request $request, EvaluationRound $round)
     {
-        $publication = $inspection->publication;
+        $publication = RoundPublication::where('evaluation_round_id', $round->id)->first();
         
         if (!$publication) {
             return redirect()->back()->withErrors(['publication' => 'Publicação não encontrada.']);
@@ -57,7 +57,7 @@ class InspectionPublicationController extends Controller
         $visibility = Visibility::from($validated['visibility']);
         
         try {
-            $this->publicationService->updateVisibility($inspection, $visibility);
+            $this->publicationService->updateVisibility($round, $visibility);
             return redirect()->back()->with('success', 'Visibilidade da publicação atualizada.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
@@ -67,9 +67,9 @@ class InspectionPublicationController extends Controller
     /**
      * Revoke publication.
      */
-    public function destroy(Inspection $inspection)
+    public function destroy(Request $request, EvaluationRound $round)
     {
-        $publication = $inspection->publication;
+        $publication = RoundPublication::where('evaluation_round_id', $round->id)->first();
         
         if (!$publication) {
             return redirect()->back();
@@ -78,7 +78,7 @@ class InspectionPublicationController extends Controller
         Gate::authorize('delete', $publication);
 
         try {
-            $this->publicationService->revoke($inspection);
+            $this->publicationService->revoke($round);
             return redirect()->back()->with('success', 'Publicação removida do diretório.');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);

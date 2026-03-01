@@ -13,6 +13,8 @@ use App\Services\DivergenceService;
 
 class CloseInspectionAction
 {
+    public function __construct() {}
+
     /**
      * Close an inspection: calculate individual + consolidated snapshots.
      * RN-07: Calcular resultados individuais, consolidado, persistir snapshots,

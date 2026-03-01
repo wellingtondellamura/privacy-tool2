@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ResultSnapshot;
+use App\Models\RoundSnapshot;
 
 class ComparisonService
 {
@@ -19,15 +20,32 @@ class ComparisonService
             throw new \InvalidArgumentException('Both snapshots must be consolidated (team) snapshots.');
         }
 
-        $baselineInspection = $baseline->inspection;
-        $comparisonInspection = $comparison->inspection;
-
-        if ($baselineInspection->project_id !== $comparisonInspection->project_id) {
+        if ($baseline->inspection->project_id !== $comparison->inspection->project_id) {
             throw new \InvalidArgumentException('Both inspections must belong to the same project.');
         }
 
-        $baselineSections = $baseline->payload_json['sections'] ?? [];
-        $comparisonSections = $comparison->payload_json['sections'] ?? [];
+        return static::comparePayloads($baseline->payload_json, $comparison->payload_json);
+    }
+
+    /**
+     * Compare two round snapshots from the same project.
+     */
+    public static function compareRoundSnapshots(RoundSnapshot $baseline, RoundSnapshot $comparison): array
+    {
+        if ($baseline->evaluationRound->project_id !== $comparison->evaluationRound->project_id) {
+            throw new \InvalidArgumentException('Both rounds must belong to the same project.');
+        }
+
+        return static::comparePayloads($baseline->payload_json, $comparison->payload_json);
+    }
+
+    /**
+     * Logic to calculate delta between two payloads.
+     */
+    public static function comparePayloads(array $baselinePayload, array $comparisonPayload): array
+    {
+        $baselineSections = $baselinePayload['sections'] ?? [];
+        $comparisonSections = $comparisonPayload['sections'] ?? [];
 
         $sections = [];
 

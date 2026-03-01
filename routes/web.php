@@ -7,7 +7,8 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\DataExportController;
-use App\Http\Controllers\InspectionPublicationController;
+use App\Http\Controllers\EvaluationRoundController;
+use App\Http\Controllers\EvaluationRoundPublicationController;
 use App\Http\Controllers\PublicDirectoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/inspections/{inspection}/close', [InspectionController::class, 'close'])
         ->name('inspections.close');
 
+    // Evaluation Round routes
+    Route::post('/projects/{project}/rounds', [EvaluationRoundController::class, 'store'])
+        ->name('projects.rounds.store');
+    Route::get('/rounds/{round}', [EvaluationRoundController::class, 'show'])
+        ->name('rounds.show');
+    Route::post('/rounds/{round}/close', [EvaluationRoundController::class, 'close'])
+        ->name('rounds.close');
+
     // Response routes (spec.md 7.3)
     Route::post('/inspections/{inspection}/response', [ResponseController::class, 'store'])
         ->name('responses.store');
@@ -76,6 +85,12 @@ Route::middleware('auth')->group(function () {
         ->name('results.team');
     Route::get('/inspections/{inspection}/comparison/{other}', [ResultController::class, 'comparison'])
         ->name('results.comparison');
+    Route::get('/rounds/{round}/results', [ResultController::class, 'round'])
+        ->name('rounds.results');
+    Route::get('/rounds/{round}/review', [EvaluationRoundController::class, 'review'])
+        ->name('rounds.review');
+    Route::get('/rounds/{round}/comparison/{other}', [ResultController::class, 'roundComparison'])
+        ->name('rounds.comparison');
 
     // Export routes
     Route::get('/projects/{project}/export', [DataExportController::class, 'exportProject'])
@@ -83,13 +98,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/export-all', [DataExportController::class, 'exportAll'])
         ->name('profile.export-all');
 
-    // Publication routes (spec.md 4.1)
-    Route::post('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'store'])
-        ->name('inspections.publish');
-    Route::put('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'update'])
-        ->name('inspections.publications.update');
-    Route::delete('/inspections/{inspection}/publish', [InspectionPublicationController::class, 'destroy'])
-        ->name('inspections.publications.destroy');
+    // Round Publication routes
+    Route::post('/rounds/{round}/publish', [EvaluationRoundPublicationController::class, 'store'])
+        ->name('rounds.publish');
+    Route::put('/rounds/{round}/publish', [EvaluationRoundPublicationController::class, 'update'])
+        ->name('rounds.publications.update');
+    Route::delete('/rounds/{round}/publish', [EvaluationRoundPublicationController::class, 'destroy'])
+        ->name('rounds.publications.destroy');
 });
 
 require __DIR__.'/auth.php';

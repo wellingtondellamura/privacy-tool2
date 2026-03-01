@@ -42,10 +42,11 @@ const emit = defineEmits(['close', 'confirm']);
             <h2 class="text-lg font-semibold text-surface-900 mb-4">
                 {{ title }}
             </h2>
-            <p class="text-sm text-surface-600 mb-6">
+            <p class="text-sm text-surface-600 mb-6" v-if="message">
                 {{ message }}
             </p>
-            <div class="flex justify-end gap-3">
+            <slot />
+            <div class="flex justify-end gap-3" :class="{'mt-6': $slots.default}">
                 <Button variant="outline" @click="$emit('close')" :disabled="processing">
                     {{ cancelText }}
                 </Button>

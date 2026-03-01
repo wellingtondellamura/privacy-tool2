@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Visibility;
-use App\Models\InspectionPublication;
+use App\Models\RoundPublication;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,9 +14,9 @@ class PublicDirectoryController extends Controller
      */
     public function index(Request $request)
     {
-        $query = InspectionPublication::query()
+        $query = RoundPublication::query()
             ->where('visibility', '!=', Visibility::PRIVATE)
-            ->with(['inspection.project', 'inspection.questionnaireVersion']);
+            ->with(['evaluationRound.project', 'evaluationRound.inspections.questionnaireVersion']);
 
         // Filter by Medal
         if ($request->filled('medal')) {
@@ -44,8 +44,8 @@ class PublicDirectoryController extends Controller
 
         $publications = $query->paginate(15)->withQueryString()->through(fn ($pub) => [
             'slug' => $pub->slug,
-            'project_name' => $pub->inspection->project->name,
-            'project_url' => $pub->inspection->project->url,
+            'project_name' => $pub->evaluationRound->project->name,
+            'project_url' => $pub->evaluationRound->project->url,
             'score' => $pub->score,
             'medal' => $pub->medal,
             'year' => $pub->year,
@@ -64,17 +64,17 @@ class PublicDirectoryController extends Controller
      */
     public function show(string $slug)
     {
-        $publication = InspectionPublication::where('slug', $slug)
+        $publication = RoundPublication::where('slug', $slug)
             ->where('visibility', '!=', Visibility::PRIVATE)
-            ->with(['inspection.project', 'inspection.questionnaireVersion', 'inspection.resultSnapshots'])
+            ->with(['evaluationRound.project', 'evaluationRound.snapshots'])
             ->firstOrFail();
 
-        $snapshot = $publication->inspection->resultSnapshots()->whereNull('user_id')->first();
+        $snapshot = $publication->evaluationRound->snapshots()->latest()->first();
         if (!$snapshot) {
             abort(404, "Consolidated snapshot not found.");
         }
 
-        $project = $publication->inspection->project;
+        $project = $publication->evaluationRound->project;
         $payload = $snapshot->payload_json;
 
         if ($publication->visibility === Visibility::SCORE_PUBLIC) {
@@ -90,9 +90,10 @@ class PublicDirectoryController extends Controller
                         'score' => $s['score'],
                         'medal' => $s['medal'],
                     ]),
-                    'inspection_date' => $publication->inspection->closed_at?->format('d/m/Y'),
-                    'version' => $publication->inspection->questionnaireVersion->version,
+                    'inspection_date' => $publication->evaluationRound->closed_at?->format('d/m/Y'),
+                    'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
                     'user_count' => $payload['user_count'] ?? 0,
+                    'diagnosis' => $publication->evaluationRound->diagnosis,
                 ]
             ]);
         }
@@ -108,8 +109,8 @@ class PublicDirectoryController extends Controller
                 'name' => $project->name,
                 'url' => $project->url,
                 'report' => $safePayload,
-                'inspection_date' => $publication->inspection->closed_at?->format('d/m/Y'),
-                'version' => $publication->inspection->questionnaireVersion->version,
+                'inspection_date' => $publication->evaluationRound->closed_at?->format('d/m/Y'),
+                'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
             ]
         ]);
     }

@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Project;
 use App\Models\QuestionnaireVersion;
+use App\Models\User;
+use App\Models\EvaluationRound;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,7 +17,9 @@ class InspectionFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
+            'user_id' => User::factory(),
             'questionnaire_version_id' => QuestionnaireVersion::factory(),
+            'evaluation_round_id' => EvaluationRound::factory(),
             'status' => 'draft',
         ];
     }

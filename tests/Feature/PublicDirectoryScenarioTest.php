@@ -1,12 +1,14 @@
 <?php
 
 use App\Enums\Visibility;
+use App\Models\EvaluationRound;
 use App\Models\Inspection;
-use App\Models\InspectionPublication;
+use App\Models\RoundPublication;
+use App\Models\RoundSnapshot;
 use App\Models\Project;
 use App\Models\ResultSnapshot;
 use App\Models\User;
-use App\Services\PublicationService;
+use App\Services\RoundPublicationService;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,25 +19,25 @@ use App\Services\PublicationService;
 
 beforeEach(function () {
     $this->owner = User::factory()->create();
-    $this->service = new PublicationService();
+    $this->service = new RoundPublicationService();
 });
 
 test('scenario: list public tools', function () {
     // Given multiple inspections with mixed visibility
     $p1 = Project::factory()->create(['name' => 'Tool A']);
-    $i1 = Inspection::factory()->closed()->create(['project_id' => $p1->id]);
-    ResultSnapshot::factory()->create(['inspection_id' => $i1->id, 'user_id' => null, 'payload_json' => ['global_score' => 95, 'medal' => ['name' => 'Ouro']]]);
-    $this->service->publish($i1, Visibility::SCORE_PUBLIC, $this->owner);
+    $r1 = EvaluationRound::factory()->closed()->create(['project_id' => $p1->id]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $r1->id, 'payload_json' => ['global_score' => 95, 'medal' => ['name' => 'Ouro']]]);
+    $this->service->publish($r1, Visibility::SCORE_PUBLIC, $this->owner);
 
     $p2 = Project::factory()->create(['name' => 'Tool B']);
-    $i2 = Inspection::factory()->closed()->create(['project_id' => $p2->id]);
-    ResultSnapshot::factory()->create(['inspection_id' => $i2->id, 'user_id' => null, 'payload_json' => ['global_score' => 80, 'medal' => ['name' => 'Prata']]]);
-    $this->service->publish($i2, Visibility::FULL_PUBLIC, $this->owner);
+    $r2 = EvaluationRound::factory()->closed()->create(['project_id' => $p2->id]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $r2->id, 'payload_json' => ['global_score' => 80, 'medal' => ['name' => 'Prata']]]);
+    $this->service->publish($r2, Visibility::FULL_PUBLIC, $this->owner);
 
     $p3 = Project::factory()->create(['name' => 'Tool C']);
-    $i3 = Inspection::factory()->closed()->create(['project_id' => $p3->id]);
-    ResultSnapshot::factory()->create(['inspection_id' => $i3->id, 'user_id' => null]);
-    $pub3 = $this->service->publish($i3, Visibility::PRIVATE, $this->owner);
+    $r3 = EvaluationRound::factory()->closed()->create(['project_id' => $p3->id]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $r3->id]);
+    $this->service->publish($r3, Visibility::PRIVATE, $this->owner);
 
     // When accessing /tools
     $response = $this->getJson('/tools', ['X-Inertia' => 'true']);
@@ -51,10 +53,9 @@ test('scenario: list public tools', function () {
 test('scenario: access score_public inspection', function () {
     // Given an inspection with visibility "score_public"
     $project = Project::factory()->create(['name' => 'EcoTool']);
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $project->id]);
-    ResultSnapshot::factory()->create([
-        'inspection_id' => $inspection->id, 
-        'user_id' => null, 
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $project->id]);
+    RoundSnapshot::factory()->create([
+        'evaluation_round_id' => $round->id, 
         'payload_json' => [
             'global_score' => 88,
             'medal' => ['name' => 'Prata'],
@@ -64,7 +65,7 @@ test('scenario: access score_public inspection', function () {
             'user_count' => 5
         ]
     ]);
-    $pub = $this->service->publish($inspection, Visibility::SCORE_PUBLIC, $this->owner);
+    $pub = $this->service->publish($round, Visibility::SCORE_PUBLIC, $this->owner);
 
     // When accessing its public page
     $response = $this->getJson("/tools/{$pub->slug}", ['X-Inertia' => 'true']);
@@ -84,10 +85,9 @@ test('scenario: access score_public inspection', function () {
 test('scenario: access full_public inspection', function () {
     // Given an inspection with visibility "full_public"
     $project = Project::factory()->create(['name' => 'FullTool']);
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $project->id]);
-    ResultSnapshot::factory()->create([
-        'inspection_id' => $inspection->id, 
-        'user_id' => null, 
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $project->id]);
+    RoundSnapshot::factory()->create([
+        'evaluation_round_id' => $round->id, 
         'payload_json' => [
             'global_score' => 92,
             'medal' => ['name' => 'Ouro'],
@@ -108,7 +108,7 @@ test('scenario: access full_public inspection', function () {
             ]
         ]
     ]);
-    $pub = $this->service->publish($inspection, Visibility::FULL_PUBLIC, $this->owner);
+    $pub = $this->service->publish($round, Visibility::FULL_PUBLIC, $this->owner);
 
     // When accessing its public page
     $response = $this->getJson("/tools/{$pub->slug}", ['X-Inertia' => 'true']);
@@ -125,9 +125,9 @@ test('scenario: access full_public inspection', function () {
 
 test('scenario: access private inspection', function () {
     // Given an inspection with visibility "private"
-    $inspection = Inspection::factory()->closed()->create();
-    ResultSnapshot::factory()->create(['inspection_id' => $inspection->id, 'user_id' => null, 'payload_json' => ['global_score' => 50, 'medal' => ['name' => 'Bronze']]]);
-    $pub = $this->service->publish($inspection, Visibility::PRIVATE, $this->owner);
+    $round = EvaluationRound::factory()->closed()->create();
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $round->id, 'payload_json' => ['global_score' => 50, 'medal' => ['name' => 'Bronze']]]);
+    $pub = $this->service->publish($round, Visibility::PRIVATE, $this->owner);
 
     // When accessing its public page
     $response = $this->getJson("/tools/{$pub->slug}", ['X-Inertia' => 'true']);

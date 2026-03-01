@@ -16,9 +16,22 @@ class InspectionController extends Controller
     /**
      * POST /projects/{project}/inspections — Create new inspection.
      */
-    public function store(Project $project)
+    public function store(Request $request, Project $project)
     {
         Gate::authorize('view', $project);
+
+        $evaluationRoundId = $request->input('evaluation_round_id');
+        if (!$evaluationRoundId) {
+            return redirect()->back()->withErrors(['evaluation_round_id' => 'É necessário selecionar uma rodada de avaliação para iniciar uma inspeção.']);
+        }
+
+        $round = \App\Models\EvaluationRound::where('id', $evaluationRoundId)
+            ->where('project_id', $project->id)
+            ->firstOrFail();
+        
+        if ($round->status === 'closed') {
+            return redirect()->back()->withErrors(['status' => 'Não é possível adicionar inspeções a uma rodada que já está fechada.']);
+        }
 
         $activeVersion = QuestionnaireVersion::getActive();
 
@@ -30,6 +43,7 @@ class InspectionController extends Controller
             'project_id' => $project->id,
             'user_id' => Auth::id(),
             'questionnaire_version_id' => $activeVersion->id,
+            'evaluation_round_id' => $evaluationRoundId ?? null,
             'status' => 'draft',
         ]);
 
@@ -47,8 +61,12 @@ class InspectionController extends Controller
             'questionnaireVersion.sections.categories.questions',
             'project',
             'user',
+            'evaluationRound',
             'responses' => function ($query) {
                 $query->where('user_id', Auth::id());
+            },
+            'resultSnapshots' => function ($query) {
+                $query->whereNull('user_id'); // Consolidado
             }
         ]);
 
@@ -81,7 +99,7 @@ class InspectionController extends Controller
      * POST /inspections/{inspection}/close — Close active inspection.
      * Uses CloseInspectionAction to generate snapshots (RN-07).
      */
-    public function close(Inspection $inspection)
+    public function close(Inspection $inspection, CloseInspectionAction $action)
     {
         Gate::authorize('view', $inspection->project);
 
@@ -96,7 +114,6 @@ class InspectionController extends Controller
         // Let's stick to the "responsible" rule as requested.
 
         try {
-            $action = new CloseInspectionAction();
             $action->execute($inspection);
         } catch (\InvalidArgumentException $e) {
             return redirect()->back()->withErrors(['status' => $e->getMessage()]);

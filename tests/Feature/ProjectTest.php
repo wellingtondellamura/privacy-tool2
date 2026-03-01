@@ -20,7 +20,7 @@ test('authenticated user can create a project', function () {
     ]);
 
     // Then the project should be persisted
-    $response->assertStatus(201);
+    $response->assertStatus(302);
     $this->assertDatabaseHas('projects', [
         'name' => 'My Privacy Project',
         'url' => 'https://example.com',
@@ -51,10 +51,9 @@ test('non-member cannot access project', function () {
 
     $outsider = User::factory()->create();
 
-    // When the user attempts to access the project
-    $response = $this->actingAs($outsider)->getJson("/projects/{$project->id}");
-
     // Then the system should return 403 Forbidden
+    $response = $this->actingAs($outsider)
+        ->getJson("/projects/{$project->id}", ['X-Inertia' => 'true']);
     $response->assertStatus(403);
 });
 
@@ -67,7 +66,8 @@ test('member can access project', function () {
         'role' => 'owner',
     ]);
 
-    $response = $this->actingAs($owner)->getJson("/projects/{$project->id}");
+    $response = $this->actingAs($owner)
+        ->getJson("/projects/{$project->id}", ['X-Inertia' => 'true']);
 
     $response->assertStatus(200);
     $response->assertJsonFragment(['name' => $project->name]);
@@ -86,7 +86,7 @@ test('owner can update project', function () {
         'name' => 'Updated Name',
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     expect($project->fresh()->name)->toBe('Updated Name');
 });
 
@@ -101,7 +101,7 @@ test('owner can delete project', function () {
 
     $response = $this->actingAs($owner)->deleteJson("/projects/{$project->id}");
 
-    $response->assertStatus(204);
+    $response->assertStatus(302);
     $this->assertSoftDeleted('projects', ['id' => $project->id]);
 });
 

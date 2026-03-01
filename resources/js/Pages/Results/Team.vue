@@ -82,15 +82,19 @@ const getMedalImage = (medalName) => {
                     <Breadcrumbs :items="[
                         { label: 'Workspace', url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
+                        { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
                         { label: 'Resultado Consolidado da Equipe' }
                     ]" />
                     <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
                         Resultado Consolidado da Equipe
                     </h2>
-                    <p class="text-sm text-surface-500 mt-1">Inspeção #{{ inspection.sequential_id }} — {{ inspection.project.name }}</p>
+                    <p class="text-sm text-surface-500 mt-1">Inspeção #{{ inspection.sequential_id }} — {{ inspection.evaluation_round.name }}</p>
                 </div>
                 
-                <div>
+                <div class="flex items-center gap-2">
+                    <Button variant="outline" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
+                        Voltar à Rodada
+                    </Button>
                     <Button variant="outline" @click="$inertia.get(route('results.individual', inspection.id))">
                         Ver Meu Resultado (Individual)
                     </Button>
@@ -106,7 +110,7 @@ const getMedalImage = (medalName) => {
                     <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-300 to-brand-600"></div>
                     <div class="flex items-center justify-center gap-12">
                         <!-- Medal on the left -->
-                        <img v-if="getMedalImage(snapshot.medal.name)" 
+                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)" 
                              :src="getMedalImage(snapshot.medal.name)" 
                              class="w-48 h-48 object-contain drop-shadow-lg" 
                              :alt="snapshot.medal.name" />

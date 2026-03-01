@@ -1,0 +1,217 @@
+<script setup>
+import { Head, Link } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Card from '@/Components/Card.vue';
+import Button from '@/Components/Button.vue';
+import Badge from '@/Components/Badge.vue';
+import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+
+const props = defineProps({
+    round: {
+        type: Object,
+        required: true,
+    },
+    snapshot: {
+        type: Object,
+        required: true,
+    }
+});
+
+const getMedalColor = (medalName) => {
+    const colors = {
+        'Ouro': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        'Prata': 'bg-gray-100 text-gray-800 border-gray-300',
+        'Bronze': 'bg-orange-100 text-orange-800 border-orange-300',
+        'Sem Medalha': 'bg-surface-100 text-surface-800 border-surface-300',
+    };
+    return colors[medalName] || colors['Sem Medalha'];
+};
+
+const toRoman = (num) => {
+    if (isNaN(num)) return '';
+    const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+    let result = '';
+    for (let key in map) {
+        while (num >= map[key]) {
+            result += key;
+            num -= map[key];
+        }
+    }
+    return result;
+};
+
+const toAlpha = (index) => String.fromCharCode(65 + index);
+
+const getMedalImage = (medalName) => {
+    const images = {
+        'Ouro': '/images/badges-gold.png',
+        'Prata': '/images/badges-silver.png',
+        'Bronze': '/images/badges-bronze.png',
+    };
+    return images[medalName] || null;
+};
+
+</script>
+
+<template>
+    <Head :title="`Resultado Consolidado - ${round.name}`" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <div class="flex items-center justify-between">
+                <div>
+                    <Breadcrumbs :items="[
+                        { label: 'Workspace', url: route('projects.index') },
+                        { label: round.project.name, url: route('projects.show', round.project.id) },
+                        { label: round.name, url: route('rounds.show', round.id) },
+                        { label: 'Resultado Consolidado da Rodada' }
+                    ]" />
+                    <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
+                        Resultado Consolidado da Rodada
+                    </h2>
+                    <p class="text-sm text-surface-500 mt-1">{{ round.name }} — {{ round.project.name }}</p>
+                </div>
+                
+                <div>
+                    <Button variant="outline" @click="$inertia.get(route('rounds.show', round.id))">
+                        Voltar à Rodada
+                    </Button>
+                </div>
+            </div>
+        </template>
+
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+
+                <!-- Diagnosis/Comment Analysis (New for Round Results) -->
+                <Card v-if="round.diagnosis" class="border-brand-100 shadow-sm overflow-hidden">
+                    <template #header>
+                        <div class="bg-brand-50/50 px-6 py-4 border-b border-brand-100 flex items-center gap-2 text-brand-900 font-semibold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Análise Técnica e Diagnóstico
+                        </div>
+                    </template>
+                    <div class="p-6 prose prose-brand max-w-none text-surface-700 whitespace-pre-wrap">{{ round.diagnosis }}</div>
+                </Card>
+
+                <!-- Global Score -->
+                <Card class="bg-gradient-to-br from-surface-50 to-white border-surface-200 py-10 shadow-sm relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-300 to-brand-600"></div>
+                    <div class="flex items-center justify-center gap-12">
+                        <!-- Medal on the left -->
+                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)" 
+                             :src="getMedalImage(snapshot.medal.name)" 
+                             class="w-48 h-48 object-contain drop-shadow-lg" 
+                             :alt="snapshot.medal.name" />
+                        
+                        <!-- Score column on the right -->
+                        <div class="flex flex-col items-center">
+                            <div class="text-[100px] font-bold text-surface-800 leading-none">
+                                {{ snapshot.global_score }}
+                            </div>
+                            <div class="mt-4 text-xs font-bold text-surface-400 uppercase tracking-[0.2em]">
+                                Pontuação Média Global
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+
+                <!-- Sections -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-semibold text-surface-900 border-b border-surface-200 pb-2">Desempenho Médio por Seção</h3>
+                    
+                    <div class="space-y-8">
+                        <section v-for="(section, sIndex) in snapshot.sections" :key="section.id" class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
+                                <h4 class="font-medium text-lg text-surface-900">{{ toRoman(sIndex + 1) }}. {{ section.name }}</h4>
+                                <span class="text-xl font-bold text-brand-600">{{ section.score }}</span>
+                            </div>
+
+                            <div class="p-6 space-y-4">
+                                <div v-for="(cat, cIndex) in section.categories" :key="cat.id" class="flex items-center justify-between">
+                                    <h5 class="text-surface-700 font-medium text-sm">{{ toAlpha(cIndex) }}. {{ cat.name }}</h5>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-32 bg-surface-100 rounded-full h-1.5 hidden sm:block">
+                                            <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score}%`"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer with Project Info -->
+        <footer class="mt-12 bg-surface-900 text-surface-300 py-12 shrink-0 border-t border-surface-800">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-start mb-12">
+                    <!-- Project Column -->
+                    <div>
+                        <h4 class="text-white font-bold text-lg mb-6 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
+                            Informações do Projeto
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Nome do Projeto</span>
+                                <p class="text-surface-200 font-medium">{{ round.project.name }}</p>
+                            </div>
+                            <div v-if="round.project.website_url">
+                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Website URL</span>
+                                <a :href="round.project.website_url" target="_blank" class="text-brand-400 hover:text-brand-300 transition-colors underline decoration-brand-400/30">
+                                    {{ round.project.website_url }}
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Data da Rodada</span>
+                                    <p class="text-surface-200">{{ new Date(round.closed_at || round.created_at).toLocaleDateString('pt-BR') }}</p>
+                                </div>
+                                <div>
+                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">ID da Rodada</span>
+                                    <p class="text-surface-200">#{{ round.id }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- References Column -->
+                    <div class="flex flex-col md:items-end gap-3 text-sm h-full justify-between">
+                        <div class="w-full md:w-auto">
+                            <span class="font-semibold text-white mb-4 block md:text-right">Referências Oficiais</span>
+                            <div class="space-y-3">
+                                <a href="https://each.usp.br/cond_met_pand/trmodel/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2 md:justify-end group">
+                                    <span class="group-hover:translate-x-[-4px] transition-transform">Metodologia TRModel (USP)</span>
+                                    <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                                <a href="https://www.gov.br/esporte/pt-br/acesso-a-informacao/lgpd" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2 md:justify-end group">
+                                    <span class="group-hover:translate-x-[-4px] transition-transform">Portal Oficial: LGPD (Governo Federal)</span>
+                                    <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-surface-500 mt-auto md:text-right leading-relaxed max-w-sm">
+                            Uma iniciativa para ampliar a aderência a boas práticas técnicas de dados pessoais e empoderar a transparência.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="border-surface-800 mb-8" />
+
+                <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
+                    <div class="flex items-center gap-3 opacity-50 mb-4 sm:mb-0">
+                        <ApplicationLogo class="h-4 w-auto fill-current" />
+                        <span>&copy; {{ new Date().getFullYear() }} Privacy Tool.</span>
+                    </div>
+                    <p>Desenvolvido com o rigor técnico TR-Model v1.0</p>
+                </div>
+            </div>
+        </footer>
+    </AuthenticatedLayout>
+</template>

@@ -118,6 +118,12 @@ onMounted(() => {
                             >
                                 Dashboard
                             </NavLink>
+                            <NavLink
+                                :href="route('public.tools.index')"
+                                :active="route().current('public.tools.*')"
+                            >
+                                Diretório Público
+                            </NavLink>
                         </div>
                     </div>
 
@@ -224,6 +230,12 @@ onMounted(() => {
                         :active="route().current('dashboard')"
                     >
                         Dashboard
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink
+                        :href="route('public.tools.index')"
+                        :active="route().current('public.tools.*')"
+                    >
+                        Diretório Público
                     </ResponsiveNavLink>
                 </div>
 

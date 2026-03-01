@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -9,17 +10,36 @@ import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 const props = defineProps({
     baseInspection: {
         type: Object,
-        required: true,
+        required: false,
     },
     otherInspection: {
         type: Object,
-        required: true,
+        required: false,
+    },
+    baseRound: {
+        type: Object,
+        required: false,
+    },
+    otherRound: {
+        type: Object,
+        required: false,
     },
     comparison: {
         type: Object,
         required: true,
+    },
+    isRoundComparison: {
+        type: Boolean,
+        default: false,
     }
 });
+
+const base = computed(() => props.isRoundComparison ? props.baseRound : props.baseInspection);
+const other = computed(() => props.isRoundComparison ? props.otherRound : props.otherInspection);
+const project = computed(() => base.value?.project);
+
+const baseLabel = computed(() => props.isRoundComparison ? base.value?.name : `#${base.value?.sequential_id}`);
+const otherLabel = computed(() => props.isRoundComparison ? other.value?.name : `#${other.value?.sequential_id}`);
 
 const getDeltaColor = (delta) => {
     if (delta > 0) return 'text-green-600 bg-green-50 px-2 py-1 rounded font-bold';
@@ -40,7 +60,7 @@ const globalDelta = totalCompScore - totalBaseScore;
 </script>
 
 <template>
-    <Head :title="`Comparação - Inspeção #${baseInspection.sequential_id} vs #${otherInspection.sequential_id}`" />
+    <Head :title="`Comparação - ${baseLabel} vs ${otherLabel}`" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -48,16 +68,16 @@ const globalDelta = totalCompScore - totalBaseScore;
                 <div>
                     <Breadcrumbs :items="[
                         { label: 'Workspace', url: route('projects.index') },
-                        { label: baseInspection.project.name, url: route('projects.show', baseInspection.project.id) },
+                        { label: project?.name, url: route('projects.show', project?.id) },
                         { label: 'Evolução e Comparação' }
                     ]" />
                     <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
                         Evolução / Comparação
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">
-                        Inspeção Base: #{{ baseInspection.sequential_id }}
+                        Referência: {{ baseLabel }}
                         <span class="mx-2 text-surface-300">|</span>
-                        Inspeção Atual: #{{ otherInspection.sequential_id }}
+                        Comparação: {{ otherLabel }}
                     </p>
                 </div>
             </div>
@@ -69,7 +89,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                 <!-- Global Metrics Comparison -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card class="text-center py-6">
-                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Base (#{{ baseInspection.sequential_id }})</h4>
+                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">{{ baseLabel }}</h4>
                         <div class="text-4xl font-bold text-surface-800">{{ totalBaseScore }}</div>
                     </Card>
                     
@@ -81,7 +101,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                     </Card>
 
                     <Card class="text-center py-6">
-                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">Atual (#{{ otherInspection.sequential_id }})</h4>
+                        <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">{{ otherLabel }}</h4>
                         <div class="text-4xl font-bold text-surface-800">{{ totalCompScore }}</div>
                     </Card>
                 </div>

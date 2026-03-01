@@ -34,6 +34,7 @@ class Inspection extends Model
         'status',
         'started_at',
         'closed_at',
+        'evaluation_round_id',
     ];
 
     public function user(): BelongsTo
@@ -64,6 +65,11 @@ class Inspection extends Model
     public function questionnaireVersion(): BelongsTo
     {
         return $this->belongsTo(QuestionnaireVersion::class);
+    }
+
+    public function evaluationRound(): BelongsTo
+    {
+        return $this->belongsTo(EvaluationRound::class);
     }
 
     public function responses(): HasMany

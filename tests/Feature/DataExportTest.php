@@ -20,7 +20,7 @@ class DataExportTest extends TestCase
     {
         $user = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $user->id]);
-        $project->users()->attach($user, ['role' => 'owner']);
+        $project->participants()->attach($user, ['role' => 'owner']);
 
         $response = $this->actingAs($user)->get(route('projects.export', $project));
 
@@ -34,8 +34,8 @@ class DataExportTest extends TestCase
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $owner->id]);
-        $project->users()->attach($owner, ['role' => 'owner']);
-        $project->users()->attach($member, ['role' => 'evaluator']);
+        $project->participants()->attach($owner, ['role' => 'owner']);
+        $project->participants()->attach($member, ['role' => 'evaluator']);
 
         $response = $this->actingAs($member)->get(route('projects.export', $project));
 
@@ -48,7 +48,7 @@ class DataExportTest extends TestCase
         $owner = User::factory()->create();
         $randomUser = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $owner->id]);
-        $project->users()->attach($owner, ['role' => 'owner']);
+        $project->participants()->attach($owner, ['role' => 'owner']);
 
         $response = $this->actingAs($randomUser)->get(route('projects.export', $project));
 
@@ -60,12 +60,12 @@ class DataExportTest extends TestCase
         $user = User::factory()->create();
         
         $project1 = Project::factory()->create(['owner_id' => $user->id, 'name' => 'Project One']);
-        $project1->users()->attach($user, ['role' => 'owner']);
+        $project1->participants()->attach($user, ['role' => 'owner']);
         
         $owner2 = User::factory()->create();
         $project2 = Project::factory()->create(['owner_id' => $owner2->id, 'name' => 'Project Two']);
-        $project2->users()->attach($owner2, ['role' => 'owner']);
-        $project2->users()->attach($user, ['role' => 'evaluator']);
+        $project2->participants()->attach($owner2, ['role' => 'owner']);
+        $project2->participants()->attach($user, ['role' => 'evaluator']);
 
         $response = $this->actingAs($user)->get(route('profile.export-all'));
 
@@ -78,7 +78,7 @@ class DataExportTest extends TestCase
     {
         $user = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $user->id]);
-        $project->users()->attach($user, ['role' => 'owner']);
+        $project->participants()->attach($user, ['role' => 'owner']);
 
         $response = $this->actingAs($user)->put(route('projects.update', $project), [
             'name' => 'Novo Nome',

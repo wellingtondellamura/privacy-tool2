@@ -1,97 +1,89 @@
 <?php
 
 use App\Enums\Visibility;
-use App\Models\Inspection;
+use App\Models\EvaluationRound;
+use App\Models\RoundSnapshot;
 use App\Models\Project;
 use App\Models\Response;
-use App\Models\ResultSnapshot;
 use App\Models\User;
-use App\Services\PublicationService;
+use App\Services\RoundPublicationService;
 
 /*
 |--------------------------------------------------------------------------
-| Publication Integrity Tests
+| Publication Integrity Tests (EvaluationRound)
 |--------------------------------------------------------------------------
-| Maps to specs/002-public-directory/features/publication_integrity.feature
 */
 
 beforeEach(function () {
     $this->owner = User::factory()->create();
-    $this->service = new PublicationService();
+    $this->service = app(RoundPublicationService::class);
 });
 
-test('scenario: snapshot remains immutable after publication', function () {
-    // Given a published inspection
-    $project = Project::factory()->create(['owner_id' => $this->owner->id]);
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $project->id]);
+test('scenario: round snapshot remains immutable after publication', function () {
+    // Given a published round
+    $project = Project::factory()->create(['owner_id' => $this->owner->id, 'name' => 'Integrity Project']);
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $project->id]);
     
     // Create a snapshot with a specific score
-    $snapshot = ResultSnapshot::factory()->create([
-        'inspection_id' => $inspection->id,
-        'user_id' => null,
+    $snapshot = RoundSnapshot::factory()->create([
+        'evaluation_round_id' => $round->id,
         'payload_json' => [
             'global_score' => 85,
             'medal' => ['name' => 'Prata'],
-            'year' => 2026,
-            'questionnaire_version_id' => $inspection->questionnaire_version_id
+            'sections' => []
         ]
     ]);
 
-    $pub = $this->service->publish($inspection, Visibility::SCORE_PUBLIC, $this->owner);
+    $pub = $this->service->publish($round, Visibility::SCORE_PUBLIC, $this->owner);
 
-    // When underlying responses are modified in storage (simulating corruption or late edits)
-    // (Note: CloseInspectionAction already prevents this, but we test the publication layer's dependency)
-    Response::where('inspection_id', $inspection->id)->delete();
-
+    // When we attempt to change something indirectly
+    // (In round snapshots, there are no individual responses directly linked to the snapshot payload)
+    
     // Then the public score must remain equal to the snapshot value
     $pub->refresh();
     expect($pub->score)->toBe(85);
     
     // And if we re-publish/update visibility, it should still use the SAME snapshot
-    $this->service->updateVisibility($inspection, Visibility::FULL_PUBLIC);
+    $this->service->updateVisibility($round, Visibility::FULL_PUBLIC);
     expect($pub->fresh()->score)->toBe(85);
 });
 
-test('scenario: no recalculation on publication', function () {
-    // Given a closed inspection with an existing snapshot
+test('scenario: no recalculation on round publication', function () {
+    // Given a closed round with an existing snapshot
     $project = Project::factory()->create(['owner_id' => $this->owner->id]);
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $project->id]);
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $project->id]);
     
-    $snapshot = ResultSnapshot::factory()->create([
-        'inspection_id' => $inspection->id,
-        'user_id' => null,
+    $snapshot = RoundSnapshot::factory()->create([
+        'evaluation_round_id' => $round->id,
         'payload_json' => [
-            'global_score' => 99, // A custom score that wouldn't be naturally calculated
+            'global_score' => 99, 
             'medal' => ['name' => 'Ouro'],
-            'year' => 2026,
-            'questionnaire_version_id' => $inspection->questionnaire_version_id
+            'sections' => []
         ]
     ]);
 
     // When publishing
-    $pub = $this->service->publish($inspection, Visibility::SCORE_PUBLIC, $this->owner);
+    $pub = $this->service->publish($round, Visibility::SCORE_PUBLIC, $this->owner);
 
     // Then no recalculation of score must occur
-    // (If it recalculated, it would likely get 0 since there are no responses in this factory-created test)
     expect($pub->score)->toBe(99);
     
     // And the existing snapshot must be used
-    expect($pub->inspection->resultSnapshots()->whereNull('user_id')->first()->id)->toBe($snapshot->id);
+    expect($pub->evaluationRound->snapshots()->latest()->first()->id)->toBe($snapshot->id);
 });
 
-test('integrity: slug is deterministic and unique', function () {
-    $project = Project::factory()->create(['name' => 'Test Project', 'owner_id' => $this->owner->id]);
-    $inspection = Inspection::factory()->closed()->create(['project_id' => $project->id]);
-    ResultSnapshot::factory()->create(['inspection_id' => $inspection->id, 'user_id' => null, 'payload_json' => ['global_score' => 10, 'year' => 2026]]);
+test('integrity: round slug is stable', function () {
+    $project = Project::factory()->create(['name' => 'Stable Project', 'owner_id' => $this->owner->id]);
+    $round = EvaluationRound::factory()->closed()->create(['project_id' => $project->id]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $round->id, 'payload_json' => ['global_score' => 10]]);
 
-    $pub1 = $this->service->publish($inspection, Visibility::SCORE_PUBLIC, $this->owner);
+    $pub1 = $this->service->publish($round, Visibility::SCORE_PUBLIC, $this->owner);
     $slug1 = $pub1->slug;
     
     // Revoke and re-publish
-    $this->service->revoke($inspection);
-    $pub2 = $this->service->publish($inspection, Visibility::SCORE_PUBLIC, $this->owner);
+    $this->service->revoke($round);
+    $pub2 = $this->service->publish($round, Visibility::SCORE_PUBLIC, $this->owner);
     
-    // Slug should be the same (deterministic based on project name + year maybe? or just stable)
-    // Current implementation uses Str::slug($inspection->project->name)
+    // Slug should be the same
     expect($pub2->slug)->toBe($slug1);
 });
