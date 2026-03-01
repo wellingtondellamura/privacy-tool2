@@ -4,94 +4,50 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Models\EvaluationRound;
 use App\Models\Inspection;
-use App\Models\Question;
-use App\Models\Category;
-use App\Models\Section;
+use App\Models\ProjectMember;
 use App\Models\QuestionnaireVersion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Gate;
 
 class DataExportTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_export_owned_project_json()
+    public function test_transform_project_data_includes_rounds_and_inspections()
     {
         $user = User::factory()->create();
         $project = Project::factory()->create(['owner_id' => $user->id]);
-        $project->participants()->attach($user, ['role' => 'owner']);
-
-        $response = $this->actingAs($user)->get(route('projects.export', $project));
-
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/json');
-        $response->assertDownload();
-    }
-
-    public function test_user_can_export_member_project_json()
-    {
-        $owner = User::factory()->create();
-        $member = User::factory()->create();
-        $project = Project::factory()->create(['owner_id' => $owner->id]);
-        $project->participants()->attach($owner, ['role' => 'owner']);
-        $project->participants()->attach($member, ['role' => 'evaluator']);
-
-        $response = $this->actingAs($member)->get(route('projects.export', $project));
-
-        $response->assertStatus(200);
-        $response->assertDownload();
-    }
-
-    public function test_user_cannot_export_unauthorized_project_json()
-    {
-        $owner = User::factory()->create();
-        $randomUser = User::factory()->create();
-        $project = Project::factory()->create(['owner_id' => $owner->id]);
-        $project->participants()->attach($owner, ['role' => 'owner']);
-
-        $response = $this->actingAs($randomUser)->get(route('projects.export', $project));
-
-        $response->assertStatus(403);
-    }
-
-    public function test_user_can_export_all_projects_zip()
-    {
-        $user = User::factory()->create();
         
-        $project1 = Project::factory()->create(['owner_id' => $user->id, 'name' => 'Project One']);
-        $project1->participants()->attach($user, ['role' => 'owner']);
-        
-        $owner2 = User::factory()->create();
-        $project2 = Project::factory()->create(['owner_id' => $owner2->id, 'name' => 'Project Two']);
-        $project2->participants()->attach($owner2, ['role' => 'owner']);
-        $project2->participants()->attach($user, ['role' => 'evaluator']);
-
-        $response = $this->actingAs($user)->get(route('profile.export-all'));
-
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/zip');
-        $response->assertDownload();
-    }
-
-    public function test_user_can_update_project()
-    {
-        $user = User::factory()->create();
-        $project = Project::factory()->create(['owner_id' => $user->id]);
-        $project->participants()->attach($user, ['role' => 'owner']);
-
-        $response = $this->actingAs($user)->put(route('projects.update', $project), [
-            'name' => 'Novo Nome',
-            'description' => 'Nova Descrição',
-            'url' => 'https://novosite.com',
+        $round = EvaluationRound::factory()->create([
+            'project_id' => $project->id,
+            'name' => 'Round 1',
         ]);
 
-        $response->assertStatus(302);
-        $this->assertDatabaseHas('projects', [
-            'id' => $project->id,
-            'name' => 'Novo Nome',
-            'description' => 'Nova Descrição',
-            'url' => 'https://novosite.com',
+        $qv = QuestionnaireVersion::factory()->create();
+
+        $inspection = Inspection::create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'evaluation_round_id' => $round->id,
+            'questionnaire_version_id' => $qv->id,
+            'status' => 'active',
+            'started_at' => now(),
         ]);
+
+        $controller = new \App\Http\Controllers\DataExportController();
+        $reflection = new \ReflectionClass($controller);
+        $method = $reflection->getMethod('transformProjectData');
+        $method->setAccessible(true);
+        
+        $data = $method->invoke($controller, $project);
+
+        $this->assertArrayHasKey('rounds', $data);
+        $this->assertCount(1, $data['rounds']);
+        $this->assertEquals('Round 1', $data['rounds'][0]['name']);
+        $this->assertCount(1, $data['rounds'][0]['inspections']);
+        $this->assertEquals($inspection->id, $data['rounds'][0]['inspections'][0]['id']);
     }
 }

@@ -60,8 +60,8 @@ class DataExportController extends Controller
     private function transformProjectData(Project $project): array
     {
         $project->load([
-            'inspections.responses.question.category.section',
-            'inspections.responses.user',
+            'evaluationRounds.inspections.responses.question.category.section',
+            'evaluationRounds.inspections.responses.user',
             'owner',
             'members.user'
         ]);
@@ -80,21 +80,30 @@ class DataExportController extends Controller
                 'email' => $member->user->email,
                 'role' => $member->role,
             ]),
-            'inspections' => $project->inspections->map(fn($inspection) => [
-                'id' => $inspection->id,
-                'status' => $inspection->status,
-                'started_at' => $inspection->started_at?->toIso8601String(),
-                'closed_at' => $inspection->closed_at?->toIso8601String(),
-                'responses' => $inspection->responses->map(fn($response) => [
-                    'question' => $response->question->text,
-                    'category' => $response->question->category->name,
-                    'section' => $response->question->category->section->name,
-                    'answer' => $response->answer,
-                    'observation' => $response->observation,
-                    'user' => [
-                        'name' => $response->user->name,
-                        'email' => $response->user->email,
-                    ],
+            'rounds' => $project->evaluationRounds->map(fn($round) => [
+                'id' => $round->id,
+                'name' => $round->name,
+                'status' => $round->status,
+                'diagnosis' => $round->diagnosis,
+                'started_at' => $round->started_at?->toIso8601String(),
+                'closed_at' => $round->closed_at?->toIso8601String(),
+                'inspections' => $round->inspections->map(fn($inspection) => [
+                    'id' => $inspection->id,
+                    'sequential_id' => $inspection->sequential_id,
+                    'status' => $inspection->status,
+                    'started_at' => $inspection->started_at?->toIso8601String(),
+                    'closed_at' => $inspection->closed_at?->toIso8601String(),
+                    'responses' => $inspection->responses->map(fn($response) => [
+                        'question' => $response->question->text,
+                        'category' => $response->question->category->name,
+                        'section' => $response->question->category->section->name,
+                        'answer' => $response->answer,
+                        'observation' => $response->observation,
+                        'user' => [
+                            'name' => $response->user->name,
+                            'email' => $response->user->email,
+                        ],
+                    ]),
                 ]),
             ]),
         ];

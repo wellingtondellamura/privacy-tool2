@@ -395,7 +395,7 @@ const revokePublication = () => {
                     <div class="space-y-6">
                         <Card title="Membros do Projeto">
                             <template #header v-if="canManageMembers">
-                                <div class="flex justify-between items-center px-6 py-5 border-b border-surface-100 bg-surface-50/50">
+                                <div class="flex justify-between items-center px-6 border-surface-100 bg-surface-50/50">
                                     <h3 class="text-lg font-medium text-surface-900">Membros</h3>
                                     <Button size="sm" variant="outline" @click="isInviting = !isInviting">
                                         Convidar
