@@ -112,6 +112,7 @@ const getMedalVariant = (medal) => {
                                 </div>
 
                                 <div class="relative pt-2">
+                                    <p class="text-[10px] font-bold text-brand-600 uppercase tracking-tight mb-2">{{ tool.round_name }}</p>
                                     <div class="flex justify-between items-end mb-2">
                                         <span class="text-xs font-bold text-surface-400 uppercase tracking-tighter">Score Global</span>
                                         <span class="text-3xl font-black text-surface-900">{{ tool.score }}%</span>

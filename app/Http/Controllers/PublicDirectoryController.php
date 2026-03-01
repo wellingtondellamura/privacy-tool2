@@ -45,6 +45,7 @@ class PublicDirectoryController extends Controller
         $publications = $query->paginate(15)->withQueryString()->through(fn ($pub) => [
             'slug' => $pub->slug,
             'project_name' => $pub->evaluationRound->project->name,
+            'round_name' => $pub->evaluationRound->name,
             'project_url' => $pub->evaluationRound->project->url,
             'score' => $pub->score,
             'medal' => $pub->medal,
