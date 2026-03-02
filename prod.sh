@@ -22,7 +22,7 @@ php artisan filament:upgrade --ansi
 
 # 4. Frontend (Vite Build)
 echo "🌐 Compilando assets do frontend (Vite)..."
-npm install
+npm install --legacy-peer-deps
 npm run build
 
 echo "✅ Aplicação otimizada com sucesso!"
