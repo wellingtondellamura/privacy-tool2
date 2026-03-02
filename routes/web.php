@@ -9,6 +9,7 @@ use App\Http\Controllers\ResultController;
 use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\EvaluationRoundController;
 use App\Http\Controllers\EvaluationRoundPublicationController;
+use App\Http\Controllers\RoundBadgeController;
 use App\Http\Controllers\PublicDirectoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,12 @@ Route::get('/tools', [PublicDirectoryController::class, 'index'])
     ->name('public.tools.index');
 Route::get('/tools/{slug}', [PublicDirectoryController::class, 'show'])
     ->name('public.tools.show');
+
+// Public Badge endpoints (spec.md 4)
+Route::get('/badge/{token}', [RoundBadgeController::class, 'publicShow'])
+    ->name('badge.show');
+Route::get('/badge/{token}.js', [RoundBadgeController::class, 'publicScript'])
+    ->name('badge.script');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -105,6 +112,14 @@ Route::middleware('auth')->group(function () {
         ->name('rounds.publications.update');
     Route::delete('/rounds/{round}/publish', [EvaluationRoundPublicationController::class, 'destroy'])
         ->name('rounds.publications.destroy');
+
+    // Round Badge routes (spec.md 4)
+    Route::post('/rounds/{round}/badge', [RoundBadgeController::class, 'store'])
+        ->name('rounds.badge.store');
+    Route::delete('/badges/{badge}', [RoundBadgeController::class, 'destroy'])
+        ->name('badges.destroy');
+    Route::put('/badges/{badge}/style', [RoundBadgeController::class, 'updateStyle'])
+        ->name('badges.style.update');
 });
 
 require __DIR__.'/auth.php';

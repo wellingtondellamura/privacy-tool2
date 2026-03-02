@@ -36,6 +36,11 @@ class EvaluationRound extends Model
         return $this->hasOne(RoundPublication::class);
     }
 
+    public function badge(): HasOne
+    {
+        return $this->hasOne(RoundBadge::class);
+    }
+
     public function inspections(): HasMany
     {
         return $this->hasMany(Inspection::class);
@@ -49,5 +54,10 @@ class EvaluationRound extends Model
     public function isClosed(): bool
     {
         return $this->status === 'closed';
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->isClosed() && $this->publicDirectory()->exists();
     }
 }

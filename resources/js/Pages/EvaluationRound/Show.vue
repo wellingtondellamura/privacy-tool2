@@ -75,6 +75,29 @@ const translateStatus = (status) => {
     return map[status] || status;
 };
 
+const isRevokingModalOpen = ref(false);
+
+const confirmRevocation = () => {
+    isRevokingModalOpen.value = true;
+};
+
+const closeRevokeModal = () => {
+    isRevokingModalOpen.value = false;
+};
+
+const submitRevocation = () => {
+    router.delete(route('badges.destroy', props.round.badge.id), {
+        onSuccess: () => closeRevokeModal(),
+    });
+};
+
+const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+        // Simple visual feedback could be added here
+        alert('Copiado para a área de transferência!');
+    });
+};
+
 </script>
 
 <template>
@@ -204,6 +227,85 @@ const translateStatus = (status) => {
                                 </div>
                             </div>
                         </Card>
+
+                        <!-- Selo Embeddable Card (RN-BADGE-01) -->
+                        <Card v-if="isClosed" title="Selo Embeddable">
+                            <div class="space-y-4 px-6 py-4">
+                                <div v-if="round.public_directory?.visibility === 'private'" class="p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700">
+                                    A visibilidade da rodada está definida como <strong>Privada</strong>. O selo embeddable exige que a rodada seja pública.
+                                </div>
+                                
+                                <div v-else-if="!round.badge" class="space-y-4">
+                                    <p class="text-xs text-surface-500">
+                                        Gere um selo oficial para exibir o resultado consolidado desta rodada em seu site ou sistema externo.
+                                    </p>
+                                    <Button variant="primary" size="sm" class="w-full" @click="$inertia.post(route('rounds.badge.store', round.id))">
+                                        Gerar Selo Oficial
+                                    </Button>
+                                </div>
+
+                                <div v-else class="space-y-4">
+                                    <!-- Preview Visual -->
+                                    <div class="p-4 bg-surface-50 border border-surface-200 rounded-lg flex flex-col items-center">
+                                        <span class="text-[10px] text-surface-400 mb-2 uppercase font-bold">Preview do Selo</span>
+                                        
+                                        <!-- Mini Mockup of Badge -->
+                                        <div class="bg-white border border-surface-200 rounded-lg p-3 shadow-sm text-center min-w-[140px]">
+                                            <div class="text-[10px] text-surface-500">{{ round.project.name }}</div>
+                                            <div class="font-bold text-sm text-surface-900">{{ round.snapshots[0]?.payload_json?.medal?.name }}</div>
+                                            <div class="text-[10px] text-surface-400">Score: {{ round.snapshots[0]?.payload_json?.global_score }}%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estilo -->
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-surface-500 uppercase mb-1">Escolha o Estilo</label>
+                                        <select 
+                                            class="w-full text-xs rounded-md border-surface-300 focus:border-brand-500 focus:ring-brand-500"
+                                            :value="round.badge.style"
+                                            @change="(e) => $inertia.put(route('badges.style.update', round.badge.id), { style: e.target.value })"
+                                        >
+                                            <option value="default">Padrão (Card)</option>
+                                            <option value="compact">Compacto (Linha)</option>
+                                            <option value="minimal">Minimalista (Texto)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Código Embed -->
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-surface-500 uppercase mb-1">Código de Incorporação</label>
+                                        <div class="relative group">
+                                            <pre class="bg-surface-900 text-surface-100 text-[10px] p-2 rounded overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;script src="{{ $page.props.app_url }}/badge/{{ round.badge.public_token }}.js"&gt;&lt;/script&gt;</pre>
+                                            <button 
+                                                class="absolute top-1 right-1 p-1 bg-surface-700 hover:bg-surface-600 rounded text-white transition-colors"
+                                                @click="copyToClipboard(`<script src='${$page.props.app_url}/badge/${round.badge.public_token}.js'></script>`)"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-surface-100">
+                                        <button 
+                                            v-if="!round.badge.is_active"
+                                            class="text-[10px] text-brand-600 hover:underline font-medium"
+                                            @click="$inertia.post(route('rounds.badge.store', round.id))"
+                                        >
+                                            Ativar Novamente
+                                        </button>
+                                        <button 
+                                            v-else
+                                            class="text-[10px] text-red-600 hover:underline font-medium"
+                                            @click="confirmRevocation"
+                                        >
+                                            Revogar Selo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
                     </div>
                 </div>
 
@@ -260,4 +362,15 @@ const translateStatus = (status) => {
             </div>
         </template>
     </ConfirmModal>
+
+    <ConfirmModal
+        :show="isRevokingModalOpen"
+        title="Revogar Selo"
+        message="Tem certeza que deseja revogar este selo? Ele deixará de ser exibido em sites externos imediatamente."
+        confirm-text="Revogar"
+        cancel-text="Cancelar"
+        confirm-variant="danger"
+        @confirm="submitRevocation"
+        @close="closeRevokeModal"
+    />
 </template>

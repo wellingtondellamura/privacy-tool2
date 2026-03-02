@@ -44,7 +44,8 @@ class EvaluationRoundController extends Controller
             'snapshots' => function ($query) {
                 $query->latest();
             },
-            'publicDirectory'
+            'publicDirectory',
+            'badge'
         ]);
 
         return Inertia::render('EvaluationRound/Show', [
