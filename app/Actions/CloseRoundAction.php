@@ -89,11 +89,17 @@ class CloseRoundAction
                     $qScores = $payloads->map(fn($p) => $p['sections'][$sIndex]['categories'][$cIndex]['questions'][$qIndex]['score'] ?? 0);
                     $avgQScores = (int) round($qScores->sum() / $count);
                     
+                    $levelValue = match (true) {
+                        $avgQScores >= 91 => 'high',
+                        $avgQScores >= 41 => 'medium',
+                        default => 'low',
+                    };
+
                     $questions[] = [
                         'question_id' => $templateQuestion['question_id'],
-                        'question_text' => $templateQuestion['question_text'],
+                        'level' => $levelValue,
                         'score' => $avgQScores,
-                        'variance' => 0, // Round-level variance maybe later
+                        'variance' => 0, 
                         'classification' => 'baixa',
                     ];
                 }

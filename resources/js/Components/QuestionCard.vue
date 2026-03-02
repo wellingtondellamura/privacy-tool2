@@ -23,6 +23,10 @@ const props = defineProps({
     index: {
         type: Number,
         required: true,
+    },
+    options: {
+        type: Array,
+        required: true,
     }
 });
 
@@ -36,6 +40,8 @@ const saveError = ref(null);
 let saveTimeout = null;
 
 const saveResponse = async () => {
+    // If answer is not set, we don't save. 
+    // If it's the same as existing, we skip (unless it's an auto-save for observation)
     if (!answer.value) return;
 
     isSaving.value = true;
@@ -64,21 +70,12 @@ const triggerSave = () => {
 // Auto-save when answer changes immediately
 const selectAnswer = (val) => {
     if (props.disabled) return;
+    if (answer.value === val) return; // Toggle logic if needed, but here we just select
+    
     answer.value = val;
     // Debounced text area save logic, immediate for radios
     if (saveTimeout) clearTimeout(saveTimeout);
     saveResponse();
-};
-
-const getOptions = () => {
-    // Determine options based on question type / expected values in domain
-    // From mock/seeder, some are Yes/No scale
-    return [
-        { value: 'Suficiente', label: 'Suficiente', desc: 'Totalmente atendido' },
-        { value: 'Insuficiente', label: 'Insuficiente', desc: 'Atendido parcialmente' },
-        { value: 'Inexistente', label: 'Inexistente', desc: 'Não atendido' },
-        { value: 'Outro', label: 'Outro', desc: 'Cenário diferente' },
-    ];
 };
 </script>
 
@@ -99,7 +96,7 @@ const getOptions = () => {
 
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button 
-                v-for="opt in getOptions()" 
+                v-for="opt in options" 
                 :key="opt.value"
                 type="button"
                 @click="selectAnswer(opt.value)"
@@ -115,7 +112,7 @@ const getOptions = () => {
                 <span :class="['block text-sm font-medium', answer === opt.value ? 'text-brand-900' : 'text-surface-900']">
                     {{ opt.label }}
                 </span>
-                <span :class="['block text-xs mt-1', answer === opt.value ? 'text-brand-700' : 'text-surface-500']">
+                <span v-if="opt.desc" :class="['block text-xs mt-1', answer === opt.value ? 'text-brand-700' : 'text-surface-500']">
                     {{ opt.desc }}
                 </span>
             </button>
@@ -129,7 +126,7 @@ const getOptions = () => {
             leave-from-class="opacity-100 translate-y-0"
             leave-to-class="opacity-0 translate-y-1"
         >
-            <div v-if="answer === 'Outro'" class="mt-4">
+            <div v-if="answer === 'other'" class="mt-4">
                 <label :for="'obs-' + question.id" class="block text-sm font-medium text-surface-700 mb-1">
                     Por favor, especifique
                 </label>

@@ -2,24 +2,16 @@
 
 namespace App\Services;
 
+use App\Enums\AnswerLevel;
+
 class AggregationService
 {
     /**
-     * RN-01 — Convert answer to numeric score.
-     *
-     * Existência e Qualidade:
-     *   Suficiente = 100, Insuficiente = 50, Inexistente = 0, Outro = 0
-     * Formato:
-     *   Apropriado = 100, Necessita melhorias = 50, Inapropriado = 0, Outro = 0
+     * RN-01 — Convert answer to numeric score using canonical enum.
      */
-    public static function scoreForAnswer(string $answer): int
+    public static function scoreForAnswer(AnswerLevel $answer): ?int
     {
-        return match ($answer) {
-            'Suficiente', 'Apropriado' => 100,
-            'Insuficiente', 'Necessita melhorias' => 50,
-            'Inexistente', 'Inapropriado', 'Outro' => 0,
-            default => 0,
-        };
+        return AnswerScoreResolver::resolve($answer);
     }
 
     /**
@@ -54,20 +46,34 @@ class AggregationService
 
     /**
      * RN-04 — Score da seção.
-     * scoreSecao = round((scoreCat1 + scoreCat2) / 2)
+     * scoreSecao = round(sum(categoryScores) / totalCategories)
+     *
+     * @param int[] $categoryScores
      */
-    public static function sectionScore(int $cat1Score, int $cat2Score): int
+    public static function sectionScore(array $categoryScores): int
     {
-        return (int) round(($cat1Score + $cat2Score) / 2);
+        $count = count($categoryScores);
+        if ($count === 0) {
+            return 0;
+        }
+
+        return (int) round(array_sum($categoryScores) / $count);
     }
 
     /**
      * RN-05 — Percentual respondido da seção.
-     * percentualSecao = (percentualCat1 + percentualCat2) / 2
+     * percentualSecao = sum(categoryPercentages) / totalCategories
+     *
+     * @param float[] $categoryPercentages
      */
-    public static function sectionPercentage(float $cat1Pct, float $cat2Pct): float
+    public static function sectionPercentage(array $categoryPercentages): float
     {
-        return ($cat1Pct + $cat2Pct) / 2;
+        $count = count($categoryPercentages);
+        if ($count === 0) {
+            return 0;
+        }
+
+        return array_sum($categoryPercentages) / $count;
     }
 
     /**

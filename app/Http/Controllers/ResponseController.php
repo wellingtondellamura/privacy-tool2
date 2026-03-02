@@ -32,7 +32,7 @@ class ResponseController extends Controller
 
         $validated = $request->validate([
             'question_id' => 'required|exists:questions,id',
-            'answer' => 'required|string|in:Suficiente,Insuficiente,Inexistente,Outro,Apropriado,Necessita melhorias,Inapropriado',
+            'answer' => 'required|string|in:high,medium,low,other',
             'observation' => 'nullable|string',
         ]);
 

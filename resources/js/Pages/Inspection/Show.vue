@@ -110,6 +110,10 @@ const isClosed = computed(() => props.inspection.status === 'closed');
 const isOwner = computed(() => props.inspection.project.owner_id === usePage().props.auth.user.id);
 const isResponsible = computed(() => props.inspection.user_id === usePage().props.auth.user.id);
 
+const activeSection = computed(() => {
+    return sections.value.find(s => s.categories.some(c => c.id === activeCategoryId.value));
+});
+
 const toRoman = (num) => {
     if (isNaN(num)) return '';
     const map = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
@@ -319,6 +323,7 @@ const activeCategoryIndex = computed(() => {
                         :index="qIndex + 1"
                         :inspection-id="inspection.id"
                         :existing-response="responseMap[question.id]"
+                        :options="activeSection?.options || []"
                         :disabled="!isActive"
                         @saved="handleResponseSaved"
                     />

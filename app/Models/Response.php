@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Enums\AnswerLevel;
+
 class Response extends Model
 {
     use HasFactory;
@@ -15,6 +17,10 @@ class Response extends Model
         'user_id',
         'answer',
         'observation',
+    ];
+
+    protected $casts = [
+        'answer' => AnswerLevel::class,
     ];
 
     public function inspection(): BelongsTo

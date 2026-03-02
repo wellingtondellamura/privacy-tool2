@@ -8,10 +8,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+use App\Enums\ResponseProfile;
+
+use App\Services\ResponseLabelResolver;
+
 class Section extends Model
 {
     use HasFactory;
-    protected $fillable = ['questionnaire_version_id', 'name', 'order'];
+    protected $fillable = ['questionnaire_version_id', 'name', 'order', 'response_profile'];
+
+    protected $casts = [
+        'response_profile' => ResponseProfile::class,
+    ];
+
+    protected $appends = ['options'];
+
+    public function getOptionsAttribute(): array
+    {
+        return ResponseLabelResolver::optionsForProfile($this->response_profile);
+    }
 
     public function questionnaireVersion(): BelongsTo
     {

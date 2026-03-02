@@ -86,9 +86,7 @@ class CloseInspectionAction
 
             foreach ($section->categories as $category) {
                 $questions = $category->questions;
-                $scores = [];
-                $answered = 0;
-
+                $questionData = [];
                 foreach ($questions as $question) {
                     $response = Response::where([
                         'inspection_id' => $inspection->id,
@@ -97,8 +95,16 @@ class CloseInspectionAction
                     ])->first();
 
                     if ($response) {
-                        $scores[] = AggregationService::scoreForAnswer($response->answer);
+                        $level = $response->answer;
+                        $score = AggregationService::scoreForAnswer($level);
+                        $scores[] = $score;
                         $answered++;
+
+                        $questionData[] = [
+                            'question_id' => $question->id,
+                            'level' => $level->value,
+                            'score' => $score,
+                        ];
                     }
                 }
 
@@ -113,16 +119,15 @@ class CloseInspectionAction
                     'percentage' => $categoryPercentage,
                     'total_questions' => $totalQuestions,
                     'answered' => $answered,
+                    'questions' => $questionData,
                 ];
             }
 
-            $cat1Score = $categories[0]['score'] ?? 0;
-            $cat2Score = $categories[1]['score'] ?? 0;
-            $cat1Pct = $categories[0]['percentage'] ?? 0;
-            $cat2Pct = $categories[1]['percentage'] ?? 0;
+            $catScores = array_column($categories, 'score');
+            $catPercentages = array_column($categories, 'percentage');
 
-            $sectionScore = AggregationService::sectionScore($cat1Score, $cat2Score);
-            $sectionPercentage = AggregationService::sectionPercentage($cat1Pct, $cat2Pct);
+            $sectionScore = AggregationService::sectionScore($catScores);
+            $sectionPercentage = AggregationService::sectionPercentage($catPercentages);
 
             $sections[] = [
                 'id' => $section->id,
