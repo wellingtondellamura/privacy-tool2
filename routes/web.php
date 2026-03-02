@@ -24,6 +24,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/metodo-mitra', function () {
+    return Inertia::render('MitraMethod');
+})->name('metodo.mitra');
+
 Route::get('/dashboard', function () {
     return redirect()->route('projects.index');
 })->middleware(['auth', 'verified'])->name('dashboard');

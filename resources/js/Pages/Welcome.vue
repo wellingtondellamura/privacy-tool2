@@ -31,7 +31,7 @@ defineProps({
                 <ApplicationLogo class="h-8 w-auto text-brand-600 fill-current" />                
             </div>
             <nav v-if="canLogin" class="flex items-center gap-4">
-                <a href="#metodologia" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Metodologia</a>
+                <Link :href="route('metodo.mitra')" class="text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Método Mitra</Link>
                 <a href="#funcionalidades" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Funcionalidades</a>
                 <a href="#diretorio" class="hidden lg:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Diretório Público</a>
                 
@@ -262,6 +262,36 @@ defineProps({
 
                         <div class="relative flex justify-center lg:justify-end">
                             <img src="/images/undraw_terms_sx63.svg" alt="Termos e Funcionalidades" class="w-full max-w-sm h-auto drop-shadow-xl" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Método Mitra (New Section) -->
+            <section id="metodo-mitra" class="py-24 bg-surface-50 border-b border-surface-200">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid lg:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-6">
+                                Base Científica
+                            </div>
+                            <h2 class="text-3xl lg:text-4xl font-bold text-surface-900 mb-6">Método Mitra</h2>
+                            <p class="text-lg text-surface-600 mb-6 leading-relaxed">
+                                O <strong>Método Mitra</strong> é o coração desta ferramenta. Ele oferece um checklist estruturado para avaliar a transparência no tratamento de dados pessoais, focando tanto na qualidade da informação quanto no seu formato de exibição.
+                            </p>
+                            <p class="text-surface-600 mb-8 leading-relaxed">
+                                Baseado no modelo <strong>TR-Model</strong> e validado academicamente, o método permite classificar softwares em níveis de conformidade e usabilidade de privacidade.
+                            </p>
+                            <Link :href="route('metodo.mitra')">
+                                <Button variant="outline" size="lg" class="gap-2">
+                                    Conhecer o Método Detalhadamente
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                </Button>
+                            </Link>
+                        </div>
+                        <div class="relative flex justify-center lg:justify-end">
+                            <div class="absolute -inset-4 bg-brand-100/50 rounded-full blur-3xl opacity-50"></div>
+                            <img src="/images/undraw_logic_re_nyb4.svg" alt="Método Mitra" class="relative z-10 w-full max-w-sm h-auto drop-shadow-xl" />
                         </div>
                     </div>
                 </div>

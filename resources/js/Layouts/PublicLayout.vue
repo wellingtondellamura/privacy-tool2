@@ -24,6 +24,13 @@ defineProps({
             </div>
             <nav class="flex items-center gap-4">
                 <Link
+                    :href="route('metodo.mitra')"
+                    class="text-sm font-medium transition-colors"
+                    :class="route().current('metodo.mitra') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
+                >
+                    Método Mitra
+                </Link>
+                <Link
                     :href="route('public.tools.index')"
                     class="hidden md:block text-sm font-medium transition-colors"
                     :class="route().current('public.tools.*') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
