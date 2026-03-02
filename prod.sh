@@ -26,3 +26,4 @@ npm install --legacy-peer-deps
 npm run build
 
 echo "✅ Aplicação otimizada com sucesso!"
+ 
