@@ -167,7 +167,7 @@ const sections = [
                 <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-6 mb-12">
                     <h3 class="text-sm font-semibold text-surface-400 uppercase tracking-wider mb-4">Navegação Rápida</h3>
                     <div class="flex flex-wrap gap-2">
-                        <button v-for="s in sections" :key="s.id" @click="toggle(s.id); $nextTick(() => { const el = document.getElementById(s.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) })"
+                        <button v-for="s in sections" :key="s.id" @click="activeSection = s.id; $nextTick(() => { const el = document.getElementById(s.id); if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 100; window.scrollTo({ top: y, behavior: 'smooth' }); } })"
                             class="px-3 py-1.5 text-sm rounded-lg border transition-all duration-200"
                             :class="activeSection === s.id ? 'bg-brand-50 border-brand-200 text-brand-700 font-semibold' : 'bg-surface-50 border-surface-200 text-surface-600 hover:bg-brand-50 hover:text-brand-600'"
                         >{{ s.title }}</button>
