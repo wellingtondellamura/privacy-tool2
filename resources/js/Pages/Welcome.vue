@@ -32,6 +32,7 @@ defineProps({
             </div>
             <nav v-if="canLogin" class="flex items-center gap-4">
                 <Link :href="route('metodo.mitra')" class="text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Método Mitra</Link>
+                <Link :href="route('manual')" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Manual de Uso</Link>
                 <a href="#funcionalidades" class="hidden md:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Funcionalidades</a>
                 <a href="#diretorio" class="hidden lg:block text-sm font-medium text-surface-500 hover:text-brand-600 transition-colors">Diretório Público</a>
                 

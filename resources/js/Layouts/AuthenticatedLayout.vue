@@ -125,6 +125,12 @@ onMounted(() => {
                                 Método Mitra
                             </NavLink>
                             <NavLink
+                                :href="route('manual')"
+                                :active="route().current('manual')"
+                            >
+                                Manual de Uso
+                            </NavLink>
+                            <NavLink
                                 :href="route('public.tools.index')"
                                 :active="route().current('public.tools.*')"
                             >
@@ -242,6 +248,12 @@ onMounted(() => {
                         :active="route().current('metodo.mitra')"
                     >
                         Método Mitra
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink
+                        :href="route('manual')"
+                        :active="route().current('manual')"
+                    >
+                        Manual de Uso
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('public.tools.index')"

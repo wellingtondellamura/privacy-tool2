@@ -31,6 +31,13 @@ defineProps({
                     Método Mitra
                 </Link>
                 <Link
+                    :href="route('manual')"
+                    class="hidden md:block text-sm font-medium transition-colors"
+                    :class="route().current('manual') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
+                >
+                    Manual de Uso
+                </Link>
+                <Link
                     :href="route('public.tools.index')"
                     class="hidden md:block text-sm font-medium transition-colors"
                     :class="route().current('public.tools.*') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
