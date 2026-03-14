@@ -17,7 +17,10 @@ const classes = computed(() => {
         'success': 'bg-green-100 text-green-800',
         'warning': 'bg-yellow-100 text-yellow-800',
         'danger': 'bg-red-100 text-red-800',
-    }[props.variant];
+        'error': 'bg-red-100 text-red-800',
+        'neutral': 'bg-surface-100 text-surface-800',
+        'primary': 'bg-brand-100 text-brand-800',
+    }[props.variant] || 'bg-surface-100 text-surface-800';
 
     return `${base} ${variant}`;
 });

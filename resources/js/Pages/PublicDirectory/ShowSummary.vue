@@ -42,7 +42,7 @@ const getMedalImage = (medal) => {
                     
                     <div class="relative z-10 space-y-8">
                         <div class="flex flex-col items-center">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-bold uppercase tracking-widest mb-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-[10px] font-bold uppercase tracking-widest mb-6">
                                 Relatório de Privacidade
                             </div>
                             <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-tight">{{ tool.name }}</h1>
@@ -51,7 +51,7 @@ const getMedalImage = (medal) => {
                         <div class="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-20">
                             <div class="text-center group">
                                 <div class="text-7xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-500">{{ tool.score }}%</div>
-                                <div class="text-surface-400 uppercase tracking-[0.2em] text-[10px] font-bold">Score Global</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">Score Global</div>
                             </div>
                             
                             <div class="h-16 w-px bg-surface-700 hidden md:block"></div>
@@ -67,7 +67,7 @@ const getMedalImage = (medal) => {
                                         {{ tool.medal.name || tool.medal }}
                                     </Badge>
                                 </div>
-                                <div class="text-surface-400 uppercase tracking-[0.2em] text-[10px] font-bold">Classificação Final</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">Classificação Final</div>
                             </div>
                         </div>
                     </div>

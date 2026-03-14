@@ -60,18 +60,6 @@ class CloseInspectionAction
 
         // Transition to closed
         $inspection->transitionTo('closed');
-
-        if ($inspection->evaluation_round_id) {
-            $round = $inspection->evaluationRound;
-            // Check if all inspections are closed
-            $allClosed = $round->inspections()
-                ->where('status', '!=', 'closed')
-                ->count() === 0;
-
-            if ($allClosed) {
-                app(CloseRoundAction::class)->execute($round);
-            }
-        }
     }
 
     /**
@@ -87,6 +75,8 @@ class CloseInspectionAction
             foreach ($section->categories as $category) {
                 $questions = $category->questions;
                 $questionData = [];
+                $scores = [];
+                $answered = 0;
                 foreach ($questions as $question) {
                     $response = Response::where([
                         'inspection_id' => $inspection->id,
