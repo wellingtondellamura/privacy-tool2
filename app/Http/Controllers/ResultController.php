@@ -28,7 +28,7 @@ class ResultController extends Controller
         ])->first();
 
         if (!$snapshot) {
-            return redirect()->back()->withErrors(['results' => 'Nenhum resultado encontrado para este usuário.']);
+            return redirect()->back()->withErrors(['results' => __('messages.no_results_for_user')]);
         }
 
         $inspection->load('project', 'questionnaireVersion', 'evaluationRound');
@@ -47,7 +47,7 @@ class ResultController extends Controller
         Gate::authorize('view', $inspection->project);
 
         if (!$inspection->isClosed()) {
-            return redirect()->back()->withErrors(['results' => 'A inspeção deve estar concluída para ver resultados da equipe.']);
+            return redirect()->back()->withErrors(['results' => __('messages.inspection_must_be_closed')]);
         }
 
         $snapshot = ResultSnapshot::where([
@@ -56,7 +56,7 @@ class ResultController extends Controller
         ])->first();
 
         if (!$snapshot) {
-            return redirect()->back()->withErrors(['results' => 'Resultados consolidados não encontrados.']);
+            return redirect()->back()->withErrors(['results' => __('messages.consolidated_not_found')]);
         }
 
         $inspection->load('project', 'questionnaireVersion', 'evaluationRound');
@@ -79,7 +79,7 @@ class ResultController extends Controller
             ->first();
 
         if (!$snapshot) {
-            return redirect()->back()->withErrors(['results' => 'Resultado consolidado da rodada não encontrado.']);
+            return redirect()->back()->withErrors(['results' => __('messages.round_consolidated_not_found')]);
         }
 
         $round->load('project');
@@ -98,7 +98,7 @@ class ResultController extends Controller
         Gate::authorize('view', $inspection->project);
 
         if ($inspection->project_id !== $other->project_id) {
-            return redirect()->back()->withErrors(['comparison' => 'As inspeções devem pertencer ao mesmo projeto.']);
+            return redirect()->back()->withErrors(['comparison' => __('messages.inspections_same_project')]);
         }
 
         $baseline = ResultSnapshot::where([
@@ -112,7 +112,7 @@ class ResultController extends Controller
         ])->first();
 
         if (!$baseline || !$comparison) {
-            return redirect()->back()->withErrors(['comparison' => 'Ambas as inspeções devem estar concluídas.']);
+            return redirect()->back()->withErrors(['comparison' => __('messages.both_inspections_closed')]);
         }
 
         try {
@@ -138,14 +138,14 @@ class ResultController extends Controller
         Gate::authorize('view', $round->project);
 
         if ($round->project_id !== $other->project_id) {
-            return redirect()->back()->withErrors(['comparison' => 'As rodadas devem pertencer ao mesmo projeto.']);
+            return redirect()->back()->withErrors(['comparison' => __('messages.rounds_same_project')]);
         }
 
         $baseline = $round->snapshots()->latest()->first();
         $comparison = $other->snapshots()->latest()->first();
 
         if (!$baseline || !$comparison) {
-            return redirect()->back()->withErrors(['comparison' => 'Ambas as rodadas devem estar concluídas.']);
+            return redirect()->back()->withErrors(['comparison' => __('messages.both_rounds_closed')]);
         }
 
         try {

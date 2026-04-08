@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EvaluationRound;
 use App\Models\RoundBadge;
+use App\Services\AggregationService;
 use App\Services\RoundBadgeService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -28,7 +29,7 @@ class RoundBadgeController extends Controller
 
         try {
             $badge = $this->service->createBadge($round);
-            return back()->with('success', 'Selo gerado com sucesso.');
+            return back()->with('success', __('messages.badge_generated'));
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -43,7 +44,7 @@ class RoundBadgeController extends Controller
 
         $this->service->revokeBadge($badge);
 
-        return back()->with('success', 'Selo revogado.');
+        return back()->with('success', __('messages.badge_revoked'));
     }
 
     /**
@@ -59,7 +60,7 @@ class RoundBadgeController extends Controller
 
         $this->service->updateStyle($badge, $request->style);
 
-        return back()->with('success', 'Estilo do selo atualizado.');
+        return back()->with('success', __('messages.badge_style_updated'));
     }
 
     /**
@@ -78,15 +79,25 @@ class RoundBadgeController extends Controller
             abort(404);
         }
 
+        $lang = request()->query('lang', 'en');
+        if (!in_array($lang, ['pt_BR', 'en'])) {
+            $lang = 'en';
+        }
+        app()->setLocale($lang);
+
         $snapshot = $round->snapshots()->latest()->firstOrFail();
         $payload = $snapshot->payload_json;
+
+        $medalKey = $payload['medal']['name'];
 
         return response()->json([
             'project_name' => $round->project->name,
             'round_name' => $round->name,
             'global_score' => $payload['global_score'],
-            'medal' => $payload['medal']['name'],
+            'medal' => AggregationService::medalLabel($medalKey),
+            'medal_key' => $medalKey,
             'date' => $round->closed_at?->format('d/m/Y'),
+            'audited_label' => __('labels.audited_at'),
             'public_url' => route('public.tools.show', $round->publicDirectory->slug),
             'style' => $badge->style,
         ])->setCache([
@@ -108,7 +119,12 @@ class RoundBadgeController extends Controller
             abort(404);
         }
 
-        $apiUrl = route('badge.show', $token);
+        $lang = request()->query('lang', 'en');
+        if (!in_array($lang, ['pt_BR', 'en'])) {
+            $lang = 'en';
+        }
+
+        $apiUrl = route('badge.show', $token) . '?lang=' . $lang;
         
         $js = <<<JS
 (function() {
@@ -124,7 +140,7 @@ class RoundBadgeController extends Controller
                     <div style="border:1px solid #ccc; border-radius:8px; padding:10px; display:inline-block; background:#fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <div style="font-size:12px; color:#666;">\${data.project_name}</div>
                         <div style="font-weight:bold; font-size:16px; margin:4px 0;">\${data.medal} (\${data.global_score}%)</div>
-                        <div style="font-size:10px; color:#999;">Auditado em \${data.date}</div>
+                        <div style="font-size:10px; color:#999;">\${data.audited_label} \${data.date}</div>
                     </div>
                 </a>
             `;

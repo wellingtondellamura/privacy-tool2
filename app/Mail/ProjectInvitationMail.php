@@ -36,7 +36,7 @@ class ProjectInvitationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Você foi convidado para o projeto: ' . $this->project->name,
+            subject: __('email.invitation_subject', ['project' => $this->project->name]),
         );
     }
 

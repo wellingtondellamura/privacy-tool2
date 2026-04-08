@@ -5,6 +5,9 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
@@ -37,18 +40,17 @@ const updatePassword = () => {
     <section>
         <header>
             <h2 class="text-lg font-medium text-gray-900">
-                Atualizar Senha
+                {{ $t('profile.update_password_title') }}
             </h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                Certifique-se de que sua conta esteja usando uma senha longa e aleatória para se
-                manter segura.
+                {{ $t('profile.update_password_description') }}
             </p>
         </header>
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="current_password" value="Senha Atual" />
+                <InputLabel for="current_password" :value="$t('profile.current_password')" />
 
                 <TextInput
                     id="current_password"
@@ -66,7 +68,7 @@ const updatePassword = () => {
             </div>
 
             <div>
-                <InputLabel for="password" value="Nova Senha" />
+                <InputLabel for="password" :value="$t('profile.new_password')" />
 
                 <TextInput
                     id="password"
@@ -83,7 +85,7 @@ const updatePassword = () => {
             <div>
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirmar Senha"
+                    :value="$t('profile.confirm_password')"
                 />
 
                 <TextInput
@@ -101,7 +103,7 @@ const updatePassword = () => {
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Salvar</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">{{ $t('common.save') }}</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -113,7 +115,7 @@ const updatePassword = () => {
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                        Salvo.
+                        {{ $t('common.saved') }}
                     </p>
                 </Transition>
             </div>

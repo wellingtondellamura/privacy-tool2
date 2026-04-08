@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -18,14 +19,16 @@ const props = defineProps({
     }
 });
 
+const { t } = useI18n();
+
 const getMedalColor = (medalName) => {
     const colors = {
-        'Ouro': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        'Prata': 'bg-gray-100 text-gray-800 border-gray-300',
-        'Bronze': 'bg-orange-100 text-orange-800 border-orange-300',
-        'Sem Medalha': 'bg-surface-100 text-surface-800 border-surface-300',
+        'gold': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        'silver': 'bg-gray-100 text-gray-800 border-gray-300',
+        'bronze': 'bg-orange-100 text-orange-800 border-orange-300',
+        'incipient': 'bg-surface-100 text-surface-800 border-surface-300',
     };
-    return colors[medalName] || colors['Sem Medalha'];
+    return colors[medalName] || colors['incipient'];
 };
 
 const toRoman = (num) => {
@@ -45,9 +48,9 @@ const toAlpha = (index) => String.fromCharCode(65 + index);
 
 const getMedalImage = (medalName) => {
     const images = {
-        'Ouro': '/images/badges-gold.png',
-        'Prata': '/images/badges-silver.png',
-        'Bronze': '/images/badges-bronze.png',
+        'gold': '/images/badges-gold.png',
+        'silver': '/images/badges-silver.png',
+        'bronze': '/images/badges-bronze.png',
     };
     return images[medalName] || null;
 };
@@ -55,31 +58,31 @@ const getMedalImage = (medalName) => {
 </script>
 
 <template>
-    <Head :title="`Resultados - Inspeção #${inspection.sequential_id}`" />
+    <Head :title="t('results.individual_title') + ' - ' + t('project.inspection_label', { id: inspection.sequential_id })" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
                 <div>
                     <Breadcrumbs :items="[
-                        { label: 'Workspace', url: route('projects.index') },
+                        { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
                         { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
-                        { label: 'Resultados Individuais' }
+                        { label: $t('results.individual_title') }
                     ]" />
                     <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
-                        Resultados Individuais
+                        {{ $t('results.individual_title') }}
                     </h2>
-                    <p class="text-sm text-surface-500 mt-1">Inspeção #{{ inspection.sequential_id }} — {{ inspection.evaluation_round.name }}</p>
+                    <p class="text-sm text-surface-500 mt-1">{{ $t('results.individual_subtitle', { id: inspection.sequential_id, round: inspection.evaluation_round.name }) }}</p>
                 </div>
                 
                 <div class="flex items-center gap-2">
                     <Button variant="outline" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
-                        Voltar à Rodada
+                        {{ $t('results.back_to_round') }}
                     </Button>
                     <div v-if="inspection.status === 'closed'">
                         <Button variant="outline" @click="$inertia.get(route('results.team', inspection.id))">
-                            Ver Resultado Consolidado (Equipe)
+                            {{ $t('results.view_team') }}
                         </Button>
                     </div>
                 </div>
@@ -104,7 +107,7 @@ const getMedalImage = (medalName) => {
                                 {{ snapshot.global_score }}
                             </div>
                             <div class="mt-4 text-xs font-bold text-surface-400 uppercase tracking-[0.2em]">
-                                Pontuação Global
+                                {{ $t('results.global_score') }}
                             </div>
                         </div>
                     </div>
@@ -112,7 +115,7 @@ const getMedalImage = (medalName) => {
 
                 <!-- Sections -->
                 <div class="space-y-6">
-                    <h3 class="text-lg font-semibold text-surface-900 border-b border-surface-200 pb-2">Desempenho por Seção</h3>
+                    <h3 class="text-lg font-semibold text-surface-900 border-b border-surface-200 pb-2">{{ $t('results.section_performance') }}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card v-for="(section, sIndex) in snapshot.sections" :key="section.id" class="flex flex-col h-full">
                             <template #header>
@@ -148,26 +151,26 @@ const getMedalImage = (medalName) => {
                     <div>
                         <h4 class="text-white font-bold text-lg mb-6 flex items-center gap-2">
                             <span class="w-2 h-6 bg-brand-500 rounded-full"></span>
-                            Informações do Projeto
+                            {{ $t('results.footer.project_info') }}
                         </h4>
                         <div class="space-y-4">
                             <div>
-                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Nome do Projeto</span>
+                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">{{ $t('results.footer.project_name') }}</span>
                                 <p class="text-surface-200 font-medium">{{ inspection.project.name }}</p>
                             </div>
                             <div v-if="inspection.project.website_url">
-                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Website URL</span>
+                                <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">{{ $t('results.footer.website') }}</span>
                                 <a :href="inspection.project.website_url" target="_blank" class="text-brand-400 hover:text-brand-300 transition-colors underline decoration-brand-400/30">
                                     {{ inspection.project.website_url }}
                                 </a>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">Data da Inspeção</span>
-                                    <p class="text-surface-200">{{ new Date(inspection.created_at).toLocaleDateString() }}</p>
+                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">{{ $t('results.footer.inspection_date') }}</span>
+                                    <p class="text-surface-200">{{ new Date(inspection.created_at).toLocaleDateString(t('common.locale_code')) }}</p>
                                 </div>
                                 <div>
-                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">ID Sequencial</span>
+                                    <span class="block text-xs uppercase tracking-wider text-surface-500 font-bold mb-1">{{ $t('results.footer.sequential_id') }}</span>
                                     <p class="text-surface-200">#{{ inspection.sequential_id }}</p>
                                 </div>
                             </div>
@@ -177,21 +180,21 @@ const getMedalImage = (medalName) => {
                     <!-- References Column -->
                     <div class="flex flex-col md:items-end gap-3 text-sm h-full justify-between">
                         <div class="w-full md:w-auto">
-                            <span class="font-semibold text-white mb-4 block md:text-right">Referências Oficiais</span>
+                            <span class="font-semibold text-white mb-4 block md:text-right">{{ $t('results.footer.references') }}</span>
                             <div class="space-y-3">
                                 <a href="https://each.usp.br/cond_met_pand/trmodel/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2 md:justify-end group">
-                                    <span class="group-hover:translate-x-[-4px] transition-transform">Metodologia TRModel (USP)</span>
+                                    <span class="group-hover:translate-x-[-4px] transition-transform">{{ $t('results.footer.trmodel_link') }}</span>
                                     <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                 </a>
                                 <a href="https://www.gov.br/esporte/pt-br/acesso-a-informacao/lgpd" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2 md:justify-end group">
-                                    <span class="group-hover:translate-x-[-4px] transition-transform">Portal Oficial: LGPD (Governo Federal)</span>
+                                    <span class="group-hover:translate-x-[-4px] transition-transform">{{ $t('results.footer.lgpd_link') }}</span>
                                     <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                 </a>
                             </div>
                         </div>
 
                         <p class="text-xs text-surface-500 mt-auto md:text-right leading-relaxed max-w-sm">
-                            Uma iniciativa para ampliar a aderência a boas práticas técnicas de dados pessoais e empoderar a transparência.
+                            {{ $t('results.footer.description') }}
                         </p>
                     </div>
                 </div>
@@ -203,7 +206,7 @@ const getMedalImage = (medalName) => {
                         <ApplicationLogo class="h-4 w-auto fill-current" />
                         <span>&copy; {{ new Date().getFullYear() }} Privacy Tool.</span>
                     </div>
-                    <p>Desenvolvido com o rigor técnico TR-Model v1.0</p>
+                    <p>{{ $t('results.footer.developed_with') }}</p>
                 </div>
             </div>
         </footer>

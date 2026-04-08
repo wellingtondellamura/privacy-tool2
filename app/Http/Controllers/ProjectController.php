@@ -65,7 +65,7 @@ class ProjectController extends Controller
             'role' => 'owner',
         ]);
 
-        return redirect()->route('projects.show', $project->id)->with('success', 'Projeto criado com sucesso.');
+        return redirect()->route('projects.show', $project->id)->with('success', __('messages.project_created'));
     }
 
     /**
@@ -116,7 +116,7 @@ class ProjectController extends Controller
 
         $project->update($validated);
 
-        return redirect()->back()->with('success', 'Projeto atualizado com sucesso.');
+        return redirect()->back()->with('success', __('messages.project_updated'));
     }
 
     /**
@@ -128,7 +128,7 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return redirect()->route('projects.index')->with('success', 'Projeto removido com sucesso.');
+        return redirect()->route('projects.index')->with('success', __('messages.project_deleted'));
     }
 
     /**
@@ -148,11 +148,11 @@ class ProjectController extends Controller
 
         // Prevent changing the original owner's role
         if ($member->role === 'owner') {
-            return redirect()->back()->withErrors(['role' => 'Não é possível alterar o papel do dono do projeto.']);
+            return redirect()->back()->withErrors(['role' => __('messages.cannot_change_owner_role')]);
         }
 
         $member->update(['role' => $validated['role']]);
 
-        return redirect()->back()->with('success', 'Papel do membro atualizado com sucesso.');
+        return redirect()->back()->with('success', __('messages.member_role_updated'));
     }
 }

@@ -11,10 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use App\Enums\ResponseProfile;
 
 use App\Services\ResponseLabelResolver;
+use Spatie\Translatable\HasTranslations;
 
 class Section extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
+
+    public $translatable = ['name'];
     protected $fillable = ['questionnaire_version_id', 'name', 'order', 'response_profile'];
 
     protected $casts = [

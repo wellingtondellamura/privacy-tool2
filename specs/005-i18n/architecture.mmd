@@ -1,0 +1,212 @@
+%% Privacy Tool — Arquitetura Completa do Sistema
+%% Renderizar com: mmdc -i architecture.mmd -o architecture.png -t dark -w 3000
+
+graph TB
+    subgraph FRONTEND["🖥️ FRONTEND — Vue 3 + Inertia.js + Vite"]
+        direction TB
+        
+        subgraph LAYOUTS["Layouts"]
+            AL[AuthenticatedLayout]
+            GL[GuestLayout]
+            IL[InspectionLayout]
+            PL[PublicLayout]
+        end
+        
+        subgraph PAGES["Pages"]
+            direction LR
+            subgraph AUTH_PAGES["Auth"]
+                Login[Login]
+                Register[Register]
+                ForgotPwd[ForgotPassword]
+            end
+            subgraph WORKSPACE_PAGES["Workspace"]
+                WI[Workspace/Index]
+                PS[Project/Show]
+            end
+            subgraph INSPECTION_PAGES["Inspeção"]
+                IS[Inspection/Show]
+                QC[QuestionCard]
+            end
+            subgraph ROUND_PAGES["Rodadas"]
+                RS[Round/Show]
+                RR[Round/Review]
+            end
+            subgraph RESULTS_PAGES["Resultados"]
+                RI[Results/Individual]
+                RT[Results/Team]
+                RRound[Results/Round]
+                CS[Comparison/Show]
+            end
+            subgraph PUBLIC_PAGES["Público"]
+                Welcome[Welcome]
+                Manual[Manual]
+                Mitra[MitraMethod]
+                PDI[PublicDirectory/Index]
+                PDS[PublicDirectory/Show]
+            end
+        end
+        
+        subgraph COMPONENTS["Componentes Compartilhados"]
+            NavLink & Breadcrumbs & Modal
+            Card & Badge & ProjectIcon
+            TextInput & Button & Dropdown
+        end
+    end
+
+    subgraph BACKEND["⚙️ BACKEND — Laravel 11 + PHP 8.3"]
+        direction TB
+        
+        subgraph MIDDLEWARE["Middleware"]
+            HI[HandleInertiaRequests]
+            AM[AdminMiddleware]
+        end
+        
+        subgraph CONTROLLERS["Controllers"]
+            direction LR
+            PC[ProjectController]
+            IC[InspectionController]
+            ERC[EvaluationRoundController]
+            RC[ResponseController]
+            ResC[ResultController]
+            RBC[RoundBadgeController]
+            InvC[InvitationController]
+            PubC[PublicationController]
+            PDC[PublicDirectoryController]
+            DEC[DataExportController]
+            ProfC[ProfileController]
+        end
+        
+        subgraph ACTIONS["Actions"]
+            CIA[CloseInspectionAction]
+            CRA[CloseRoundAction]
+        end
+        
+        subgraph SERVICES["Services"]
+            AS[AggregationService]
+            ASR[AnswerScoreResolver]
+            RLR[ResponseLabelResolver]
+            DS[DivergenceService]
+            CmpS[ComparisonService]
+            RPS[RoundPublicationService]
+            RBS_svc[RoundBadgeService]
+        end
+        
+        subgraph ENUMS["Enums"]
+            ALE[AnswerLevel<br/>HIGH · MEDIUM · LOW · OTHER]
+            RPE[ResponseProfile<br/>INFO_QUALITY · PRESENTATION]
+            VE[Visibility<br/>PRIVATE · SCORE · FULL]
+        end
+        
+        subgraph POLICIES["Policies"]
+            PP[ProjectPolicy]
+            PubP[PublicationPolicy]
+            RBP[RoundBadgePolicy]
+        end
+        
+        subgraph MAIL_LAYER["Mail"]
+            PIM[ProjectInvitationMail]
+        end
+    end
+
+    subgraph FILAMENT["🔧 FILAMENT — Admin Panel"]
+        direction LR
+        FQV[QuestionnaireVersionResource]
+        FPR[ProjectResource]
+        FIR[InspectionResource]
+        FUR[UserResource]
+    end
+
+    subgraph DATABASE["🗄️ DATABASE — SQLite / MySQL"]
+        direction TB
+        subgraph CORE_TABLES["Core"]
+            U[(Users)]
+            P[(Projects)]
+            PM[(ProjectMembers)]
+            INV[(Invitations)]
+        end
+        subgraph QUESTIONNAIRE_TABLES["Questionário"]
+            QV[(QuestionnaireVersions)]
+            S[(Sections)]
+            CAT[(Categories)]
+            Q[(Questions)]
+        end
+        subgraph EVALUATION_TABLES["Avaliação"]
+            ER[(EvaluationRounds)]
+            INS[(Inspections)]
+            RESP[(Responses)]
+        end
+        subgraph SNAPSHOT_TABLES["Snapshots & Publicação"]
+            RSNAP[(ResultSnapshots)]
+            RDSNAP[(RoundSnapshots)]
+            RPUB[(RoundPublications)]
+            IPUB[(InspectionPublications)]
+            RB[(RoundBadges)]
+        end
+    end
+
+    %% Frontend → Backend
+    PAGES -->|"Inertia Requests (XHR)"| MIDDLEWARE
+    MIDDLEWARE --> CONTROLLERS
+
+    %% Controllers → Actions/Services
+    IC -->|"close()"| CIA
+    ERC -->|"close()"| CRA
+    CIA --> AS
+    CIA --> DS
+    CRA --> AS
+    RC --> ASR
+    ResC --> CmpS
+    PubC --> RPS
+    RBC --> RBS_svc
+    InvC --> PIM
+    AS --> ALE
+    AS --> RPE
+    RLR --> ALE
+    RLR --> RPE
+    RPS --> VE
+
+    %% Controllers → Policies
+    PC --> PP
+    PubC --> PubP
+    RBC --> RBP
+
+    %% Actions → Snapshots
+    CIA -->|"gera snapshots"| RSNAP
+    CRA -->|"gera snapshots"| RDSNAP
+
+    %% Filament → Database
+    FILAMENT --> DATABASE
+
+    %% Database Relationships
+    U --- PM
+    P --- PM
+    P --- INV
+    P --- INS
+    P --- ER
+    ER --- INS
+    ER --- RDSNAP
+    ER --- RPUB
+    ER --- RB
+    INS --- RESP
+    INS --- RSNAP
+    INS --- IPUB
+    QV --- S
+    S --- CAT
+    CAT --- Q
+    Q --- RESP
+    INS --- QV
+
+    %% Styling
+    classDef frontend fill:#4FC3F7,stroke:#0288D1,color:#000
+    classDef backend fill:#81C784,stroke:#388E3C,color:#000
+    classDef database fill:#FFB74D,stroke:#F57C00,color:#000
+    classDef filament fill:#CE93D8,stroke:#7B1FA2,color:#000
+    classDef action fill:#EF9A9A,stroke:#C62828,color:#000
+    classDef service fill:#A5D6A7,stroke:#2E7D32,color:#000
+
+    class FRONTEND frontend
+    class BACKEND backend
+    class DATABASE database
+    class FILAMENT filament
+    class CIA,CRA action
+    class AS,ASR,RLR,DS,CmpS,RPS,RBS_svc service

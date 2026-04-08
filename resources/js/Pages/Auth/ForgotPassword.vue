@@ -23,12 +23,10 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Esqueceu a Senha" />
+        <Head :title="$t('auth.forgot_password_title')" />
 
         <div class="mb-4 text-sm text-gray-600">
-            Esqueceu sua senha? Sem problemas. Apenas informe seu endereço de
-            e-mail e nós enviaremos um link de redefinição de senha para que você
-            possa escolher uma nova.
+            {{ $t('auth.forgot_password_description') }}
         </div>
 
         <div
@@ -42,14 +40,14 @@ const submit = () => {
                     href="/"
                     class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                    Voltar ao Início
+                    {{ $t('auth.back_home') }}
                 </Link>
             </div>
         </div>
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="E-mail" />
+                <InputLabel for="email" :value="$t('auth.email')" />
 
                 <TextInput
                     id="email"
@@ -69,7 +67,7 @@ const submit = () => {
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Enviar Link de Redefinição de Senha
+                    {{ $t('auth.send_reset_link') }}
                 </PrimaryButton>
             </div>
         </form>

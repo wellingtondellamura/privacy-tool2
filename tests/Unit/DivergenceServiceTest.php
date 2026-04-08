@@ -28,7 +28,7 @@ test('all same answers gives low divergence', function () {
 
     // Then divergence classification must be "low"
     expect($result['variance'])->toBe(0.0);
-    expect($result['classification'])->toBe('baixa');
+    expect($result['classification'])->toBe('low');
 });
 
 // Scenario: High divergence
@@ -41,7 +41,7 @@ test('extreme variation gives high divergence', function () {
 
     // Then divergence classification must be "high"
     expect($result['variance'])->toBe(2500.0);
-    expect($result['classification'])->toBe('alta');
+    expect($result['classification'])->toBe('high');
 });
 
 // Additional variance edge cases
@@ -51,21 +51,21 @@ test('medium divergence classification', function () {
     $result = DivergenceService::forQuestion($scores);
 
     expect($result['variance'])->toBe(25.0);
-    expect($result['classification'])->toBe('média');
+    expect($result['classification'])->toBe('medium');
 });
 
 test('variance boundary at 10 is low', function () {
-    expect(DivergenceService::classify(10))->toBe('baixa');
+    expect(DivergenceService::classify(10))->toBe('low');
 });
 
 test('variance boundary at 11 is medium', function () {
-    expect(DivergenceService::classify(11))->toBe('média');
+    expect(DivergenceService::classify(11))->toBe('medium');
 });
 
 test('variance boundary at 30 is medium', function () {
-    expect(DivergenceService::classify(30))->toBe('média');
+    expect(DivergenceService::classify(30))->toBe('medium');
 });
 
 test('variance boundary at 31 is high', function () {
-    expect(DivergenceService::classify(31))->toBe('alta');
+    expect(DivergenceService::classify(31))->toBe('high');
 });

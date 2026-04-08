@@ -2,6 +2,7 @@
 import { Link, Head } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Button from '@/Components/Button.vue';
+import LocaleSwitcher from '@/Components/LocaleSwitcher.vue';
 
 defineProps({
     title: String,
@@ -28,31 +29,33 @@ defineProps({
                     class="text-sm font-medium transition-colors"
                     :class="route().current('metodo.mitra') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
                 >
-                    Método Mitra
+                    {{ $t('nav.mitra_method') }}
                 </Link>
                 <Link
                     :href="route('manual')"
                     class="hidden md:block text-sm font-medium transition-colors"
                     :class="route().current('manual') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
                 >
-                    Manual de Uso
+                    {{ $t('nav.manual') }}
                 </Link>
                 <Link
                     :href="route('public.tools.index')"
                     class="hidden md:block text-sm font-medium transition-colors"
                     :class="route().current('public.tools.*') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
                 >
-                    Diretório Público
+                    {{ $t('nav.public_directory') }}
                 </Link>
                 
                 <div class="w-px h-4 bg-surface-200 hidden md:block mx-2"></div>
+
+                <LocaleSwitcher />
 
                 <Link
                     v-if="$page.props.auth.user"
                     :href="route('dashboard')"
                     class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors duration-smooth"
                 >
-                    Dashboard
+                    {{ $t('nav.dashboard') }}
                 </Link>
 
                 <template v-else>
@@ -60,14 +63,14 @@ defineProps({
                         :href="route('login')"
                         class="text-sm font-medium text-surface-600 hover:text-brand-600 transition-colors duration-smooth"
                     >
-                        Entrar
+                        {{ $t('nav.login') }}
                     </Link>
 
                     <Link
                         :href="route('register')"
                         class="hidden sm:block"
                     >
-                        <Button variant="primary" size="sm" class="shadow-sm">Cadastre-se</Button>
+                        <Button variant="primary" size="sm" class="shadow-sm">{{ $t('nav.register') }}</Button>
                     </Link>
                 </template>
             </nav>
@@ -87,17 +90,17 @@ defineProps({
                             <ApplicationLogo class="h-6 w-auto text-brand-400 fill-current" />                            
                         </div>
                         <p class="text-sm max-w-sm leading-relaxed text-surface-400">
-                            Uma iniciativa para ampliar a aderência a boas práticas técnicas de dados pessoais e empoderar a transparência.
+                            {{ $t('footer.description') }}
                         </p>
                     </div>
                     <div class="flex flex-col md:items-end gap-3 text-sm">
-                        <span class="font-semibold text-white mb-2">Referências Oficiais</span>
+                        <span class="font-semibold text-white mb-2">{{ $t('footer.references') }}</span>
                         <a href="https://each.usp.br/cond_met_pand/trmodel/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2">
-                            <span>Metodologia TRModel (USP)</span>
+                            <span>{{ $t('footer.trmodel_link') }}</span>
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         </a>
                         <a href="https://www.gov.br/esporte/pt-br/acesso-a-informacao/lgpd" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2">
-                            <span>Portal Oficial: LGPD (Governo Federal)</span>
+                            <span>{{ $t('footer.lgpd_link') }}</span>
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         </a>
                     </div>
@@ -106,7 +109,7 @@ defineProps({
                 <hr class="border-surface-800 mb-8" />
 
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
-                    <p>&copy; {{ new Date().getFullYear() }} Privacy Tool. Todos os direitos reservados.</p>
+                    <p>&copy; {{ new Date().getFullYear() }} {{ $t('footer.copyright') }}</p>
                 </div>
             </div>
         </footer>

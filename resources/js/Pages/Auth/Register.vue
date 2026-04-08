@@ -20,12 +20,12 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Cadastrar" />
+        <Head :title="$t('auth.register_title')" />
 
         <form @submit.prevent="submit" class="space-y-6">
             <div>
                 <Input
-                    label="Nome completo"
+                    :label="$t('auth.name')"
                     id="name"
                     type="text"
                     v-model="form.name"
@@ -33,26 +33,26 @@ const submit = () => {
                     autofocus
                     autocomplete="name"
                     :error="form.errors.name"
-                    placeholder="João Silva"
+                    :placeholder="$t('auth.name_placeholder')"
                 />
             </div>
 
             <div>
                 <Input
-                    label="E-mail profissional"
+                    :label="$t('auth.email_professional')"
                     id="email"
                     type="email"
                     v-model="form.email"
                     required
                     autocomplete="username"
                     :error="form.errors.email"
-                    placeholder="voce@exemplo.com"
+                    :placeholder="$t('auth.email_placeholder')"
                 />
             </div>
 
             <div>
                 <Input
-                    label="Senha"
+                    :label="$t('auth.password')"
                     id="password"
                     type="password"
                     v-model="form.password"
@@ -65,7 +65,7 @@ const submit = () => {
 
             <div>
                 <Input
-                    label="Confirmar Senha"
+                    :label="$t('auth.password_confirm')"
                     id="password_confirmation"
                     type="password"
                     v-model="form.password_confirmation"
@@ -84,18 +84,18 @@ const submit = () => {
                     class="w-full"
                     :disabled="form.processing"
                 >
-                    Cadastrar
+                    {{ $t('auth.register_title') }}
                 </Button>
             </div>
 
             <div class="mt-4 text-center">
                 <p class="text-sm text-surface-500">
-                    Já possui conta?
+                    {{ $t('auth.has_account') }}
                     <Link
                         :href="route('login')"
                         class="font-medium text-brand-600 hover:text-brand-500 transition-colors duration-smooth"
                     >
-                        Entrar
+                        {{ $t('auth.login_title') }}
                     </Link>
                 </p>
             </div>

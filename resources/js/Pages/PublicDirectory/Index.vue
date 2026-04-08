@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
@@ -25,6 +26,8 @@ watch(filters, (newFilters) => {
     });
 }, { deep: true });
 
+const { t } = useI18n();
+
 const getMedalVariant = (medal) => {
     if (!medal) return 'neutral';
     const name = (medal.name || medal).toLowerCase();
@@ -48,17 +51,17 @@ const getMedalImage = (medal) => {
 </script>
 
 <template>
-    <PublicLayout title="Diretório Público de Ferramentas">
+    <PublicLayout :title="t('directory.page_title')">
         <div class="py-12 bg-surface-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-700 text-[10px] font-bold uppercase tracking-wider mb-4">
-                            Transparência Coletiva
+                            {{ $t('directory.badge') }}
                         </div>
-                        <h1 class="text-4xl font-extrabold text-surface-900 tracking-tight">Diretório Público</h1>
-                        <p class="mt-3 text-lg text-surface-500 max-w-2xl">Explore ferramentas que priorizaram a transparência e a conformidade de dados pessoais.</p>
+                        <h1 class="text-4xl font-extrabold text-surface-900 tracking-tight">{{ $t('directory.title') }}</h1>
+                        <p class="mt-3 text-lg text-surface-500 max-w-2xl">{{ $t('directory.description') }}</p>
                     </div>
 
                     <!-- Filters -->
@@ -67,18 +70,18 @@ const getMedalImage = (medal) => {
                             v-model="filters.medal" 
                             class="rounded-lg border-surface-200 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
                         >
-                            <option value="">Todas as Medalhas</option>
-                            <option value="Ouro">Ouro</option>
-                            <option value="Prata">Prata</option>
-                            <option value="Bronze">Bronze</option>
-                            <option value="Incipiente">Incipiente</option>
+                            <option value="">{{ $t('directory.all_medals') }}</option>
+                            <option value="Ouro">{{ $t('directory.medal_gold') }}</option>
+                            <option value="Prata">{{ $t('directory.medal_silver') }}</option>
+                            <option value="Bronze">{{ $t('directory.medal_bronze') }}</option>
+                            <option value="Incipiente">{{ $t('directory.medal_incipient') }}</option>
                         </select>
 
                         <select 
                             v-model="filters.year" 
                             class="rounded-lg border-surface-200 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
                         >
-                            <option value="">Todos os Anos</option>
+                            <option value="">{{ $t('directory.all_years') }}</option>
                             <option v-for="year in [2026, 2027, 2028, 2029, 2030]" :key="year" :value="year">{{ year }}</option>
                         </select>
 
@@ -86,9 +89,9 @@ const getMedalImage = (medal) => {
                             v-model="filters.sort" 
                             class="rounded-lg border-surface-200 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
                         >
-                            <option value="score_desc">Melhor Score</option>
-                            <option value="score_asc">Pior Score</option>
-                            <option value="date_desc">Mais Recentes</option>
+                            <option value="score_desc">{{ $t('directory.sort_best') }}</option>
+                            <option value="score_asc">{{ $t('directory.sort_worst') }}</option>
+                            <option value="date_desc">{{ $t('directory.sort_recent') }}</option>
                         </select>
                     </div>
                 </header>
@@ -112,7 +115,7 @@ const getMedalImage = (medal) => {
                                         </div>
                                         <div>
                                             <h2 class="text-xl font-bold text-surface-900 line-clamp-1 decoration-brand-500 group-hover:underline decoration-2 underline-offset-4">{{ tool.project_name }}</h2>
-                                            <p class="text-xs text-surface-400 mt-1 font-medium">Publicado em {{ tool.published_at }}</p>
+                                            <p class="text-xs text-surface-400 mt-1 font-medium">{{ $t('directory.published_at', { date: tool.published_at }) }}</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-col items-end gap-1.5 whitespace-nowrap">
@@ -129,7 +132,7 @@ const getMedalImage = (medal) => {
                                 <div class="relative pt-2">
                                     <p class="text-[10px] font-bold text-brand-600 uppercase tracking-tight mb-2">{{ tool.round_name }}</p>
                                     <div class="flex justify-between items-end mb-2">
-                                        <span class="text-xs font-bold text-surface-400 uppercase tracking-tighter">Score Global</span>
+                                        <span class="text-xs font-bold text-surface-400 uppercase tracking-tighter">{{ $t('directory.global_score') }}</span>
                                         <span class="text-3xl font-black text-surface-900">{{ tool.score }}%</span>
                                     </div>
                                     <div class="w-full bg-surface-100 h-2.5 rounded-full overflow-hidden border border-surface-200/50 p-0.5">
@@ -142,7 +145,7 @@ const getMedalImage = (medal) => {
                             </div>
                             
                             <div class="px-6 py-4 bg-surface-50/50 border-t border-surface-100 flex items-center justify-between group-hover:bg-brand-50 transition-colors">
-                                <span class="text-sm font-medium text-surface-600 group-hover:text-brand-700">Ver detalhes do relatório</span>
+                                <span class="text-sm font-medium text-surface-600 group-hover:text-brand-700">{{ $t('directory.view_details') }}</span>
                                 <svg class="w-4 h-4 text-surface-400 group-hover:text-brand-600 transform group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
@@ -158,13 +161,13 @@ const getMedalImage = (medal) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-surface-900">Nenhuma ferramenta encontrada</h3>
-                    <p class="text-surface-500 mt-2">Tente ajustar seus filtros para encontrar o que procura.</p>
+                    <h3 class="text-xl font-bold text-surface-900">{{ $t('directory.no_results') }}</h3>
+                    <p class="text-surface-500 mt-2">{{ $t('directory.no_results_description') }}</p>
                     <button 
                         @click="filters = { medal: '', year: '', sort: 'score_desc' }"
                         class="mt-6 text-brand-600 font-bold hover:underline"
                     >
-                        Limpar todos os filtros
+                        {{ $t('directory.clear_filters') }}
                     </button>
                 </Card>
 

@@ -27,7 +27,7 @@ class EvaluationRoundController extends Controller
             'status' => 'draft',
         ]);
 
-        return redirect()->route('rounds.show', $round->id)->with('success', 'Rodada de avaliação criada com sucesso.');
+        return redirect()->route('rounds.show', $round->id)->with('success', __('messages.round_created'));
     }
 
     /**
@@ -91,7 +91,7 @@ class EvaluationRoundController extends Controller
         ]);
 
         if ($round->status !== 'draft') {
-            return redirect()->back()->withErrors(['status' => 'Esta rodada já foi fechada.']);
+            return redirect()->back()->withErrors(['status' => __('messages.round_already_closed')]);
         }
 
         // We update the diagnosis first so the snapshot can include it
@@ -114,6 +114,6 @@ class EvaluationRoundController extends Controller
             return redirect()->back()->withErrors(['status' => $e->getMessage()]);
         }
 
-        return redirect()->route('rounds.show', $round->id)->with('success', 'Rodada fechada com sucesso.');
+        return redirect()->route('rounds.show', $round->id)->with('success', __('messages.round_closed'));
     }
 }

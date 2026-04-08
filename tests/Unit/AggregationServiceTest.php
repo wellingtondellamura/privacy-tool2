@@ -5,35 +5,24 @@
  * All rules deterministic: RN-01 to RN-06
  */
 
+use App\Enums\AnswerLevel;
 use App\Services\AggregationService;
 
-// RN-01 — Score mapping
-test('Suficiente maps to 100', function () {
-    expect(AggregationService::scoreForAnswer('Suficiente'))->toBe(100);
+// RN-01 — Score mapping (canonical enum values)
+test('high maps to 100', function () {
+    expect(AggregationService::scoreForAnswer(AnswerLevel::HIGH))->toBe(100);
 });
 
-test('Insuficiente maps to 50', function () {
-    expect(AggregationService::scoreForAnswer('Insuficiente'))->toBe(50);
+test('medium maps to 50', function () {
+    expect(AggregationService::scoreForAnswer(AnswerLevel::MEDIUM))->toBe(50);
 });
 
-test('Inexistente maps to 0', function () {
-    expect(AggregationService::scoreForAnswer('Inexistente'))->toBe(0);
+test('low maps to 0', function () {
+    expect(AggregationService::scoreForAnswer(AnswerLevel::LOW))->toBe(0);
 });
 
-test('Apropriado maps to 100', function () {
-    expect(AggregationService::scoreForAnswer('Apropriado'))->toBe(100);
-});
-
-test('Necessita melhorias maps to 50', function () {
-    expect(AggregationService::scoreForAnswer('Necessita melhorias'))->toBe(50);
-});
-
-test('Inapropriado maps to 0', function () {
-    expect(AggregationService::scoreForAnswer('Inapropriado'))->toBe(0);
-});
-
-test('Outro maps to 0', function () {
-    expect(AggregationService::scoreForAnswer('Outro'))->toBe(0);
+test('other maps to null', function () {
+    expect(AggregationService::scoreForAnswer(AnswerLevel::OTHER))->toBeNull();
 });
 
 // RN-02 — Category score calculation
@@ -60,60 +49,60 @@ test('category percentage calculation', function () {
 // RN-04 — Section score
 test('section score is average of two category scores', function () {
     // Scenario: Section score calculation — cat1=80, cat2=60 → 70
-    expect(AggregationService::sectionScore(80, 60))->toBe(70);
+    expect(AggregationService::sectionScore([80, 60]))->toBe(70);
 });
 
 test('section score rounds correctly', function () {
-    expect(AggregationService::sectionScore(81, 60))->toBe(71);
-    expect(AggregationService::sectionScore(79, 60))->toBe(70);
+    expect(AggregationService::sectionScore([81, 60]))->toBe(71);
+    expect(AggregationService::sectionScore([79, 60]))->toBe(70);
 });
 
 // RN-05 — Section percentage
 test('section percentage is average of two category percentages', function () {
-    expect(AggregationService::sectionPercentage(80.0, 60.0))->toBe(70.0);
+    expect(AggregationService::sectionPercentage([80.0, 60.0]))->toBe(70.0);
 });
 
 // RN-06 — Medal assignment
-test('score 95 gives Ouro', function () {
-    expect(AggregationService::medalForScore(95))->toBe('Ouro');
+test('score 95 gives gold', function () {
+    expect(AggregationService::medalForScore(95))->toBe('gold');
 });
 
-test('score 91 gives Ouro', function () {
-    expect(AggregationService::medalForScore(91))->toBe('Ouro');
+test('score 91 gives gold', function () {
+    expect(AggregationService::medalForScore(91))->toBe('gold');
 });
 
-test('score 100 gives Ouro', function () {
-    expect(AggregationService::medalForScore(100))->toBe('Ouro');
+test('score 100 gives gold', function () {
+    expect(AggregationService::medalForScore(100))->toBe('gold');
 });
 
-test('score 70 gives Prata', function () {
-    expect(AggregationService::medalForScore(70))->toBe('Prata');
+test('score 70 gives silver', function () {
+    expect(AggregationService::medalForScore(70))->toBe('silver');
 });
 
-test('score 61 gives Prata', function () {
-    expect(AggregationService::medalForScore(61))->toBe('Prata');
+test('score 61 gives silver', function () {
+    expect(AggregationService::medalForScore(61))->toBe('silver');
 });
 
-test('score 90 gives Prata', function () {
-    expect(AggregationService::medalForScore(90))->toBe('Prata');
+test('score 90 gives silver', function () {
+    expect(AggregationService::medalForScore(90))->toBe('silver');
 });
 
-test('score 50 gives Bronze', function () {
-    expect(AggregationService::medalForScore(50))->toBe('Bronze');
+test('score 50 gives bronze', function () {
+    expect(AggregationService::medalForScore(50))->toBe('bronze');
 });
 
-test('score 41 gives Bronze', function () {
-    expect(AggregationService::medalForScore(41))->toBe('Bronze');
+test('score 41 gives bronze', function () {
+    expect(AggregationService::medalForScore(41))->toBe('bronze');
 });
 
-test('score 30 gives Incipiente', function () {
-    expect(AggregationService::medalForScore(30))->toBe('Incipiente');
+test('score 30 gives incipient', function () {
+    expect(AggregationService::medalForScore(30))->toBe('incipient');
 });
 
-test('score 0 gives Incipiente', function () {
-    expect(AggregationService::medalForScore(0))->toBe('Incipiente');
+test('score 0 gives incipient', function () {
+    expect(AggregationService::medalForScore(0))->toBe('incipient');
 });
 
-test('score 40 gives Incipiente', function () {
-    expect(AggregationService::medalForScore(40))->toBe('Incipiente');
+test('score 40 gives incipient', function () {
+    expect(AggregationService::medalForScore(40))->toBe('incipient');
 });

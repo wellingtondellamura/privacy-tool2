@@ -35,7 +35,7 @@ class DataExportController extends Controller
         $projects = $user->projects()->get();
 
         if ($projects->isEmpty()) {
-            return back()->with('error', 'Você não possui projetos para exportar.');
+            return back()->with('error', __('messages.no_projects_to_export'));
         }
 
         $zipFileName = 'todos_os_projetos-' . now()->format('Y-m-d-His') . '.zip';
@@ -43,7 +43,7 @@ class DataExportController extends Controller
 
         $zip = new ZipArchive();
         if ($zip->open($tempFile, ZipArchive::CREATE) !== TRUE) {
-            return back()->with('error', 'Não foi possível criar o arquivo ZIP.');
+            return back()->with('error', __('messages.zip_creation_failed'));
         }
 
         foreach ($projects as $project) {

@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -57,27 +58,29 @@ const formatDelta = (delta) => {
 const totalBaseScore = props.comparison.sections.reduce((acc, curr) => acc + curr.baseline_score, 0);
 const totalCompScore = props.comparison.sections.reduce((acc, curr) => acc + curr.comparison_score, 0);
 const globalDelta = totalCompScore - totalBaseScore;
+
+const { t } = useI18n();
 </script>
 
 <template>
-    <Head :title="`Comparação - ${baseLabel} vs ${otherLabel}`" />
+    <Head :title="t('comparison.head_title', { base: baseLabel, other: otherLabel })" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between w-full">
                 <div>
                     <Breadcrumbs :items="[
-                        { label: 'Workspace', url: route('projects.index') },
+                        { label: t('common.workspace'), url: route('projects.index') },
                         { label: project?.name, url: route('projects.show', project?.id) },
-                        { label: 'Evolução e Comparação' }
+                        { label: t('comparison.breadcrumb_evolution') }
                     ]" />
                     <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
-                        Evolução / Comparação
+                        {{ $t('comparison.title') }}
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">
-                        Referência: {{ baseLabel }}
+                        {{ $t('comparison.reference', { label: baseLabel }) }}
                         <span class="mx-2 text-surface-300">|</span>
-                        Comparação: {{ otherLabel }}
+                        {{ $t('comparison.comparison', { label: otherLabel }) }}
                     </p>
                 </div>
             </div>
@@ -94,7 +97,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                     </Card>
                     
                     <Card class="text-center py-6 bg-brand-50 border-brand-100 flex flex-col justify-center items-center">
-                        <h4 class="text-sm text-brand-700 tracking-wider uppercase mb-2">Variação Global</h4>
+                        <h4 class="text-sm text-brand-700 tracking-wider uppercase mb-2">{{ $t('comparison.global_variation') }}</h4>
                         <div :class="['text-4xl', getDeltaColor(globalDelta)]">
                             {{ formatDelta(globalDelta) }}
                         </div>
@@ -109,7 +112,7 @@ const globalDelta = totalCompScore - totalBaseScore;
                 <!-- Detailed Breakdown -->
                 <div class="space-y-8 mt-12">
                     <h3 class="text-xl font-semibold text-surface-900 pb-2 border-b border-surface-200">
-                        Análise de Variâncias por Seção
+                        {{ $t('comparison.section_analysis') }}
                     </h3>
 
                     <div v-for="section in comparison.sections" :key="section.id" class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden">
@@ -119,11 +122,11 @@ const globalDelta = totalCompScore - totalBaseScore;
                             <h4 class="font-medium text-lg text-surface-900">{{ section.name }}</h4>
                             <div class="flex items-center gap-6">
                                 <div class="text-sm">
-                                    <span class="text-surface-500 pr-1">Base:</span>
+                                    <span class="text-surface-500 pr-1">{{ $t('comparison.base_label') }}</span>
                                     <span class="font-bold text-surface-800">{{ section.baseline_score }}</span>
                                 </div>
                                 <div class="text-sm">
-                                    <span class="text-surface-500 pr-1">Atual:</span>
+                                    <span class="text-surface-500 pr-1">{{ $t('comparison.current_label') }}</span>
                                     <span class="font-bold text-surface-800">{{ section.comparison_score }}</span>
                                 </div>
                                 <div :class="['text-base w-16 text-center', getDeltaColor(section.delta)]">

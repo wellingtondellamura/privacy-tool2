@@ -1,6 +1,9 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     show: {
@@ -17,11 +20,11 @@ const props = defineProps({
     },
     confirmText: {
         type: String,
-        default: 'Confirmar',
+        default: null,
     },
     cancelText: {
         type: String,
-        default: 'Cancelar',
+        default: null,
     },
     confirmVariant: {
         type: String,
@@ -48,10 +51,10 @@ const emit = defineEmits(['close', 'confirm']);
             <slot />
             <div class="flex justify-end gap-3" :class="{'mt-6': $slots.default}">
                 <Button variant="outline" @click="$emit('close')" :disabled="processing">
-                    {{ cancelText }}
+                    {{ cancelText || $t('common.cancel') }}
                 </Button>
                 <Button :variant="confirmVariant" @click="$emit('confirm')" :disabled="processing">
-                    {{ confirmText }}
+                    {{ confirmText || $t('common.confirm') }}
                 </Button>
             </div>
         </div>

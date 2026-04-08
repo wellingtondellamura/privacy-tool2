@@ -1,6 +1,7 @@
 <script setup>
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InspectionLayout from '@/Layouts/InspectionLayout.vue';
 import QuestionCard from '@/Components/QuestionCard.vue';
 import Button from '@/Components/Button.vue';
@@ -109,6 +110,7 @@ const isActive = computed(() => props.inspection.status === 'active');
 const isClosed = computed(() => props.inspection.status === 'closed');
 const isOwner = computed(() => props.inspection.project.owner_id === usePage().props.auth.user.id);
 const isResponsible = computed(() => props.inspection.user_id === usePage().props.auth.user.id);
+const { t } = useI18n();
 
 const activeSection = computed(() => {
     return sections.value.find(s => s.categories.some(c => c.id === activeCategoryId.value));
@@ -141,14 +143,14 @@ const activeCategoryIndex = computed(() => {
 </script>
 
 <template>
-    <Head :title="`Inspeção #${inspection.sequential_id}`" />
+    <Head :title="t('project.inspection_label', { id: inspection.sequential_id })" />
 
     <InspectionLayout>
 
         <!-- Sidebar Navigation -->
         <template #sidebar>
             <div>
-                <h3 class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">Seções</h3>
+                <h3 class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">{{ $t('inspection.sections') }}</h3>
                 <nav class="space-y-4">
                     <div v-for="(section, sIndex) in sections" :key="section.id" class="space-y-1">
                         <div class="px-2 font-medium text-surface-900 text-sm mb-2">
@@ -186,24 +188,24 @@ const activeCategoryIndex = computed(() => {
             <div class="flex items-center justify-between w-full">
                 <div>
                     <Breadcrumbs :items="[
-                        { label: 'Workspace', url: route('projects.index') },
+                        { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
                         { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
-                        { label: `Inspeção #${inspection.sequential_id}` }
+                        { label: t('project.inspection_label', { id: inspection.sequential_id }) }
                     ]" />
                     
                     <h1 v-if="isActive || isDraft" class="text-2xl font-semibold text-surface-900 truncate mt-1">
                         {{ toRoman(activeSectionIndex + 1) }}.{{ toAlpha(activeCategoryIndex) }} - {{ activeCategory.name }}
                     </h1>
                     <h2 v-else class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
-                        Inspeção #{{ inspection.sequential_id }}
+                        {{ $t('project.inspection_label', { id: inspection.sequential_id }) }}
                     </h2>
-                    <p class="text-sm text-surface-500 mt-1">Projeto: {{ inspection.project.name }} — {{ inspection.evaluation_round.name }}</p>
+                    <p class="text-sm text-surface-500 mt-1">{{ $t('inspection.project_round', { project: inspection.project.name, round: inspection.evaluation_round.name }) }}</p>
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">
                     <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')" class="shrink-0">
-                        {{ isActive ? 'Ativa' : (isClosed ? 'Concluída' : 'Rascunho') }}
+                        {{ isActive ? $t('inspection.status.active') : (isClosed ? $t('inspection.status.closed') : $t('inspection.status.draft')) }}
                     </Badge>
                 </div>
             </div>
@@ -216,7 +218,7 @@ const activeCategoryIndex = computed(() => {
                 <div>
                     <Button variant="outline" size="xs" class="w-full flex items-center justify-center gap-2" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Voltar à Rodada
+                        {{ $t('inspection.back_to_round') }}
                     </Button>
                 </div>
 
@@ -224,39 +226,39 @@ const activeCategoryIndex = computed(() => {
                 
                 <!-- Status Actions -->
                 <div class="space-y-3">
-                    <h3 class="text-sm font-medium text-surface-900">Ações</h3>
+                    <h3 class="text-sm font-medium text-surface-900">{{ $t('inspection.actions') }}</h3>
                     
                     <template v-if="isDraft">
                         <p v-if="isResponsible" class="text-xs text-surface-600 mb-3">
-                            A inspeção está em rascunho. Ative para permitir respostas.
+                            {{ $t('inspection.draft_message') }}
                         </p>
                         <p v-else class="text-xs text-surface-600 mb-3 italic">
-                            Aguardando o responsável (<span class="font-medium">{{ inspection.user?.name }}</span>) iniciar a inspeção.
+                            {{ $t('inspection.draft_awaiting') }} (<span class="font-medium">{{ inspection.user?.name }}</span>)
                         </p>
                         <Button v-if="isResponsible" variant="primary" size="sm" class="w-full" @click="activateInspection" :disabled="activateForm.processing">
-                            Ativar Inspeção
+                            {{ $t('inspection.activate_button') }}
                         </Button>
                     </template>
 
                     <div v-if="isActive" class="p-4 bg-surface-50 rounded-lg border border-surface-200">
                         <p class="text-xs text-surface-600 mb-3">
-                            Progresso Global: {{ calculateGlobalProgress() }}%
+                            {{ $t('inspection.global_progress') }} {{ calculateGlobalProgress() }}%
                         </p>
                         <div class="w-full bg-surface-200 rounded-full h-2 mb-4">
                             <div class="bg-brand-500 h-2 rounded-full transition-all duration-500" :style="`width: ${calculateGlobalProgress()}%`"></div>
                         </div>
                         <Button v-if="isResponsible" variant="danger" size="sm" class="w-full" @click="openCloseConfirm" :disabled="closeForm.processing">
-                            Finalizar Inspeção
+                            {{ $t('inspection.close_button') }}
                         </Button>
                         <p v-else class="text-[10px] text-surface-500 text-center italic">
-                            Apenas o responsável (<span class="font-medium text-surface-700">{{ inspection.user?.name }}</span>) pode finalizar esta inspeção.
+                            {{ $t('inspection.only_responsible_prefix') }} (<span class="font-medium text-surface-700">{{ inspection.user?.name }}</span>) {{ $t('inspection.only_responsible_suffix') }}
                         </p>
                     </div>
 
                     <div v-if="isClosed" class="p-4 bg-green-50 rounded-lg border border-green-200 text-center">
-                        <p class="text-sm font-medium text-green-800 mb-2">Inspeção Concluída</p>
+                        <p class="text-sm font-medium text-green-800 mb-2">{{ $t('inspection.closed_title') }}</p>
                         <Button variant="outline" size="sm" class="w-full" @click="$inertia.get(route('results.individual', inspection.id))">
-                            Ver Resultados
+                            {{ $t('inspection.view_results') }}
                         </Button>
                     </div>
                 </div>
@@ -265,30 +267,30 @@ const activeCategoryIndex = computed(() => {
 
                 <!-- Informações -->
                 <div class="space-y-2">
-                    <h3 class="text-sm font-medium text-surface-900">Detalhes</h3>
+                    <h3 class="text-sm font-medium text-surface-900">{{ $t('inspection.details') }}</h3>
                     <p v-if="isClosed && inspection.result_snapshots?.length > 0" class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Score Obtido: </span>
+                        <span class="font-medium text-surface-700">{{ $t('inspection.score_label') }} </span>
                         <span class="text-brand-600 font-bold">{{ inspection.result_snapshots[0].payload_json.global_score }}%</span>
                     </p>
                     <p class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Status: </span>
-                        {{ isDraft ? 'Rascunho (Não Iniciada)' : (isActive ? 'Ativa (Em progresso)' : 'Concluída') }}
+                        <span class="font-medium text-surface-700">{{ $t('inspection.status_label') }} </span>
+                        {{ isDraft ? $t('inspection.status.draft_detail') : (isActive ? $t('inspection.status.active_detail') : $t('inspection.status.closed')) }}
                     </p>
                     <p class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Responsável: </span>
-                        {{ inspection.user?.name || 'Sistema' }}
+                        <span class="font-medium text-surface-700">{{ $t('inspection.responsible_label') }} </span>
+                        {{ inspection.user?.name || $t('inspection.responsible_system') }}
                     </p>
                     <p class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Versão: </span>
+                        <span class="font-medium text-surface-700">{{ $t('inspection.version_label') }} </span>
                         {{ inspection.questionnaire_version.version_number }}
                     </p>
                     <p class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Início: </span>
-                        {{ inspection.started_at ? new Date(inspection.started_at).toLocaleDateString('pt-BR') : new Date(inspection.created_at).toLocaleDateString('pt-BR') }}
+                        <span class="font-medium text-surface-700">{{ $t('inspection.start_label') }} </span>
+                        {{ inspection.started_at ? new Date(inspection.started_at).toLocaleDateString(t('common.locale_code')) : new Date(inspection.created_at).toLocaleDateString(t('common.locale_code')) }}
                     </p>
                     <p v-if="inspection.closed_at" class="text-xs text-surface-500">
-                        <span class="font-medium text-surface-700">Conclusão: </span>
-                        {{ new Date(inspection.closed_at).toLocaleDateString('pt-BR') }}
+                        <span class="font-medium text-surface-700">{{ $t('inspection.end_label') }} </span>
+                        {{ new Date(inspection.closed_at).toLocaleDateString(t('common.locale_code')) }}
                     </p>
                 </div>
             </div>
@@ -299,13 +301,13 @@ const activeCategoryIndex = computed(() => {
             <div class="mb-8">
                 <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">{{ activeCategory.name }}</h2>
                 <p class="text-surface-500 mt-2">
-                    Responda às questões abaixo de acordo com a realidade atual do produto. As respostas são salvas automaticamente.
+                    {{ $t('inspection.instructions') }}
                 </p>
                 <div v-if="isDraft" class="mt-4 p-3 bg-yellow-50 text-yellow-800 text-sm border border-yellow-200 rounded-md">
-                    Inspeção não iniciada. As respostas estão desativadas.
+                    {{ $t('inspection.draft_alert') }}
                 </div>
                 <div v-if="isClosed" class="mt-4 p-3 bg-green-50 text-green-800 text-sm border border-green-200 rounded-md">
-                    Inspeção fechada. As respostas não podem ser editadas.
+                    {{ $t('inspection.closed_alert') }}
                 </div>
             </div>
 
@@ -334,10 +336,10 @@ const activeCategoryIndex = computed(() => {
         <!-- Modals -->
         <ConfirmModal
             :show="showCloseConfirm"
-            title="Finalizar Inspeção"
-            message="Tem certeza? A inspeção será consolidada e nenhuma nova resposta será permitida. Esta ação é irreversível."
-            confirm-text="Sim, Finalizar"
-            cancel-text="Cancelar"
+            :title="$t('inspection.close_modal_title')"
+            :message="$t('inspection.close_modal_message')"
+            :confirm-text="$t('inspection.close_confirm')"
+            :cancel-text="$t('common.cancel')"
             confirm-variant="danger"
             :processing="closeForm.processing"
             @confirm="closeInspection"

@@ -22,7 +22,7 @@ class InspectionController extends Controller
 
         $evaluationRoundId = $request->input('evaluation_round_id');
         if (!$evaluationRoundId) {
-            return redirect()->back()->withErrors(['evaluation_round_id' => 'É necessário selecionar uma rodada de avaliação para iniciar uma inspeção.']);
+            return redirect()->back()->withErrors(['evaluation_round_id' => __('messages.round_required')]);
         }
 
         $round = \App\Models\EvaluationRound::where('id', $evaluationRoundId)
@@ -30,7 +30,7 @@ class InspectionController extends Controller
             ->firstOrFail();
         
         if ($round->status === 'closed') {
-            return redirect()->back()->withErrors(['status' => 'Não é possível adicionar inspeções a uma rodada que já está fechada.']);
+            return redirect()->back()->withErrors(['status' => __('messages.cannot_add_to_closed_round')]);
         }
 
         $activeVersion = QuestionnaireVersion::getActive();
@@ -83,7 +83,7 @@ class InspectionController extends Controller
         Gate::authorize('view', $inspection->project);
 
         if ($inspection->user_id !== Auth::id()) {
-            return redirect()->back()->withErrors(['status' => 'Apenas o responsável pela inspeção pode mudar seu status.']);
+            return redirect()->back()->withErrors(['status' => __('messages.only_responsible_can_change')]);
         }
 
         try {
@@ -92,7 +92,7 @@ class InspectionController extends Controller
             return redirect()->back()->withErrors(['status' => $e->getMessage()]);
         }
 
-        return redirect()->back()->with('success', 'Inspeção iniciada e mudou para status Ativa.');
+        return redirect()->back()->with('success', __('messages.inspection_activated'));
     }
 
     /**
@@ -105,7 +105,7 @@ class InspectionController extends Controller
 
         // Only creator can close
         if ($inspection->user_id !== Auth::id()) {
-            return redirect()->back()->withErrors(['status' => 'Apenas o responsável pela inspeção pode mudar seu status.']);
+            return redirect()->back()->withErrors(['status' => __('messages.only_responsible_can_change')]);
         }
 
         // Only owner can close? The user said "não permita que outro usuário mude o status", 
@@ -119,6 +119,6 @@ class InspectionController extends Controller
             return redirect()->back()->withErrors(['status' => $e->getMessage()]);
         }
 
-        return redirect()->route('results.individual', $inspection->id)->with('success', 'Inspeção finalizada e instantâneos gerados.');
+        return redirect()->route('results.individual', $inspection->id)->with('success', __('messages.inspection_closed'));
     }
 }

@@ -19,16 +19,15 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Confirmar Senha" />
+        <Head :title="$t('auth.confirm_password_title')" />
 
         <div class="mb-4 text-sm text-gray-600">
-            Esta é uma área segura do aplicativo. Por favor, confirme sua
-            senha antes de continuar.
+            {{ $t('auth.confirm_password_description') }}
         </div>
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="password" value="Senha" />
+                <InputLabel for="password" :value="$t('auth.password')" />
                 <TextInput
                     id="password"
                     type="password"
@@ -47,7 +46,7 @@ const submit = () => {
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Confirmar
+                    {{ $t('common.confirm') }}
                 </PrimaryButton>
             </div>
         </form>

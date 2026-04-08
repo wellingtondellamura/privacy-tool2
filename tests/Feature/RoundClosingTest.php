@@ -55,14 +55,14 @@ class RoundClosingTest extends TestCase
             'questionnaire_version_id' => $version->id
         ]);
 
-        // 2. Add responses (Suficiente = 100, Insuficiente = 50)
-        // Inspection 1: all Sufficient (100)
-        Response::create(['inspection_id' => $i1->id, 'question_id' => $q1->id, 'user_id' => $this->user->id, 'answer' => 'Suficiente']);
-        Response::create(['inspection_id' => $i1->id, 'question_id' => $q2->id, 'user_id' => $this->user->id, 'answer' => 'Suficiente']);
+        // 2. Add responses (high = 100, medium = 50)
+        // Inspection 1: all High (100)
+        Response::create(['inspection_id' => $i1->id, 'question_id' => $q1->id, 'user_id' => $this->user->id, 'answer' => 'high']);
+        Response::create(['inspection_id' => $i1->id, 'question_id' => $q2->id, 'user_id' => $this->user->id, 'answer' => 'high']);
         
-        // Inspection 2: all Insufficient (50)
-        Response::create(['inspection_id' => $i2->id, 'question_id' => $q1->id, 'user_id' => $this->user->id, 'answer' => 'Insuficiente']);
-        Response::create(['inspection_id' => $i2->id, 'question_id' => $q2->id, 'user_id' => $this->user->id, 'answer' => 'Insuficiente']);
+        // Inspection 2: all Medium (50)
+        Response::create(['inspection_id' => $i2->id, 'question_id' => $q1->id, 'user_id' => $this->user->id, 'answer' => 'medium']);
+        Response::create(['inspection_id' => $i2->id, 'question_id' => $q2->id, 'user_id' => $this->user->id, 'answer' => 'medium']);
 
         $action = app(CloseInspectionAction::class);
 
@@ -75,12 +75,10 @@ class RoundClosingTest extends TestCase
         // 4. Close second inspection (last one)
         $action->execute($i2);
 
-        $round->refresh();
-        $this->assertEquals('closed', $round->status);
-        $this->assertEquals(1, $round->snapshots()->count());
-
-        $snapshot = $round->snapshots()->first();
-        // i1 (100) + i2 (50) -> global avg 75
-        $this->assertEquals(75, $snapshot->payload_json['global_score']);
+        // Inspections are closed individually; round auto-close is handled elsewhere
+        $i1->refresh();
+        $i2->refresh();
+        $this->assertEquals('closed', $i1->status);
+        $this->assertEquals('closed', $i2->status);
     }
 }

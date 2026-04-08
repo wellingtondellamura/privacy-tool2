@@ -31,5 +31,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="APP_LOCALE" value="pt_BR"/>
+        <env name="APP_FALLBACK_LOCALE" value="en"/>
     </php>
 </phpunit>

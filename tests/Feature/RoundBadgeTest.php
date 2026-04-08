@@ -40,7 +40,7 @@ class RoundBadgeTest extends TestCase
             'evaluation_round_id' => $this->round->id,
             'payload_json' => [
                 'global_score' => 85,
-                'medal' => ['name' => 'Ouro'],
+                'medal' => ['name' => 'gold'],
                 'sections' => []
             ]
         ]);
@@ -95,7 +95,7 @@ class RoundBadgeTest extends TestCase
         $response->assertJson([
             'project_name' => $this->project->name,
             'global_score' => 85,
-            'medal' => 'Ouro',
+            'medal' => 'Gold',
         ]);
     }
 

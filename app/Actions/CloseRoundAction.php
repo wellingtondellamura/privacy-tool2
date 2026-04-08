@@ -52,7 +52,7 @@ class CloseRoundAction
             }])->get();
 
         if ($inspections->isEmpty()) {
-            return ['global_score' => 0, 'medal' => ['name' => 'Sem Dados'], 'sections' => []];
+            return ['global_score' => 0, 'medal' => ['name' => 'no_data'], 'sections' => []];
         }
 
         return $this->calculateRoundPayload($inspections);
@@ -67,7 +67,7 @@ class CloseRoundAction
         $count = $payloads->count();
 
         if ($count === 0) {
-            return ['global_score' => 0, 'medal' => ['name' => 'Incipiente'], 'sections' => []];
+            return ['global_score' => 0, 'medal' => ['name' => 'incipient'], 'sections' => []];
         }
 
         // We assume all inspections in a round use the same questionnaire version structure.
@@ -100,7 +100,7 @@ class CloseRoundAction
                         'level' => $levelValue,
                         'score' => $avgQScores,
                         'variance' => 0, 
-                        'classification' => 'baixa',
+                        'classification' => 'low',
                     ];
                 }
 

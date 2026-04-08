@@ -36,10 +36,18 @@ class DivergenceService
     public static function classify(float $variance): string
     {
         return match (true) {
-            $variance <= 10 => 'baixa',
-            $variance <= 30 => 'média',
-            default => 'alta',
+            $variance <= 10 => 'low',
+            $variance <= 30 => 'medium',
+            default => 'high',
         };
+    }
+
+    /**
+     * Translate a divergence key to the current locale.
+     */
+    public static function classifyLabel(string $classification): string
+    {
+        return __('labels.divergence.' . $classification);
     }
 
     /**

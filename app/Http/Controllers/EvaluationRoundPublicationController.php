@@ -31,7 +31,7 @@ class EvaluationRoundPublicationController extends Controller
         
         try {
             $this->publicationService->publish($round, $visibility, $request->user());
-            return redirect()->back()->with('success', 'Rodada publicada com sucesso no diretório.');
+            return redirect()->back()->with('success', __('messages.round_published'));
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
         }
@@ -45,7 +45,7 @@ class EvaluationRoundPublicationController extends Controller
         $publication = RoundPublication::where('evaluation_round_id', $round->id)->first();
         
         if (!$publication) {
-            return redirect()->back()->withErrors(['publication' => 'Publicação não encontrada.']);
+            return redirect()->back()->withErrors(['publication' => __('messages.publication_not_found')]);
         }
 
         Gate::authorize('update', $publication);
@@ -58,7 +58,7 @@ class EvaluationRoundPublicationController extends Controller
         
         try {
             $this->publicationService->updateVisibility($round, $visibility);
-            return redirect()->back()->with('success', 'Visibilidade da publicação atualizada.');
+            return redirect()->back()->with('success', __('messages.publication_updated'));
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
         }
@@ -79,7 +79,7 @@ class EvaluationRoundPublicationController extends Controller
 
         try {
             $this->publicationService->revoke($round);
-            return redirect()->back()->with('success', 'Publicação removida do diretório.');
+            return redirect()->back()->with('success', __('messages.publication_removed'));
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['publication' => $e->getMessage()]);
         }

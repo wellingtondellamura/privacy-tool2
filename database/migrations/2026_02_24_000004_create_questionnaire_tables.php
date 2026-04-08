@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('questionnaire_version_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
+            $table->json('name');
             $table->integer('order');
             $table->timestamps();
         });
@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('section_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
+            $table->json('name');
             $table->integer('order');
             $table->timestamps();
         });
@@ -34,7 +34,7 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->text('text');
+            $table->json('text');
             $table->integer('order');
             $table->timestamps();
         });

@@ -4,6 +4,7 @@
  * Tests aligned with 008-responses.feature
  */
 
+use App\Enums\AnswerLevel;
 use App\Models\Inspection;
 use App\Models\Project;
 use App\Models\ProjectMember;
@@ -45,7 +46,7 @@ test('evaluator can save valid response', function () {
     $response = $this->actingAs($this->evaluator)
         ->postJson("/inspections/{$this->inspection->id}/response", [
             'question_id' => $this->question->id,
-            'answer' => 'Suficiente',
+            'answer' => 'high',
         ]);
 
     $response->assertStatus(201);
@@ -53,7 +54,7 @@ test('evaluator can save valid response', function () {
         'inspection_id' => $this->inspection->id,
         'question_id' => $this->question->id,
         'user_id' => $this->evaluator->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 });
 
@@ -63,13 +64,13 @@ test('previous answer is replaced on resubmission', function () {
         'inspection_id' => $this->inspection->id,
         'question_id' => $this->question->id,
         'user_id' => $this->evaluator->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 
     $response = $this->actingAs($this->evaluator)
         ->postJson("/inspections/{$this->inspection->id}/response", [
             'question_id' => $this->question->id,
-            'answer' => 'Insuficiente',
+            'answer' => 'medium',
         ]);
 
     $response->assertStatus(201);
@@ -81,7 +82,7 @@ test('previous answer is replaced on resubmission', function () {
     ])->get();
 
     expect($answers)->toHaveCount(1);
-    expect($answers->first()->answer)->toBe('Insuficiente');
+    expect($answers->first()->answer)->toBe(AnswerLevel::MEDIUM);
 });
 
 test('observer cannot respond', function () {
@@ -96,7 +97,7 @@ test('observer cannot respond', function () {
     $response = $this->actingAs($observer)
         ->postJson("/inspections/{$this->inspection->id}/response", [
             'question_id' => $this->question->id,
-            'answer' => 'Suficiente',
+            'answer' => 'high',
         ]);
 
     $response->assertStatus(403);
@@ -112,7 +113,7 @@ test('cannot respond after closing', function () {
     $response = $this->actingAs($this->evaluator)
         ->postJson("/inspections/{$this->inspection->id}/response", [
             'question_id' => $this->question->id,
-            'answer' => 'Suficiente',
+            'answer' => 'high',
         ]);
 
     $response->assertStatus(422);

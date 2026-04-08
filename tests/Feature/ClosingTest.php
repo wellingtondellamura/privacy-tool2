@@ -50,7 +50,7 @@ test('close inspection generates individual and consolidated snapshots', functio
             'inspection_id' => $inspection->id,
             'question_id' => $question->id,
             'user_id' => $evaluator->id,
-            'answer' => 'Suficiente',
+            'answer' => 'high',
         ]);
     }
 
@@ -101,7 +101,7 @@ test('snapshot is immutable after closing', function () {
         'inspection_id' => $inspection->id,
         'question_id' => $question->id,
         'user_id' => $evaluator->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 
     // Close
@@ -120,7 +120,7 @@ test('snapshot is immutable after closing', function () {
         'inspection_id' => $inspection->id,
         'question_id' => $question->id,
         'user_id' => $evaluator->id,
-    ])->update(['answer' => 'Inexistente']);
+    ])->update(['answer' => 'low']);
 
     // Then the stored snapshot must remain unchanged
     $snapshotAfter = ResultSnapshot::find($snapshot->id);
@@ -142,7 +142,7 @@ test('closing via API generates snapshots', function () {
         'inspection_id' => $inspection->id,
         'question_id' => $question->id,
         'user_id' => $this->owner->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 
     $response = $this->actingAs($this->owner)

@@ -50,7 +50,7 @@ test('only owner can close inspection', function () {
         'inspection_id' => $inspection->id,
         'question_id' => Question::first()->id,
         'user_id' => $evaluator->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 
     // When attempting to close inspection as evaluator
@@ -79,7 +79,7 @@ test('observer can view closed inspection results', function () {
         'inspection_id' => $inspection->id,
         'question_id' => Question::first()->id,
         'user_id' => $this->owner->id,
-        'answer' => 'Suficiente',
+        'answer' => 'high',
     ]);
 
     $action = app(CloseInspectionAction::class);

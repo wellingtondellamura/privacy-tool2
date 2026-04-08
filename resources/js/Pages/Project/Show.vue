@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
@@ -38,12 +39,12 @@ const projectForm = useForm({
 
 const isRoundCreating = ref(false);
 const roundForm = useForm({
-    name: 'Rodada de ' + new Date().toLocaleDateString('pt-BR'),
+    name: t('project.round_default_name', { date: new Date().toLocaleDateString(t('common.locale_code')) }),
 });
 
 const openRoundCreateModal = () => {
     roundForm.reset();
-    roundForm.name = 'Rodada de ' + new Date().toLocaleDateString('pt-BR');
+    roundForm.name = t('project.round_default_name', { date: new Date().toLocaleDateString(t('common.locale_code')) });
     isRoundCreating.value = true;
 };
 
@@ -80,6 +81,7 @@ const submitInvite = () => {
 };
 
 const user = usePage().props.auth.user;
+const { t } = useI18n();
 
 const canManageMembers = props.project.owner_id === user.id;
 
@@ -113,14 +115,14 @@ const compareSelectedRounds = () => {
 };
 
 const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString(t('common.locale_code'));
 };
 
 const translateRole = (role) => {
     const roles = {
-        'owner': 'Proprietário',
-        'evaluator': 'Avaliador',
-        'observer': 'Observador',
+        'owner': t('workspace.role_owner'),
+        'evaluator': t('workspace.role_evaluator'),
+        'observer': t('workspace.role_observer'),
     };
     return roles[role] || role;
 };
@@ -199,7 +201,7 @@ const revokePublication = () => {
             <div class="flex items-start gap-4">
                 <div class="flex-grow">
                     <Breadcrumbs :items="[
-                        { label: 'Workspace', url: route('projects.index') },
+                        { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: project.name }
                     ]" />
                     
@@ -215,32 +217,32 @@ const revokePublication = () => {
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-sm text-surface-500 max-w-2xl mt-1">{{ project.description || 'Nenhuma descrição fornecida.' }}</p>
+                        <p class="text-sm text-surface-500 max-w-2xl mt-1">{{ project.description || $t('project.no_description') }}</p>
                     </div>
 
                     <div v-else class="mt-4 space-y-4 max-w-2xl bg-surface-50 p-6 rounded-xl border border-surface-200 shadow-inner">
                         <div class="space-y-4">
                             <Input
-                                label="Nome do Projeto"
+                                :label="$t('project.edit_name')"
                                 v-model="projectForm.name"
                                 :error="projectForm.errors.name"
                                 required
                             />
                             <div class="space-y-1">
-                                <label class="block text-sm font-medium text-surface-700">Descrição</label>
+                                <label class="block text-sm font-medium text-surface-700">{{ $t('project.edit_description') }}</label>
                                 <textarea
                                     v-model="projectForm.description"
                                     rows="3"
                                     class="block w-full rounded-lg border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
-                                    placeholder="Breve descrição do projeto..."
+                                    :placeholder="$t('project.edit_description_placeholder')"
                                 ></textarea>
                                 <p v-if="projectForm.errors.description" class="text-xs text-red-600 mt-1">{{ projectForm.errors.description }}</p>
                             </div>
                             <Input
-                                label="Website (URL)"
+                                :label="$t('project.edit_url')"
                                 v-model="projectForm.url"
                                 :error="projectForm.errors.url"
-                                placeholder="https://..."
+                                :placeholder="$t('project.edit_url_placeholder')"
                             />
                             <ProjectIconPicker
                                 v-model:icon="projectForm.icon"
@@ -252,10 +254,10 @@ const revokePublication = () => {
                         </div>
                         <div class="flex items-center gap-2 pt-2">
                             <Button size="sm" variant="primary" @click="updateProject" :disabled="projectForm.processing">
-                                Salvar Alterações
+                                {{ $t('project.save_changes') }}
                             </Button>
                             <Button size="sm" variant="ghost" @click="toggleProjectEdit">
-                                Cancelar
+                                {{ $t('common.cancel') }}
                             </Button>
                         </div>
                     </div>
@@ -263,18 +265,18 @@ const revokePublication = () => {
                 <div class="flex items-center gap-2 mt-2">
                     <a :href="route('projects.export', project.id)" target="_blank">
                         <Button variant="outline">
-                            Exportar JSON
+                            {{ $t('project.export_json') }}
                         </Button>
                     </a>
                     <Button v-if="project.evaluation_rounds.find(r => r.status === 'closed')" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click="$inertia.get(route('rounds.results', project.evaluation_rounds.find(r => r.status === 'closed').id))">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                        Resultado Consolidado
+                        {{ $t('project.consolidated_result') }}
                     </Button>
                     <Button v-if="canCompare" variant="outline" class="!border-brand-200 !text-brand-700" @click="compareSelectedRounds">
-                        Comparar Rodadas ({{ selectedRounds.length }})
+                        {{ $t('project.compare_rounds', { count: selectedRounds.length }) }}
                     </Button>
                     <Button v-if="canManageMembers" variant="outline" @click="openRoundCreateModal">
-                        Nova Rodada
+                        {{ $t('project.new_round') }}
                     </Button>
                 </div>
             </div>
@@ -286,12 +288,12 @@ const revokePublication = () => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <!-- Esquerda: Inspeções e Detalhes da Avaliação -->
                     <div class="md:col-span-2 space-y-6">
-                        <Card title="Rodadas de Avaliação">
+                        <Card :title="$t('project.rounds_title')">
                             <div v-if="project.evaluation_rounds.length === 0" class="py-12 text-center text-surface-500">
-                                Não há rodadas de avaliação criadas para este projeto ainda.
+                                {{ $t('project.no_rounds') }}
                                 <br><br>
                                 <Button v-if="canManageMembers" variant="outline" size="sm" @click="openRoundCreateModal">
-                                    Criar Primeira Rodada
+                                    {{ $t('project.create_first_round') }}
                                 </Button>
                             </div>
                             
@@ -315,15 +317,15 @@ const revokePublication = () => {
                                                     {{ round.name }}
                                                 </p>
                                                 <Badge :variant="round.status === 'closed' ? 'success' : (round.status === 'active' ? 'brand' : 'surface')">
-                                                    {{ round.status === 'closed' ? 'Concluída' : (round.status === 'active' ? 'Ativa' : 'Rascunho') }}
+                                                    {{ round.status === 'closed' ? $t('round.status_closed') : (round.status === 'active' ? $t('round.status_active') : $t('round.status_draft')) }}
                                                 </Badge>
                                                 <Badge v-if="round.public_directory" variant="primary" class="text-[10px]">
-                                                    Publicado ({{ round.public_directory.visibility }})
+                                                    {{ $t('round.published_badge', { visibility: round.public_directory.visibility }) }}
                                                 </Badge>
                                             </div>
                                             <p class="text-xs text-surface-500">
-                                                Criada em {{ formatDate(round.created_at) }} 
-                                                <span v-if="round.closed_at"> • Fechada em {{ formatDate(round.closed_at) }}</span>
+                                                {{ $t('project.created_at', { date: formatDate(round.created_at) }) }}
+                                                <span v-if="round.closed_at"> • {{ $t('project.closed_at', { date: formatDate(round.closed_at) }) }}</span>
                                                 <span v-if="round.snapshots?.[0]" class="ml-2 font-medium text-brand-600">
                                                     • Score: {{ round.snapshots[0].payload_json.global_score }}%
                                                 </span>
@@ -336,18 +338,18 @@ const revokePublication = () => {
                                             variant="ghost" 
                                             @click.stop="$inertia.get(route('rounds.show', round.id))"
                                         >
-                                            Abrir
+                                            {{ $t('common.open') }}
                                         </Button>
                                     </div>
                                 </li>
                             </ul>
                         </Card>
 
-                        <Card title="Inspeções" collapsible="true" collapsed="true">
+                        <Card :title="$t('project.inspections_title')" collapsible="true" collapsed="true">
                             <div v-if="project.inspections.length === 0" class="py-12 text-center text-surface-500">
-                                Não há inspeções criadas para este projeto ainda.
+                                {{ $t('project.no_inspections') }}
                                 <br><br>
-                                <p class="text-xs">Crie ou abra uma Rodada de Avaliação para iniciar uma nova inspeção.</p>
+                                <p class="text-xs">{{ $t('project.no_inspections_description') }}</p>
                             </div>
                             
                             <ul v-else class="divide-y divide-surface-100">
@@ -356,10 +358,10 @@ const revokePublication = () => {
                                 >
                                     <div class="cursor-pointer flex-grow" @click="$inertia.get(route('inspections.show', inspection.id))">
                                         <p class="text-sm font-medium text-surface-900">
-                                            Inspeção #{{ inspection.sequential_id }}
+                                            {{ $t('project.inspection_label', { id: inspection.sequential_id }) }}
                                         </p>
                                         <p class="text-xs text-surface-500">
-                                            Criada em {{ formatDate(inspection.created_at) }} • <span class="font-medium text-surface-700">Responsável: {{ inspection.user?.name || 'Sistema' }}</span>
+                                            {{ $t('project.created_at', { date: formatDate(inspection.created_at) }) }} • <span class="font-medium text-surface-700">{{ $t('project.responsible_label', { name: inspection.user?.name || 'Sistema' }) }}</span>
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
@@ -368,7 +370,7 @@ const revokePublication = () => {
                                                 size="xs" 
                                                 variant="outline" 
                                                 @click.stop="$inertia.get(route('results.individual', inspection.id))"
-                                                title="Meu Resultado"
+                                                :title="$t('project.my_result')"
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                             </Button>
@@ -377,13 +379,13 @@ const revokePublication = () => {
                                                 variant="outline" 
                                                 class="!bg-brand-50 !text-brand-700 !border-brand-100" 
                                                 @click.stop="$inertia.get(route('results.team', inspection.id))"
-                                                title="Resultado Consolidado"
+                                                :title="$t('project.consolidated_result')"
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                                             </Button>                                            
                                         </div>
                                         <Badge :variant="inspection.status === 'closed' ? 'success' : (inspection.status === 'active' ? 'brand' : 'surface')">
-                                            {{ inspection.status === 'closed' ? 'Concluída' : (inspection.status === 'active' ? 'Ativa' : 'Rascunho') }}
+                                            {{ inspection.status === 'closed' ? $t('round.status_closed') : (inspection.status === 'active' ? $t('round.status_active') : $t('round.status_draft')) }}
                                         </Badge>
                                     </div>
                                 </li>
@@ -393,12 +395,12 @@ const revokePublication = () => {
 
                     <!-- Direita: Membros e Info do Projeto -->
                     <div class="space-y-6">
-                        <Card title="Membros do Projeto">
+                        <Card :title="$t('project.members_title')">
                             <template #header v-if="canManageMembers">
                                 <div class="flex justify-between items-center px-6 border-surface-100 bg-surface-50/50">
-                                    <h3 class="text-lg font-medium text-surface-900">Membros</h3>
+                                    <h3 class="text-lg font-medium text-surface-900">{{ $t('project.members_title') }}</h3>
                                     <Button size="sm" variant="outline" @click="isInviting = !isInviting">
-                                        Convidar
+                                        {{ $t('project.invite') }}
                                     </Button>
                                 </div>
                             </template>
@@ -414,29 +416,29 @@ const revokePublication = () => {
                                 <div v-if="isInviting" class="mb-4 bg-brand-50 p-4 rounded-lg border border-brand-100">
                                     <form @submit.prevent="submitInvite" class="space-y-3">
                                         <Input
-                                            label="E-mail"
+                                            :label="$t('project.invite_email_label')"
                                             id="invite-email"
                                             type="email"
                                             v-model="inviteForm.email"
                                             required
                                             :error="inviteForm.errors.email"
-                                            placeholder="email@exemplo.com"
+                                            :placeholder="$t('project.invite_email_placeholder')"
                                         />
                                         <div>
                                             <label class="block text-sm font-medium text-surface-700 mb-1">
-                                                Papel
+                                                {{ $t('project.invite_role_label') }}
                                             </label>
                                             <select v-model="inviteForm.role" class="block w-full rounded-lg border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm">
-                                                <option value="evaluator">Avaliador</option>
-                                                <option value="observer">Observador</option>
+                                                <option value="evaluator">{{ $t('workspace.role_evaluator') }}</option>
+                                                <option value="observer">{{ $t('workspace.role_observer') }}</option>
                                             </select>
                                         </div>
                                         <div class="flex justify-end pt-2">
                                             <Button type="button" variant="ghost" size="sm" @click="isInviting = false" class="mr-2">
-                                                Cancelar
+                                                {{ $t('common.cancel') }}
                                             </Button>
                                             <Button type="submit" variant="primary" size="sm" :disabled="inviteForm.processing">
-                                                Enviar Convite
+                                                {{ $t('project.send_invitation') }}
                                             </Button>
                                         </div>
                                     </form>
@@ -459,8 +461,8 @@ const revokePublication = () => {
                                                 :value="member.role" 
                                                 @change="updateRole(member.user.id, $event.target.value)"
                                                 class="text-xs rounded border-surface-200 py-1 pl-2 pr-8 focus:ring-brand-500 focus:border-brand-500 bg-surface-50">
-                                            <option value="evaluator">Avaliador</option>
-                                            <option value="observer">Observador</option>
+                                            <option value="evaluator">{{ $t('workspace.role_evaluator') }}</option>
+                                            <option value="observer">{{ $t('workspace.role_observer') }}</option>
                                         </select>
                                         <Badge v-else :variant="member.role === 'owner' ? 'brand' : 'surface'">
                                             {{ translateRole(member.role) }}
@@ -470,7 +472,7 @@ const revokePublication = () => {
                             </ul>
 
                             <div v-if="project.invitations && project.invitations.length > 0" class="border-t border-surface-100 bg-surface-50/30">
-                                <h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3 bg-surface-50 border-b border-surface-100">Convites Pendentes</h4>
+                                <h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3 bg-surface-50 border-b border-surface-100">{{ $t('project.pending_invitations') }}</h4>
                                 <ul class="divide-y divide-surface-100">
                                     <li v-for="invitation in project.invitations" :key="invitation.id" class="py-3 flex items-center justify-between px-6 opacity-80 hover:opacity-100 transition-opacity">
                                         <div class="flex items-center">
@@ -483,12 +485,12 @@ const revokePublication = () => {
                                                     <div v-if="invitation.has_account" class="group relative flex items-center justify-center">
                                                         <svg class="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                         <div class="absolute bottom-full mb-1 min-w-[120px] bg-surface-800 text-white text-[10px] rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-center">
-                                                            Usuário já possui conta
+                                                            {{ $t('project.user_has_account') }}
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <span class="text-[10px] text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-100">
-                                                    Enviado {{ formatDate(invitation.created_at) }}
+                                                    {{ $t('project.invitation_sent_at', { date: formatDate(invitation.created_at) }) }}
                                                 </span>
                                             </div>
                                         </div>
@@ -498,13 +500,13 @@ const revokePublication = () => {
                                             </Badge>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <button v-if="canManageMembers && new Date(invitation.expires_at) < new Date()" @click="resendInvitation(invitation.id)" class="text-[10px] text-brand-600 hover:text-brand-800 underline font-medium">
-                                                    Reenviar
+                                                    {{ $t('project.resend') }}
                                                 </button>
                                                 <span v-if="new Date(invitation.expires_at) < new Date()" class="text-[10px] text-red-500 font-medium">
-                                                    Expirado
+                                                    {{ $t('project.expired') }}
                                                 </span>
                                                 <span v-else class="text-[10px] text-surface-400">
-                                                    Pendente
+                                                    {{ $t('project.pending') }}
                                                 </span>
                                             </div>
                                         </div>
@@ -515,7 +517,7 @@ const revokePublication = () => {
                         
                         <div v-if="project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between">
                             <div class="text-sm">
-                                <span class="block font-medium text-surface-900">URL do Produto</span>
+                                <span class="block font-medium text-surface-900">{{ $t('project.product_url') }}</span>
                                 <a :href="project.url" target="_blank" class="text-brand-600 hover:underline truncate max-w-[200px] block">
                                     {{ project.url }}
                                 </a>
@@ -536,10 +538,10 @@ const revokePublication = () => {
     <!-- Modal de Reenvio de Convite -->
     <ConfirmModal
         :show="isResendingConfirm"
-        title="Reenviar Convite"
-        message="Deseja reenviar este convite? O prazo será estendido por mais 7 dias."
-        confirm-text="Sim, Reenviar"
-        cancel-text="Cancelar"
+        :title="$t('project.resend_modal_title')"
+        :message="$t('project.resend_modal_message')"
+        :confirm-text="$t('project.resend_confirm')"
+        :cancel-text="$t('common.cancel')"
         confirm-variant="brand"
         @confirm="confirmResend"
         @close="isResendingConfirm = false"
@@ -548,10 +550,10 @@ const revokePublication = () => {
     <!-- Modal de Criação de Rodada -->
     <ConfirmModal
         :show="isRoundCreating"
-        title="Nova Rodada de Avaliação"
-        message="Dê um nome para identificar esta nova rodada de inspeções."
-        confirm-text="Criar Rodada"
-        cancel-text="Cancelar"
+        :title="$t('project.new_round_modal_title')"
+        :message="$t('project.new_round_modal_message')"
+        :confirm-text="$t('project.new_round_create')"
+        :cancel-text="$t('common.cancel')"
         confirm-variant="primary"
         :processing="roundForm.processing"
         @confirm="submitRoundCreate"
@@ -560,11 +562,11 @@ const revokePublication = () => {
         <template #default>
             <div class="mt-4">
                 <Input
-                    label="Nome da Rodada"
+                    :label="$t('project.round_name_label')"
                     v-model="roundForm.name"
                     :error="roundForm.errors.name"
                     required
-                    placeholder="Ex: Rodada Março 2024"
+                    :placeholder="$t('project.round_name_placeholder')"
                     @keyup.enter="submitRoundCreate"
                 />
             </div>
@@ -574,12 +576,12 @@ const revokePublication = () => {
     <!-- Modal de Publicação -->
     <ConfirmModal
         :show="isPublishingModalOpen"
-        title="Publicar no Diretório"
+        :title="$t('publication.modal_title')"
         :message="currentInspectionToPublish?.publication 
-            ? 'Atualize a visibilidade da publicação ou remova-a do diretório público.' 
-            : 'Esta inspeção será publicada no diretório público. Escolha o nível de visibilidade.'"
-        :confirm-text="currentInspectionToPublish?.publication ? 'Atualizar' : 'Publicar'"
-        cancel-text="Cancelar"
+            ? $t('publication.update_message') 
+            : $t('publication.create_inspection_message')"
+        :confirm-text="currentInspectionToPublish?.publication ? $t('publication.update_button') : $t('publication.publish_button')"
+        :cancel-text="$t('common.cancel')"
         :confirm-variant="currentInspectionToPublish?.publication ? 'brand' : 'primary'"
         @confirm="submitPublication"
         @close="closePublishModal"
@@ -587,27 +589,27 @@ const revokePublication = () => {
         <template #default>
             <div class="mt-4 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-surface-700 mb-2">Engajamento (Visibilidade)</label>
+                    <label class="block text-sm font-medium text-surface-700 mb-2">{{ $t('publication.visibility_engagement') }}</label>
                     <div class="space-y-2">
                         <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'private'}">
                             <input type="radio" value="private" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">Privado</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">Visível apenas para membros do projeto.</span>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.private_label') }}</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.private_members_description') }}</span>
                             </div>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'score_public'}">
                             <input type="radio" value="score_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">Apenas Score</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">Exibe a pontuação e medalha, mas mantém detalhes ocultos.</span>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.score_short_label') }}</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.score_short_description') }}</span>
                             </div>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'full_public'}">
                             <input type="radio" value="full_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">Relatório Completo</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">Torna o relatório consolidado visível para qualquer pessoa com o link.</span>
+                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.full_short_label') }}</span>
+                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.full_short_description') }}</span>
                             </div>
                         </label>
                     </div>
@@ -615,7 +617,7 @@ const revokePublication = () => {
                 
                 <div v-if="currentInspectionToPublish?.publication" class="pt-4 border-t border-surface-100 flex justify-center">
                     <button type="button" @click="revokePublication" class="text-xs text-red-600 hover:text-red-800 font-medium underline">
-                        Remover do Diretório Público
+                        {{ $t('publication.remove_link') }}
                     </button>
                 </div>
             </div>

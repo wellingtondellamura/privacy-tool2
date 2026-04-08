@@ -37,6 +37,6 @@ class MitraMethodTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Método Mitra');
+        $response->assertSee('metodo-mitra');
     }
 }

@@ -86,10 +86,18 @@ class AggregationService
     public static function medalForScore(int $score): string
     {
         return match (true) {
-            $score >= 91 => 'Ouro',
-            $score >= 61 => 'Prata',
-            $score >= 41 => 'Bronze',
-            default => 'Incipiente',
+            $score >= 91 => 'gold',
+            $score >= 61 => 'silver',
+            $score >= 41 => 'bronze',
+            default => 'incipient',
         };
+    }
+
+    /**
+     * Translate a medal key to the current locale.
+     */
+    public static function medalLabel(string $medal): string
+    {
+        return __('labels.medals.' . $medal);
     }
 }

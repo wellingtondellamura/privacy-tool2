@@ -1,7 +1,10 @@
 <script setup>
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Card from '@/Components/Card.vue';
 import axios from 'axios';
+
+const { t } = useI18n();
 
 const props = defineProps({
     question: {
@@ -56,7 +59,7 @@ const saveResponse = async () => {
         
         emit('saved', response.data);
     } catch (error) {
-        saveError.value = error.response?.data?.message || 'Erro ao salvar a resposta.';
+        saveError.value = error.response?.data?.message || t('common.save_error');
     } finally {
         isSaving.value = false;
     }
@@ -87,7 +90,7 @@ const selectAnswer = (val) => {
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
             </span>
-            <span class="text-xs text-brand-500 font-medium">Salvando...</span>
+            <span class="text-xs text-brand-500 font-medium">{{ $t('common.saving') }}</span>
         </div>
 
         <h4 class="text-lg font-medium text-surface-900 leading-relaxed">
@@ -136,7 +139,7 @@ const selectAnswer = (val) => {
                     @input="triggerSave"
                     rows="3"
                     :disabled="disabled"
-                    placeholder="Descreva a situação..."
+                    :placeholder="$t('component.observation_placeholder')"
                     class="block w-full rounded-md border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm transition-colors"
                 ></textarea>
             </div>

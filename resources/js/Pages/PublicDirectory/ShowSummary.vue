@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
@@ -7,6 +8,8 @@ import Badge from '@/Components/Badge.vue';
 const props = defineProps({
     tool: Object,
 });
+
+const { t } = useI18n();
 
 const getMedalVariant = (medal) => {
     if (!medal) return 'neutral';
@@ -31,7 +34,7 @@ const getMedalImage = (medal) => {
 </script>
 
 <template>
-    <PublicLayout :title="tool.name + ' - Resumo de Privacidade'">
+    <PublicLayout :title="t('directory.summary_page_title', { name: tool.name })">
         <div class="py-12 bg-surface-50 min-h-screen">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
                 
@@ -43,7 +46,7 @@ const getMedalImage = (medal) => {
                     <div class="relative z-10 space-y-8">
                         <div class="flex flex-col items-center">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-[10px] font-bold uppercase tracking-widest mb-6">
-                                Relatório de Privacidade
+                                {{ $t('directory.summary_badge') }}
                             </div>
                             <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-tight">{{ tool.name }}</h1>
                         </div>
@@ -51,7 +54,7 @@ const getMedalImage = (medal) => {
                         <div class="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-20">
                             <div class="text-center group">
                                 <div class="text-7xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-500">{{ tool.score }}%</div>
-                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">Score Global</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_score') }}</div>
                             </div>
                             
                             <div class="h-16 w-px bg-surface-700 hidden md:block"></div>
@@ -67,7 +70,7 @@ const getMedalImage = (medal) => {
                                         {{ tool.medal.name || tool.medal }}
                                     </Badge>
                                 </div>
-                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">Classificação Final</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_classification') }}</div>
                             </div>
                         </div>
                     </div>
@@ -79,7 +82,7 @@ const getMedalImage = (medal) => {
                     <div v-if="tool.diagnosis" class="space-y-4">
                         <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
                              <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                             Diagnóstico Geral
+                             {{ $t('directory.summary_diagnosis') }}
                         </h2>
                         <Card class="p-8 bg-white border-surface-200">
                             <div class="text-xl text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium">
@@ -91,7 +94,7 @@ const getMedalImage = (medal) => {
                     <!-- Sections Summary -->
                     <div class="space-y-6">
                         <div class="flex items-center gap-4">
-                            <h2 class="text-xl font-bold text-surface-900 tracking-tight whitespace-nowrap">Resumo por Dimensão</h2>
+                            <h2 class="text-xl font-bold text-surface-900 tracking-tight whitespace-nowrap">{{ $t('directory.summary_dimensions') }}</h2>
                             <div class="h-px bg-surface-200 w-full"></div>
                         </div>
 
@@ -117,11 +120,11 @@ const getMedalImage = (medal) => {
                     <div class="bg-surface-900 rounded-[32px] p-10 text-white flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group shadow-xl">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
                         <div class="relative z-10 text-center md:text-left">
-                            <h3 class="text-xl font-extrabold mb-2 tracking-tight uppercase">Deseja o relatório detalhado?</h3>
-                            <p class="text-surface-400 text-sm max-w-sm">Esta visualização apresenta apenas os índices gerais e medalhas por seção conforme configurado pelo projeto.</p>
+                            <h3 class="text-xl font-extrabold mb-2 tracking-tight uppercase">{{ $t('directory.summary_cta_title') }}</h3>
+                            <p class="text-surface-400 text-sm max-w-sm">{{ $t('directory.summary_cta_description') }}</p>
                         </div>
                         <Link :href="route('public.tools.index')" class="relative z-10 px-8 py-4 bg-white text-surface-900 font-black rounded-2xl hover:bg-brand-50 transition-all hover:shadow-brand active:scale-95 uppercase tracking-wider text-xs">
-                            Voltar ao Diretório
+                            {{ $t('directory.summary_back') }}
                         </Link>
                     </div>
                 </div>

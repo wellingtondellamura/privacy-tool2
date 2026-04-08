@@ -16,7 +16,7 @@ class RoundSnapshotFactory extends Factory
             'evaluation_round_id' => EvaluationRound::factory(),
             'payload_json' => [
                 'global_score' => fake()->numberBetween(0, 100),
-                'medal' => ['name' => fake()->randomElement(['Ouro', 'Prata', 'Bronze', 'Incipiente'])],
+                'medal' => ['name' => fake()->randomElement(['gold', 'silver', 'bronze', 'incipient'])],
                 'sections' => [],
             ],
         ];

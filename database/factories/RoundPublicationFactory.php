@@ -16,7 +16,7 @@ class RoundPublicationFactory extends Factory
             'evaluation_round_id' => EvaluationRound::factory(),
             'visibility' => 'private',
             'score' => fake()->numberBetween(0, 100),
-            'medal' => fake()->randomElement(['Ouro', 'Prata', 'Bronze', 'Incipiente']),
+            'medal' => fake()->randomElement(['gold', 'silver', 'bronze', 'incipient']),
             'year' => now()->year,
         ];
     }

@@ -7,6 +7,9 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
@@ -42,36 +45,32 @@ const closeModal = () => {
     <section class="space-y-6">
         <header>
             <h2 class="text-lg font-medium text-gray-900">
-                Excluir Conta
+                {{ $t('profile.delete_title') }}
             </h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                Depois que sua conta for excluída, todos os seus recursos e dados
-                serão permanentemente excluídos. Antes de excluir sua conta, faça o
-                download de quaisquer dados ou informações que deseja reter.
+                {{ $t('profile.delete_warning') }}
             </p>
         </header>
 
-        <DangerButton @click="confirmUserDeletion">Excluir Conta</DangerButton>
+        <DangerButton @click="confirmUserDeletion">{{ $t('profile.delete_button') }}</DangerButton>
 
         <Modal :show="confirmingUserDeletion" @close="closeModal">
             <div class="p-6">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
-                    Tem certeza que deseja excluir sua conta?
+                    {{ $t('profile.delete_confirm_title') }}
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
-                    Depois que sua conta for excluída, todos os seus recursos e dados
-                    serão permanentemente excluídos. Digite sua senha para
-                    confirmar que deseja excluir permanentemente sua conta.
+                    {{ $t('profile.delete_confirm_description') }}
                 </p>
 
                 <div class="mt-6">
                     <InputLabel
                         for="password"
-                        value="Senha"
+                        :value="$t('profile.password')"
                         class="sr-only"
                     />
 
@@ -81,7 +80,7 @@ const closeModal = () => {
                         v-model="form.password"
                         type="password"
                         class="mt-1 block w-3/4"
-                        placeholder="Senha"
+                        :placeholder="$t('profile.password')"
                         @keyup.enter="deleteUser"
                     />
 
@@ -90,7 +89,7 @@ const closeModal = () => {
 
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton @click="closeModal">
-                        Cancelar
+                        {{ $t('common.cancel') }}
                     </SecondaryButton>
 
                     <DangerButton
@@ -99,7 +98,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
-                        Excluir Conta
+                        {{ $t('profile.delete_button') }}
                     </DangerButton>
                 </div>
             </div>

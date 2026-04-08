@@ -20,12 +20,12 @@ test('V1 seeder creates correct structure', function () {
     expect($version)->not->toBeNull();
     expect($version->is_active)->toBeTrue();
 
-    // 5 sections
-    expect($version->sections)->toHaveCount(5);
+    // 2 sections
+    expect($version->sections)->toHaveCount(2);
 
-    // Each section has 2 categories
+    // Each section has 5 categories
     foreach ($version->sections as $section) {
-        expect($section->categories)->toHaveCount(2);
+        expect($section->categories)->toHaveCount(5);
     }
 
     // Total of 46 questions
@@ -38,11 +38,8 @@ test('question counts per section are correct', function () {
     $sections = $version->sections;
 
     $expectedCounts = [
-        'Pessoas/Atores' => 7,
-        'Propósito de uso' => 10,
-        'Dados pessoais' => 10,
-        'Compartilhamento' => 12,
-        'Agenciamento' => 7,
+        'Existência e Qualidade da Informação' => 26,
+        'Formato de Apresentação' => 20,
     ];
 
     foreach ($sections as $section) {

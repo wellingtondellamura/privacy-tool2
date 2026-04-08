@@ -1,6 +1,9 @@
 <script setup>
 import { PROJECT_ICONS, PROJECT_COLORS } from '@/Constants/ProjectOptions';
+import { useI18n } from 'vue-i18n';
 import ProjectIcon from './ProjectIcon.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     icon: String,
@@ -24,7 +27,7 @@ const selectColor = (colorName) => {
     <div class="space-y-6">
         <!-- Icon Selection -->
         <div>
-            <label class="block text-sm font-medium text-surface-700 mb-2">Ícone do Projeto</label>
+            <label class="block text-sm font-medium text-surface-700 mb-2">{{ $t('component.project_icon') }}</label>
             <div class="grid grid-cols-8 gap-2">
                 <button
                     v-for="iconName in PROJECT_ICONS"
@@ -46,7 +49,7 @@ const selectColor = (colorName) => {
 
         <!-- Color Selection -->
         <div>
-            <label class="block text-sm font-medium text-surface-700 mb-2">Cor de Identificação</label>
+            <label class="block text-sm font-medium text-surface-700 mb-2">{{ $t('component.project_color') }}</label>
             <div class="flex flex-wrap gap-3">
                 <button
                     v-for="colorOption in PROJECT_COLORS"
@@ -60,7 +63,7 @@ const selectColor = (colorName) => {
                             : 'border-transparent hover:scale-110',
                         colorOption.bg
                     ]"
-                    :title="colorOption.label"
+                    :title="$t(colorOption.labelKey)"
                 ></button>
             </div>
             <p v-if="errorColor" class="text-xs text-red-600 mt-1">{{ errorColor }}</p>

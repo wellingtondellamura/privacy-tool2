@@ -1,26 +1,26 @@
 @component('mail::message')
-# Convite para colaboração
+# {{ __('email.invitation_heading') }}
 
-Você foi convidado para participar do projeto **{{ $project->name }}** na ferramenta Privacy Tool.
+{!! __('email.invitation_body', ['project' => $project->name]) !!}
 
-Seu nível de acesso será: **{{ $invitation->role === 'evaluator' ? 'Avaliador' : 'Observador' }}**.
+{!! __('email.invitation_role', ['role' => __('labels.roles.' . $invitation->role)]) !!}
 
 @if($hasAccount)
-Como você já possui uma conta em nosso sistema, basta realizar o login e aceitar o convite através do seu Dashboard.
+{{ __('email.invitation_existing_user') }}
 
 @component('mail::button', ['url' => route('login')])
-Fazer Login e Aceitar
+{{ __('email.invitation_login_button') }}
 @endcomponent
 @else
-Para aceitar o convite e participar do projeto, você precisará criar uma conta gratuita usando este endereço de e-mail.
+{{ __('email.invitation_new_user') }}
 
 @component('mail::button', ['url' => route('register')])
-Criar Conta e Aceitar
+{{ __('email.invitation_register_button') }}
 @endcomponent
 @endif
 
-Caso você não tenha solicitado ou não conheça este projeto, nenhuma ação é necessária e este convite irá expirar.
+{{ __('email.invitation_ignore') }}
 
-Obrigado,<br>
-A equipe do {{ config('app.name') }}
+{{ __('email.thanks') }}<br>
+{{ __('email.team', ['app' => config('app.name')]) }}
 @endcomponent

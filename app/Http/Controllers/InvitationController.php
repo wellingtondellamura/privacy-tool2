@@ -44,7 +44,7 @@ class InvitationController extends Controller
 
         Mail::to($invitation->email)->send(new ProjectInvitationMail($invitation, $project));
 
-        return redirect()->back()->with('success', "Convite enviado com sucesso para {$validated['email']}.");
+        return redirect()->back()->with('success', __('messages.invitation_sent', ['email' => $validated['email']]));
     }
 
     /**
@@ -100,7 +100,7 @@ class InvitationController extends Controller
         // Mark invitation as accepted
         $invitation->update(['accepted_at' => now()]);
 
-        return redirect()->route('projects.show', $invitation->project_id)->with('success', 'Convite aceito com sucesso.');
+        return redirect()->route('projects.show', $invitation->project_id)->with('success', __('messages.invitation_accepted'));
     }
 
     /**
@@ -117,7 +117,7 @@ class InvitationController extends Controller
 
         $invitation->delete();
 
-        return redirect()->back()->with('success', 'Convite recusado/cancelado com sucesso.');
+        return redirect()->back()->with('success', __('messages.invitation_declined'));
     }
 
     /**
@@ -134,6 +134,6 @@ class InvitationController extends Controller
 
         Mail::to($invitation->email)->send(new ProjectInvitationMail($invitation, $invitation->project));
 
-        return redirect()->back()->with('success', "Convite reenviado com sucesso para {$invitation->email}.");
+        return redirect()->back()->with('success', __('messages.invitation_resent', ['email' => $invitation->email]));
     }
 }

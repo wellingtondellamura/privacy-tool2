@@ -5,6 +5,7 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
 import ExportDataForm from './Partials/ExportDataForm.vue';
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
     mustVerifyEmail: {
@@ -14,17 +15,19 @@ defineProps({
         type: String,
     },
 });
+
+const { t } = useI18n();
 </script>
 
 <template>
-    <Head title="Perfil" />
+    <Head :title="t('profile.title')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
             >
-                Perfil
+                {{ $t('profile.title') }}
             </h2>
         </template>
 

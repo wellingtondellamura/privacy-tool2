@@ -10,10 +10,6 @@ enum Visibility: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::PRIVATE => 'Privado',
-            self::SCORE_PUBLIC => 'Apenas Score',
-            self::FULL_PUBLIC => 'Relatório Completo',
-        };
+        return __('labels.visibility.' . $this->value);
     }
 }

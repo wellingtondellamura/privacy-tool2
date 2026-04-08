@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
@@ -7,6 +8,8 @@ import Badge from '@/Components/Badge.vue';
 const props = defineProps({
     tool: Object,
 });
+
+const { t } = useI18n();
 
 const toRoman = (num) => {
     if (isNaN(num)) return '';
@@ -51,7 +54,7 @@ const getMedalImage = (medal) => {
 </script>
 
 <template>
-    <PublicLayout :title="tool.name + ' - Relatório Técnico'">
+    <PublicLayout :title="t('directory.full_page_title', { name: tool.name })">
         <div class="py-12 bg-surface-50 min-h-screen">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
                 
@@ -65,14 +68,14 @@ const getMedalImage = (medal) => {
                             <h1 class="text-3xl font-extrabold text-surface-900 tracking-tight">{{ tool.name }}</h1>
                             <p class="text-xs text-surface-500 font-medium uppercase tracking-widest mt-1">
                                 <a :href="tool.url" target="_blank" class="hover:text-brand-600 transition-colors underline underline-offset-2 capitalize">{{ tool.url }}</a> 
-                                • Data da Inspeção: {{ tool.inspection_date }}
+                                • {{ $t('directory.full_inspection_date', { date: tool.inspection_date }) }}
                             </p>
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-4 bg-white p-2 pl-6 rounded-2xl shadow-sm border border-surface-200">
                         <div class="text-right">
-                            <p class="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">Score Consolidado</p>
+                            <p class="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">{{ $t('directory.full_consolidated_score') }}</p>
                             <p class="text-2xl font-black text-surface-900 leading-none">{{ tool.report.global_score }}%</p>
                         </div>
 
@@ -82,7 +85,7 @@ const getMedalImage = (medal) => {
                 <!-- Medal & Summary -->
                 <div class="grid md:grid-cols-3 gap-6">
                     <Card class="md:col-span-1 p-8 flex flex-col items-center justify-center text-center space-y-4">
-                        <div class="text-[10px] font-bold text-surface-400 uppercase tracking-widest">Classificação</div>
+                        <div class="text-[10px] font-bold text-surface-400 uppercase tracking-widest">{{ $t('directory.full_classification') }}</div>
                         <div v-if="tool.report.medal" class="flex flex-col items-center gap-2 font-medium">
                             <img v-if="getMedalImage(tool.report.medal)" 
                                  :src="getMedalImage(tool.report.medal)" 
@@ -92,16 +95,16 @@ const getMedalImage = (medal) => {
                              <Badge :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
                                 {{ tool.report.medal.name || tool.report.medal }}
                             </Badge>
-                            <p class="text-xs text-surface-400 font-medium mt-2 italic">Alcançado através de {{ tool.report.inspection_count }} auditorias</p>
+                            <p class="text-xs text-surface-400 font-medium mt-2 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count }) }}</p>
                         </div>
-                        <div v-else class="text-surface-400 italic text-sm">Sem medalha atribuída</div>
+                        <div v-else class="text-surface-400 italic text-sm">{{ $t('directory.full_no_medal') }}</div>
                     </Card>
 
                     <Card v-if="tool.report.diagnosis" class="md:col-span-2 p-8 relative overflow-hidden flex flex-col justify-center">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
                         <h2 class="text-xs font-bold text-brand-600 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                            Conclusão do Relatório
+                            {{ $t('directory.full_conclusion') }}
                         </h2>
                         <div class="text-lg text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium relative z-10">
                             "{{ tool.report.diagnosis }}"
@@ -112,7 +115,7 @@ const getMedalImage = (medal) => {
                 <!-- Sections Detail -->
                 <div class="space-y-8">
                     <div class="flex items-center gap-4">
-                        <h2 class="text-2xl font-bold text-surface-900 tracking-tight whitespace-nowrap">Detalhamento por Dimensão</h2>
+                        <h2 class="text-2xl font-bold text-surface-900 tracking-tight whitespace-nowrap">{{ $t('directory.full_dimension_detail') }}</h2>
                         <div class="h-px bg-surface-200 w-full"></div>
                     </div>
                     
@@ -162,7 +165,7 @@ const getMedalImage = (medal) => {
                 <div class="text-center pt-8 border-t border-surface-200">
                     <Link :href="route('public.tools.index')" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-surface-200 text-surface-600 font-bold hover:text-brand-600 hover:border-brand-300 hover:shadow-tactile transition-all group">
                         <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Voltar para o Diretório
+                        {{ $t('directory.full_back') }}
                     </Link>
                 </div>
 

@@ -187,7 +187,7 @@ class CloseInspectionAction
                         'score' => $avgQuestionScore,
                         ...(count($userScoresForQuestion) > 0
                             ? DivergenceService::forQuestion($userScoresForQuestion)
-                            : ['variance' => 0, 'classification' => 'baixa']),
+                        : ['variance' => 0, 'classification' => 'low']),
                     ];
                 }
 

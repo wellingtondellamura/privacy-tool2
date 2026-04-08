@@ -49,16 +49,16 @@ const declineInvitation = (id) => {
 </script>
 
 <template>
-    <Head title="Meu Workspace" />
+    <Head :title="$t('workspace.title')" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
-                    Meu Workspace
+                    {{ $t('workspace.title') }}
                 </h2>
                 <Button @click="isCreatingNode = true" variant="primary">
-                    Novo Projeto
+                    {{ $t('workspace.new_project') }}
                 </Button>
             </div>
         </template>
@@ -75,33 +75,33 @@ const declineInvitation = (id) => {
                     leave-to-class="transform opacity-0 scale-95"
                 >
                     <div v-if="isCreatingNode" class="mb-12">
-                        <Card title="Criar Novo Projeto" description="Um projeto pode ser um software, aplicativo ou site a ser inspecionado.">
+                        <Card :title="$t('workspace.create_project_title')" :description="$t('workspace.create_project_description')">
                             <div class="mt-4 bg-surface-50 p-6 rounded-xl border border-surface-200 shadow-inner">
                                 <form @submit.prevent="submit" class="space-y-4">
                                     <Input
-                                        label="Nome do Projeto"
+                                        :label="$t('workspace.project_name')"
                                         id="name"
                                         type="text"
                                         v-model="form.name"
                                         required
                                         autofocus
                                         :error="form.errors.name"
-                                        placeholder="Ex: Sistema de Gestão Interna"
+                                        :placeholder="$t('workspace.project_name_placeholder')"
                                     />
                                     
                                     <div class="space-y-1">
-                                        <label class="block text-sm font-medium text-surface-700">Descrição</label>
+                                        <label class="block text-sm font-medium text-surface-700">{{ $t('workspace.description') }}</label>
                                         <textarea
                                             v-model="form.description"
                                             rows="3"
                                             class="block w-full rounded-lg border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
-                                            placeholder="Breve descrição sobre o contexto e finalidade do projeto..."
+                                            :placeholder="$t('workspace.description_placeholder')"
                                         ></textarea>
                                         <p v-if="form.errors.description" class="text-xs text-red-600 mt-1">{{ form.errors.description }}</p>
                                     </div>
 
                                     <Input
-                                        label="URL do Produto (Site)"
+                                        :label="$t('workspace.url_label')"
                                         id="url"
                                         type="url"
                                         v-model="form.url"
@@ -116,10 +116,10 @@ const declineInvitation = (id) => {
 
                                     <div class="flex justify-end gap-3 pt-4 border-t border-surface-100 mt-6">
                                         <Button type="button" variant="ghost" @click="isCreatingNode = false">
-                                            Cancelar
+                                            {{ $t('common.cancel') }}
                                         </Button>
                                         <Button type="submit" variant="primary" :disabled="form.processing">
-                                            Criar Projeto
+                                            {{ $t('workspace.create_button') }}
                                         </Button>
                                     </div>
                                 </form>
@@ -130,7 +130,7 @@ const declineInvitation = (id) => {
 
                 <!-- Pending Invitations -->
                 <div v-if="pendingInvitations?.length > 0" class="mb-8">
-                    <h3 class="text-lg font-medium text-surface-900 mb-4 border-b border-surface-200 pb-2">Convites Pendentes</h3>
+                    <h3 class="text-lg font-medium text-surface-900 mb-4 border-b border-surface-200 pb-2">{{ $t('workspace.pending_invitations') }}</h3>
                     <div class="space-y-4">
                         <Card v-for="invitation in pendingInvitations" :key="invitation.id" class="flex flex-col sm:flex-row sm:items-center justify-between !p-4 border-brand-200 bg-brand-50/30">
                             <div>
@@ -138,18 +138,18 @@ const declineInvitation = (id) => {
                                     <svg class="h-5 w-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    Projeto: {{ invitation.project.name }}
+                                    {{ $t('workspace.invitation_project', { name: invitation.project.name }) }}
                                 </h4>
                                 <p class="text-sm text-surface-500 mt-1 pl-7">
-                                    Papel de acesso: <span class="font-medium text-surface-700 capitalize">{{ invitation.role === 'evaluator' ? 'Avaliador' : (invitation.role === 'observer' ? 'Observador' : invitation.role) }}</span>
+                                    {{ $t('workspace.invitation_role') }} <span class="font-medium text-surface-700 capitalize">{{ invitation.role === 'evaluator' ? $t('workspace.role_evaluator') : (invitation.role === 'observer' ? $t('workspace.role_observer') : invitation.role) }}</span>
                                 </p>
                             </div>
                             <div class="flex gap-3 mt-4 sm:mt-0">
                                 <Button @click="declineInvitation(invitation.id)" variant="ghost" class="!text-red-600 hover:!bg-red-50">
-                                    Recusar
+                                    {{ $t('workspace.decline') }}
                                 </Button>
                                 <Button @click="acceptInvitation(invitation.token)" variant="primary">
-                                    Aceitar Convite
+                                    {{ $t('workspace.accept_invitation') }}
                                 </Button>
                             </div>
                         </Card>
@@ -161,11 +161,11 @@ const declineInvitation = (id) => {
                     <svg class="mx-auto h-12 w-12 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <h3 class="mt-4 text-sm font-medium text-surface-900">Nenhum projeto</h3>
-                    <p class="mt-1 text-sm text-surface-500">Comece criando um novo projeto para gerenciar inspeções.</p>
+                    <h3 class="mt-4 text-sm font-medium text-surface-900">{{ $t('workspace.no_projects') }}</h3>
+                    <p class="mt-1 text-sm text-surface-500">{{ $t('workspace.no_projects_description') }}</p>
                     <div class="mt-6">
                         <Button @click="isCreatingNode = true" variant="primary">
-                            Novo Projeto
+                            {{ $t('workspace.new_project') }}
                         </Button>
                     </div>
                 </div>
@@ -183,7 +183,7 @@ const declineInvitation = (id) => {
                                 </h3>
                             </div>
                             <p class="mt-2 text-sm text-surface-500 line-clamp-2">
-                                {{ project.description || 'Sem descrição.' }}
+                                {{ project.description || $t('workspace.no_description') }}
                             </p>
                             <p v-if="project.url" class="mt-2 text-xs text-brand-600 truncate">
                                 {{ project.url }}
@@ -191,8 +191,8 @@ const declineInvitation = (id) => {
                         </div>
                         <template #footer>
                             <div class="flex items-center justify-between text-xs text-surface-500">
-                                <span>{{ project.inspections_count }} inspeções</span>
-                                <span>Criado por {{ project.owner.name }}</span>
+                                <span>{{ $t('workspace.inspections_count', { count: project.inspections_count }) }}</span>
+                                <span>{{ $t('workspace.created_by', { name: project.owner.name }) }}</span>
                             </div>
                         </template>
                     </Card>

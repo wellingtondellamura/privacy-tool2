@@ -6,7 +6,11 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import AlertModal from '@/Components/AlertModal.vue';
+import LocaleSwitcher from '@/Components/LocaleSwitcher.vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const showingNavigationDropdown = ref(false);
 
@@ -28,28 +32,28 @@ watch(() => page.props.flash, (flash) => {
     if (flash.success) {
         flashModal.value = {
             show: true,
-            title: 'Sucesso',
+            title: t('common.success'),
             message: flash.success,
             variant: 'success'
         };
     } else if (flash.error) {
         flashModal.value = {
             show: true,
-            title: 'Erro',
+            title: t('common.error'),
             message: flash.error,
             variant: 'danger'
         };
     } else if (flash.warning) {
         flashModal.value = {
             show: true,
-            title: 'Aviso',
+            title: t('common.warning'),
             message: flash.warning,
             variant: 'warning'
         };
     } else if (flash.info) {
         flashModal.value = {
             show: true,
-            title: 'Informação',
+            title: t('common.info'),
             message: flash.info,
             variant: 'primary'
         };
@@ -61,28 +65,28 @@ onMounted(() => {
     if (page.props.flash?.success) {
         flashModal.value = {
             show: true,
-            title: 'Sucesso',
+            title: t('common.success'),
             message: page.props.flash.success,
             variant: 'success'
         };
     } else if (page.props.flash?.error) {
         flashModal.value = {
             show: true,
-            title: 'Erro',
+            title: t('common.error'),
             message: page.props.flash.error,
             variant: 'danger'
         };
     } else if (page.props.flash?.warning) {
         flashModal.value = {
             show: true,
-            title: 'Aviso',
+            title: t('common.warning'),
             message: page.props.flash.warning,
             variant: 'warning'
         };
     } else if (page.props.flash?.info) {
         flashModal.value = {
             show: true,
-            title: 'Informação',
+            title: t('common.info'),
             message: page.props.flash.info,
             variant: 'primary'
         };
@@ -116,30 +120,31 @@ onMounted(() => {
                                 :href="route('dashboard')"
                                 :active="route().current('dashboard')"
                             >
-                                Dashboard
+                                {{ $t('nav.dashboard') }}
                             </NavLink>
                             <NavLink
                                 :href="route('metodo.mitra')"
                                 :active="route().current('metodo.mitra')"
                             >
-                                Método Mitra
+                                {{ $t('nav.mitra_method') }}
                             </NavLink>
                             <NavLink
                                 :href="route('manual')"
                                 :active="route().current('manual')"
                             >
-                                Manual de Uso
+                                {{ $t('nav.manual') }}
                             </NavLink>
                             <NavLink
                                 :href="route('public.tools.index')"
                                 :active="route().current('public.tools.*')"
                             >
-                                Diretório Público
+                                {{ $t('nav.public_directory') }}
                             </NavLink>
                         </div>
                     </div>
 
                     <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                        <LocaleSwitcher class="me-3" />
                         <!-- Settings Dropdown -->
                         <div class="relative ms-3">
                             <Dropdown align="right" width="48">
@@ -171,14 +176,14 @@ onMounted(() => {
                                     <DropdownLink
                                         :href="route('profile.edit')"
                                     >
-                                        Perfil
+                                        {{ $t('nav.profile') }}
                                     </DropdownLink>
                                     <DropdownLink
                                         :href="route('logout')"
                                         method="post"
                                         as="button"
                                     >
-                                        Sair
+                                        {{ $t('nav.logout') }}
                                     </DropdownLink>
                                 </template>
                             </Dropdown>
@@ -241,25 +246,25 @@ onMounted(() => {
                         :href="route('dashboard')"
                         :active="route().current('dashboard')"
                     >
-                        Dashboard
+                        {{ $t('nav.dashboard') }}
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('metodo.mitra')"
                         :active="route().current('metodo.mitra')"
                     >
-                        Método Mitra
+                        {{ $t('nav.mitra_method') }}
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('manual')"
                         :active="route().current('manual')"
                     >
-                        Manual de Uso
+                        {{ $t('nav.manual') }}
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('public.tools.index')"
                         :active="route().current('public.tools.*')"
                     >
-                        Diretório Público
+                        {{ $t('nav.public_directory') }}
                     </ResponsiveNavLink>
                 </div>
 
@@ -280,14 +285,14 @@ onMounted(() => {
 
                     <div class="mt-3 space-y-1">
                         <ResponsiveNavLink :href="route('profile.edit')">
-                            Perfil
+                            {{ $t('nav.profile') }}
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('logout')"
                             method="post"
                             as="button"
                         >
-                            Sair
+                            {{ $t('nav.logout') }}
                         </ResponsiveNavLink>
                     </div>
                 </div>

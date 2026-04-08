@@ -46,14 +46,15 @@ Route::get('/tools/{slug}', [PublicDirectoryController::class, 'show'])
     ->name('public.tools.show');
 
 // Public Badge endpoints (spec.md 4)
-Route::get('/badge/{token}', [RoundBadgeController::class, 'publicShow'])
-    ->name('badge.show');
 Route::get('/badge/{token}.js', [RoundBadgeController::class, 'publicScript'])
     ->name('badge.script');
+Route::get('/badge/{token}', [RoundBadgeController::class, 'publicShow'])
+    ->name('badge.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/locale', [ProfileController::class, 'updateLocale'])->name('profile.locale');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Project routes (spec.md 7.1)

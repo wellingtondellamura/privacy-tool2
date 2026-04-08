@@ -1,6 +1,9 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     show: {
@@ -9,7 +12,7 @@ const props = defineProps({
     },
     title: {
         type: String,
-        default: 'Aviso',
+        default: null,
     },
     message: {
         type: String,
@@ -50,7 +53,7 @@ const emit = defineEmits(['close']);
                 
                 <div class="flex-grow">
                     <h2 class="text-lg font-semibold text-surface-900 mb-2">
-                        {{ title }}
+                        {{ title || $t('common.warning') }}
                     </h2>
                     <p class="text-sm text-surface-600">
                         {{ message }}
