@@ -4,65 +4,70 @@
 
 # Privacy Tool
 
-O **Privacy Tool** é uma plataforma robusta desenvolvida para auxiliar organizações na gestão de privacidade, conformidade e proteção de dados. A ferramenta centraliza o gerenciamento de inspeções, projetos e colaboração em equipe em um único ambiente intuitivo.
+The **Privacy Tool** is a robust platform designed to support organizations in privacy management, compliance, and data protection. The tool centralizes the management of inspections, projects, and team collaboration within a single intuitive environment.
 
-## 🚀 Funcionalidades Principais
+## 🚀 Key Features
 
-- **Gestão de Projetos**: Organize suas iniciativas de conformidade por projetos dedicados.
-- **Inspeções de Privacidade**: Realize avaliações detalhadas baseadas em questionários estruturados e categorias específicas.
-- **Colaboração em Equipe**: Convide membros para seus projetos e gerencie permissões de acesso.
-- **Resultados e Snapshots**: Visualize o progresso da conformidade através de snapshots históricos e relatórios de resultados.
-- **Questionários Flexíveis**: Suporte a múltiplas versões de questionários e seções organizadas.
+- **Project Management**: Organize your compliance initiatives through dedicated projects.
+- **Privacy Inspections**: Conduct detailed assessments based on structured questionnaires and specific categories.
+- **Team Collaboration**: Invite members to your projects and manage access permissions.
+- **Results and Snapshots**: Monitor compliance progress through historical snapshots and result reports.
+- **Flexible Questionnaires**: Support for multiple questionnaire versions and structured sections.
 
-## 💻 Stack Tecnológica
+## 💻 Technology Stack
 
-- **Backend**: [Laravel 12](https://laravel.com)
-- **Frontend**: [Vue.js 3](https://vuejs.org) com [Inertia.js](https://inertiajs.com)
-- **Estilização**: [Tailwind CSS](https://tailwindcss.com)
-- **Banco de Dados**: MySQL / PostgreSQL / SQLite
+- **Backend**: Laravel 12
+- **Frontend**: Vue.js 3 with Inertia.js
+- **Styling**: Tailwind CSS
+- **Database**: MySQL / PostgreSQL / SQLite
 
-## 🛠️ Instalação e Configuração
+## 🛠️ Installation and Setup
 
-### Pré-requisitos
+### Prerequisites
 
-- PHP 8.2 ou superior
-- Node.js & NPM
-- Composer
+- PHP 8.2 or higher  
+- Node.js & NPM  
+- Composer  
 
-### Passo a Passo
+### Step-by-Step
 
-1. **Clone o repositório:**
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/wellingtondellamura/privacy-tool2.git
    cd privacy_tool2
-   ```
+    ```
 
-2. **Instale as dependências do PHP:**
+2. **Install PHP dependencies:**
+
    ```bash
    composer install
    ```
 
-3. **Instale as dependências do Frontend:**
+3. **Install frontend dependencies:**
+
    ```bash
    npm install
    ```
 
-4. **Configure o ambiente:**
+4. **Set up the environment:**
+
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-5. **Execute as migrações:**
+5. **Run database migrations:**
+
    ```bash
    php artisan migrate
    ```
 
-6. **Inicie o servidor de desenvolvimento:**
+6. **Start the development server:**
+
    ```bash
    npm run dev
    ```
 
-## 📄 Licença
+## 📄 License
 
-Este projeto é um software de código aberto licenciado sob a [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source software licensed under the MIT License.
