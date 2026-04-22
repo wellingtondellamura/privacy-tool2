@@ -37,6 +37,9 @@ const projectForm = useForm({
     color: props.project.color,
 });
 
+const user = usePage().props.auth.user;
+const { t } = useI18n();
+
 const isRoundCreating = ref(false);
 const roundForm = useForm({
     name: t('project.round_default_name', { date: new Date().toLocaleDateString(t('common.locale_code')) }),
@@ -79,9 +82,6 @@ const submitInvite = () => {
         },
     });
 };
-
-const user = usePage().props.auth.user;
-const { t } = useI18n();
 
 const canManageMembers = props.project.owner_id === user.id;
 
