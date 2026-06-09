@@ -128,7 +128,7 @@ const getMedalImage = (medalName) => {
                         <section v-for="(section, sIndex) in snapshot.sections" :key="section.id" class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden">
                             <div class="px-6 py-4 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
                                 <h4 class="font-medium text-lg text-surface-900">{{ toRoman(sIndex + 1) }}. {{ section.name }}</h4>
-                                <span class="text-xl font-bold text-brand-600">{{ section.score }}</span>
+                                <span class="text-xl font-bold text-brand-600">{{ section.score }}%</span>
                             </div>
 
                             <div class="p-6 space-y-4">
@@ -138,7 +138,7 @@ const getMedalImage = (medalName) => {
                                         <div class="w-32 bg-surface-100 rounded-full h-1.5 hidden sm:block">
                                             <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score}%`"></div>
                                         </div>
-                                        <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}</span>
+                                        <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}%</span>
                                     </div>
                                 </div>
                             </div>

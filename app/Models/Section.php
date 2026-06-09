@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLegacyTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Section extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, ResolvesLegacyTranslations;
 
     public $translatable = ['name'];
     protected $fillable = ['questionnaire_version_id', 'name', 'order', 'response_profile'];
@@ -25,6 +26,11 @@ class Section extends Model
     ];
 
     protected $appends = ['options'];
+
+    public function getNameAttribute($value): ?string
+    {
+        return $this->resolveTranslatedValue('name', $value);
+    }
 
     public function getOptionsAttribute(): array
     {

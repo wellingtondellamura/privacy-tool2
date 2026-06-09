@@ -33,8 +33,8 @@ const getMedalVariant = (medal) => {
     const name = (medal.name || medal).toLowerCase();
     if (name.includes('ouro') || name.includes('gold')) return 'warning';
     if (name.includes('prata') || name.includes('silver')) return 'neutral';
-    if (name.includes('bronze')) return 'warning';
-    if (name.includes('incipiente')) return 'error';
+    if (name.includes('bronze')) return 'primary'; // Bug 5 fix: distinct from gold (warning)
+    if (name.includes('incipiente') || name.includes('incipient')) return 'error';
     return 'primary';
 };
 
@@ -71,10 +71,10 @@ const getMedalImage = (medal) => {
                             class="rounded-lg border-surface-200 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
                         >
                             <option value="">{{ $t('directory.all_medals') }}</option>
-                            <option value="Ouro">{{ $t('directory.medal_gold') }}</option>
-                            <option value="Prata">{{ $t('directory.medal_silver') }}</option>
-                            <option value="Bronze">{{ $t('directory.medal_bronze') }}</option>
-                            <option value="Incipiente">{{ $t('directory.medal_incipient') }}</option>
+                            <option value="gold">{{ $t('directory.medal_gold') }}</option>
+                            <option value="silver">{{ $t('directory.medal_silver') }}</option>
+                            <option value="bronze">{{ $t('directory.medal_bronze') }}</option>
+                            <option value="incipient">{{ $t('directory.medal_incipient') }}</option>
                         </select>
 
                         <select 

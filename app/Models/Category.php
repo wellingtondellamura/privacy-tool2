@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLegacyTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,10 +11,15 @@ use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, ResolvesLegacyTranslations;
 
     public $translatable = ['name'];
     protected $fillable = ['section_id', 'name', 'order'];
+
+    public function getNameAttribute($value): ?string
+    {
+        return $this->resolveTranslatedValue('name', $value);
+    }
 
     public function section(): BelongsTo
     {

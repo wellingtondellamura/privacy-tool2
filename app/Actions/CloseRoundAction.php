@@ -96,10 +96,11 @@ class CloseRoundAction
                     };
 
                     $questions[] = [
-                        'question_id' => $templateQuestion['question_id'],
-                        'level' => $levelValue,
-                        'score' => $avgQScores,
-                        'variance' => 0, 
+                        'question_id'   => $templateQuestion['question_id'],
+                        'question_text' => $templateQuestion['question_text'] ?? '', // Bug 2 fix: preserve question text
+                        'level'         => $levelValue,
+                        'score'         => $avgQScores,
+                        'variance'      => 0,
                         'classification' => 'low',
                     ];
                 }
@@ -125,7 +126,11 @@ class CloseRoundAction
             ];
         }
 
-        $globalScore = (int) round($payloads->sum('global_score') / $count);
+        // Bug 1 fix: calculate global_score as average of section scores (same formula as CloseInspectionAction),
+        // not as average of individual inspection global_scores (which would be averaging already-rounded averages).
+        $globalScore = count($sections) > 0
+            ? (int) round(array_sum(array_column($sections, 'score')) / count($sections))
+            : 0;
 
         return [
             'global_score' => $globalScore,

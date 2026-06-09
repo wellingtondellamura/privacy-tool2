@@ -22,7 +22,7 @@
   "common.saved": "Saved.",
   "common.yes": "Yes",
   "common.no": "No",
-
+  "nav.workspace": "Workspace",
   "nav.dashboard": "Dashboard",
   "nav.mitra_method": "Mitra Method",
   "nav.manual": "User Manual",
@@ -31,7 +31,6 @@
   "nav.logout": "Logout",
   "nav.login": "Login",
   "nav.register": "Sign Up",
-
   "auth.login_title": "Login",
   "auth.register_title": "Register",
   "auth.forgot_password_title": "Forgot Password",
@@ -61,10 +60,8 @@
   "auth.logout_link": "Log out",
   "auth.name": "Full name",
   "auth.name_placeholder": "John Doe",
-
   "dashboard.title": "Dashboard",
   "dashboard.logged_in": "You're logged in!",
-
   "workspace.title": "My Workspace",
   "workspace.new_project": "New Project",
   "workspace.create_project_title": "Create New Project",
@@ -88,7 +85,6 @@
   "workspace.no_description": "No description.",
   "workspace.inspections_count": "{count} inspections",
   "workspace.created_by": "Created by {name}",
-
   "project.no_description": "No description provided.",
   "project.edit_name": "Project Name",
   "project.edit_description": "Description",
@@ -133,7 +129,6 @@
   "project.new_round_create": "Create Round",
   "project.round_name_label": "Round Name",
   "project.round_name_placeholder": "E.g.: March 2024 Round",
-
   "publication.modal_title": "Publish to Directory",
   "publication.update_message": "Update the publication visibility or remove it from the public directory.",
   "publication.create_message": "This consolidated round will be published to the public directory. Choose the visibility level.",
@@ -154,7 +149,6 @@
   "publication.full_description": "Makes the diagnosis and section averages publicly visible.",
   "publication.full_short_description": "Makes the consolidated report visible to anyone with the link.",
   "publication.remove_link": "Remove from Public Directory",
-
   "inspection.sections": "Sections",
   "inspection.back_to_round": "Back to Round",
   "inspection.actions": "Actions",
@@ -183,18 +177,15 @@
   "inspection.close_confirm": "Yes, Finalize",
   "inspection.new_inspection": "New Inspection",
   "inspection.project_round": "Project: {project} — {round}",
-
   "inspection.status.draft": "Draft",
   "inspection.status.active": "Active",
   "inspection.status.closed": "Completed",
   "inspection.status.draft_detail": "Draft (Not Started)",
   "inspection.status.active_detail": "Active (In Progress)",
-
   "question.saving": "Saving...",
   "question.specify_label": "Please specify",
   "question.specify_placeholder": "Describe the situation...",
   "question.save_error": "Error saving the response.",
-
   "round.new_inspection": "New Inspection",
   "round.close_round": "Close Round",
   "round.adjust_publication": "Adjust Publication",
@@ -235,7 +226,6 @@
   "round.management_description": "Management of the technical evaluation and compliance round.",
   "round.copied_clipboard": "Copied to clipboard!",
   "round.publish_round_title": "Publish Round to Directory",
-
   "review.page_title": "Review and Close - {name}",
   "review.header_title": "Review and Close Round",
   "review.header_description": "Check the inspection results and provide the final diagnosis.",
@@ -259,7 +249,6 @@
   "review.visibility_full": "Full Report (with Diagnosis)",
   "review.close_button": "Yes, Close Round Now",
   "review.cancel_link": "Cancel and Go Back",
-
   "results.individual_title": "Individual Results",
   "results.individual_subtitle": "Inspection #{id} — {round}",
   "results.team_title": "Consolidated Team Result",
@@ -280,12 +269,10 @@
   "results.divergence_consensus": "Consensus",
   "results.score_label": "Score: {score}",
   "results.variance_label": "Var: {variance}",
-
   "results.medal.gold": "Gold",
   "results.medal.silver": "Silver",
   "results.medal.bronze": "Bronze",
   "results.medal.incipient": "Incipient",
-
   "results.footer.project_name": "Project Name",
   "results.footer.project_info": "Project Information",
   "results.footer.website": "Website URL",
@@ -299,7 +286,6 @@
   "results.footer.description": "An initiative to enhance adherence to technical best practices for personal data and empower transparency.",
   "results.footer.copyright": "Privacy Tool.",
   "results.footer.developed_with": "Developed with the technical rigor of TR-Model v1.0",
-
   "comparison.breadcrumb_evolution": "Evolution and Comparison",
   "comparison.head_title": "Comparison - {base} vs {other}",
   "comparison.title": "Evolution / Comparison",
@@ -309,7 +295,6 @@
   "comparison.section_analysis": "Section Variance Analysis",
   "comparison.base_label": "Base:",
   "comparison.current_label": "Current:",
-
   "directory.page_title": "Public Tools Directory",
   "directory.badge": "Collective Transparency",
   "directory.title": "Public Directory",
@@ -325,7 +310,6 @@
   "directory.no_results": "No tools found",
   "directory.no_results_description": "Try adjusting your filters to find what you're looking for.",
   "directory.clear_filters": "Clear all filters",
-
   "directory.summary_badge": "Privacy Report",
   "directory.summary_page_title": "{name} - Privacy Summary",
   "directory.summary_score": "Global Score",
@@ -336,7 +320,6 @@
   "directory.summary_cta_title": "Want the detailed report?",
   "directory.summary_cta_description": "This view shows only the general indexes and medals per section as configured by the project.",
   "directory.summary_back": "Back to Directory",
-
   "directory.full_consolidated_score": "Consolidated Score",
   "directory.full_page_title": "{name} - Technical Report",
   "directory.full_classification": "Classification",
@@ -346,7 +329,6 @@
   "directory.full_dimension_detail": "Dimension Detail",
   "directory.full_back": "Back to Directory",
   "directory.full_inspection_date": "Inspection Date: {date}",
-
   "profile.title": "Profile",
   "profile.info_title": "Profile Information",
   "profile.info_description": "Update your account's profile information and email address.",
@@ -371,7 +353,6 @@
   "profile.export_button": "Download Projects (ZIP)",
   "profile.language_title": "Language",
   "profile.language_description": "Select the interface language.",
-
   "colors.primary": "Primary",
   "colors.primary_dark": "Primary Dark",
   "colors.secondary_green": "Secondary (Green)",
@@ -380,15 +361,12 @@
   "colors.tertiary_purple": "Tertiary (Purple)",
   "colors.tertiary_pink": "Tertiary (Pink)",
   "colors.neutral": "Neutral",
-
   "footer.description": "An initiative to enhance adherence to technical best practices for personal data and empower transparency.",
   "footer.references": "Official References",
   "footer.trmodel_link": "TRModel Methodology (USP)",
   "footer.lgpd_link": "Official Portal: LGPD (Federal Government)",
   "footer.copyright": "Privacy Tool. All rights reserved.",
-
   "badge.audited_at": "Audited on {date}",
-
   "welcome.title": "Privacy Tool v2 - Privacy Assessment Tool",
   "welcome.inspection_tool": "Inspection Tool",
   "welcome.hero_title_start": "Transparency in the use of ",
@@ -451,7 +429,6 @@
   "welcome.footer_trmodel": "TRModel Methodology (USP)",
   "welcome.footer_lgpd": "Official Portal: LGPD (Federal Government)",
   "welcome.footer_rights": "All rights reserved.",
-
   "component.project_icon": "Project Icon",
   "component.project_color": "Identification Color",
   "component.color_primary": "Primary",
@@ -462,7 +439,6 @@
   "component.color_tertiary_purple": "Tertiary (Purple)",
   "component.color_tertiary_pink": "Tertiary (Pink)",
   "component.color_neutral": "Neutral",
-
   "mitra.page_title": "Mitra Method - Data Transparency",
   "mitra.header": "Mitra Method",
   "mitra.scientific_badge": "Scientific Methodology",
@@ -494,7 +470,6 @@
   "mitra.cta_title": "Ready to evaluate your software?",
   "mitra.cta_start": "Start Now",
   "mitra.cta_dashboard": "Go to Dashboard",
-
   "manual.head_title": "User Guide - Privacy Tool v2",
   "manual.page_title": "User Guide",
   "manual.hero_badge": "Complete Documentation",
@@ -527,14 +502,12 @@
   "manual.cta_start": "Get Started",
   "manual.cta_dashboard": "Go to Dashboard",
   "manual.cta_mitra": "Learn About the Mitra Method",
-
   "manual.role_owner_name": "Owner",
   "manual.role_owner_desc": "Full control: create, edit, delete, invite members, create rounds, publish results.",
   "manual.role_evaluator_name": "Evaluator",
   "manual.role_evaluator_desc": "Create inspections, fill questionnaires, view results.",
   "manual.role_observer_name": "Observer",
   "manual.role_observer_desc": "View-only access to the project and its results.",
-
   "manual.medal_gold_name": "Gold",
   "manual.medal_gold_desc": "Highest score — excellent transparency",
   "manual.medal_silver_name": "Silver",
@@ -543,7 +516,6 @@
   "manual.medal_bronze_desc": "Partial compliance",
   "manual.medal_incipient_name": "Incipient",
   "manual.medal_incipient_desc": "Needs significant improvements",
-
   "manual.answer_sufficient_label": "Sufficient",
   "manual.answer_sufficient_desc": "The information is present and adequate.",
   "manual.answer_insufficient_label": "Insufficient",
@@ -552,7 +524,6 @@
   "manual.answer_nonexistent_desc": "The information is not provided.",
   "manual.answer_na_label": "Not applicable",
   "manual.answer_na_desc": "The question does not apply to the context.",
-
   "manual.dim_1_name": "People/Actors",
   "manual.dim_1_desc": "Identification of involved actors: controller, operator, and regulatory agencies.",
   "manual.dim_2_name": "Purpose of Use",
@@ -563,7 +534,6 @@
   "manual.dim_4_desc": "Transfer and sharing policies with third parties.",
   "manual.dim_5_name": "Agency",
   "manual.dim_5_desc": "Means for individuals to exercise their rights over data.",
-
   "manual.wf_1_title": "Create Project",
   "manual.wf_1_desc": "Register the software to be evaluated with name, description, and URL.",
   "manual.wf_2_title": "Invite Team",
@@ -580,7 +550,6 @@
   "manual.wf_7_desc": "Individual, team, and round-consolidated scores with medals.",
   "manual.wf_8_title": "Publish and Generate Badge",
   "manual.wf_8_desc": "Publish to the Public Directory and generate verifiable badges for embedding.",
-
   "manual.sec_cadastro_title": "1. Registration and Authentication",
   "manual.sec_cadastro_sub1": "Create an Account",
   "manual.sec_cadastro_text1": "On the home page, click \"Sign Up\". Fill in Name, Email, and Password (minimum 8 characters). Confirm the password and submit the form.",
@@ -588,7 +557,6 @@
   "manual.sec_cadastro_text2": "On the home page, click \"Log In\". Enter your registered email and password. The system supports \"Remember Me\" and password recovery by email.",
   "manual.sec_cadastro_sub3": "Edit Profile",
   "manual.sec_cadastro_text3": "Accessible from \"Profile\" in the top menu. Allows changing Name, Email, and Password. Includes the option to permanently delete the account.",
-
   "manual.sec_projetos_title": "2. Project Management",
   "manual.sec_projetos_sub1": "Create Project",
   "manual.sec_projetos_text1": "In the Workspace, click \"New Project\". Fill in: Name (required — name of the software being evaluated), Description, Software URL, Icon, and Highlight Color. You will be automatically added as the owner.",
@@ -596,7 +564,6 @@
   "manual.sec_projetos_text2": "Displays general information, members and their roles, pending invitations, evaluation rounds, and inspections associated with the project.",
   "manual.sec_projetos_sub3": "Edit and Delete",
   "manual.sec_projetos_text3": "The owner can edit data or delete the project at any time (deletion is reversible via soft delete).",
-
   "manual.sec_convites_title": "3. Invitations and Members",
   "manual.sec_convites_sub1": "Invite Members",
   "manual.sec_convites_text1": "On the project screen, enter the invitee's email and select the role (Evaluator or Observer). The system sends an email with an acceptance link valid for 7 days.",
@@ -604,7 +571,6 @@
   "manual.sec_convites_text2": "If the invitee already has an account, they are automatically added to the project. If not, the link directs them to create an account linked to the invitation email.",
   "manual.sec_convites_sub3": "Manage",
   "manual.sec_convites_text3": "The owner can change roles between Evaluator and Observer. The Owner role cannot be changed. Invitations can be resent (renews the deadline) or canceled.",
-
   "manual.sec_rodadas_title": "4. Evaluation Rounds",
   "manual.sec_rodadas_sub1": "Create Round",
   "manual.sec_rodadas_text1": "On the project screen, click \"New Evaluation Round\". Enter a descriptive name (e.g., \"Q1 2026 Assessment\"). The round is created with Draft status.",
@@ -612,7 +578,6 @@
   "manual.sec_rodadas_text2": "Draft → Closed. In draft state, inspections can be created and filled out. When closed, the consolidated snapshot is generated automatically.",
   "manual.sec_rodadas_sub3": "Close Round",
   "manual.sec_rodadas_text3": "Click \"Review and Close\" to see a result preview. Optionally add a textual diagnosis. Check if you want to publish immediately to the Public Directory and choose the visibility (Score Only or Full Report).",
-
   "manual.sec_inspecoes_title": "5. Inspections",
   "manual.sec_inspecoes_sub1": "What It Is",
   "manual.sec_inspecoes_text1": "An inspection represents an individual member's assessment of the software. Each inspection is linked to an Evaluation Round and a questionnaire version.",
@@ -620,13 +585,11 @@
   "manual.sec_inspecoes_text2": "On the project or round screen, click \"New Inspection\" and select the round. The inspection is created with Draft status.",
   "manual.sec_inspecoes_sub3": "Lifecycle",
   "manual.sec_inspecoes_text3": "Draft → Active (click \"Activate\") → Closed (click \"Close\"). During the Active phase, fill out the questionnaire. When closed, individual and consolidated snapshots are generated. Only the responsible person (creator) can change the status. Closed inspections cannot be reopened.",
-
   "manual.sec_questionario_title": "6. Questionnaire Filling",
   "manual.sec_questionario_sub1": "Structure",
   "manual.sec_questionario_text1": "The questionnaire contains 46 questions organized in 2 sections (Information Existence and Quality with 26 questions; Presentation Format with 20 questions), each evaluating the 5 transparency dimensions.",
   "manual.sec_questionario_sub2": "How to Fill",
   "manual.sec_questionario_text2": "Access the inspection with Active status. The questionnaire is presented in cards by section and category. For each question, select Sufficient (100 pts), Insufficient (50 pts), or Nonexistent (0 pts). Optionally, add observations justifying your choice.",
-
   "manual.sec_resultados_title": "7. Results",
   "manual.sec_resultados_sub1": "Individual",
   "manual.sec_resultados_text1": "Shows your personal assessment result: score by section, by dimension, and final medal. Access via project screen → inspection → \"View My Results\".",
@@ -636,7 +599,6 @@
   "manual.sec_resultados_text3": "Consolidation of all inspections within a round. Generated when the round is closed. Includes global score, medal, and breakdown by section and dimension.",
   "manual.sec_resultados_sub4": "Evolutionary Comparison",
   "manual.sec_resultados_text4": "Compare two inspections or two rounds of the same project side by side to track transparency evolution. Both must be closed. Visual progress indicators (↑ improvement / ↓ regression).",
-
   "manual.sec_diretorio_title": "8. Public Directory",
   "manual.sec_diretorio_sub1": "Publish",
   "manual.sec_diretorio_text1": "After closing the round, click \"Publish to Public Directory\". Choose: Score Only (displays scores and medals) or Full Report (complete breakdown by question). Publishing generates a unique slug (friendly URL).",
@@ -644,7 +606,6 @@
   "manual.sec_diretorio_text2": "Access /tools without login. Filter by medal, year, or questionnaire version. Sort by score or date. Click to view the public report.",
   "manual.sec_diretorio_sub3": "Security",
   "manual.sec_diretorio_text3": "The system automatically sanitizes public data, removing user_id, observations, and comments to protect evaluators' privacy.",
-
   "manual.sec_selos_title": "9. Verifiable Badges",
   "manual.sec_selos_sub1": "Generate Badge",
   "manual.sec_selos_text1": "On the published round screen, click \"Generate Badge\". The system creates a badge with a unique public token.",
@@ -654,13 +615,11 @@
   "manual.sec_selos_text3": "Paste the snippet on any website. The script loads updated data via API (5-min cache) and renders automatically.",
   "manual.sec_selos_sub4": "Revoke",
   "manual.sec_selos_text4": "The owner can revoke the badge at any time, making it inactive.",
-
   "manual.sec_exportacao_title": "10. Data Export",
   "manual.sec_exportacao_sub1": "Export Project",
   "manual.sec_exportacao_text1": "On the project screen, click \"Export Project\". Generates a JSON file with all data: project, members, rounds, inspections, responses, and questions.",
   "manual.sec_exportacao_sub2": "Export All",
   "manual.sec_exportacao_text2": "In \"Profile\", click \"Export All Data\". Generates a ZIP file with a JSON for each project you participate in.",
-
   "project.round_default_name": "Round of {date}",
   "component.observation_placeholder": "Describe the situation...",
   "welcome.and_conjunction": " and ",

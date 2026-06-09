@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InspectionLayout from '@/Layouts/InspectionLayout.vue';
@@ -7,7 +7,6 @@ import QuestionCard from '@/Components/QuestionCard.vue';
 import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
-import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 
 const props = defineProps({
     inspection: {
@@ -150,6 +149,20 @@ const activeCategoryIndex = computed(() => {
         <!-- Sidebar Navigation -->
         <template #sidebar>
             <div>
+                <!-- Project & Round info -->
+                <div class="mb-4 pb-4 border-b border-surface-100">
+                    <Link :href="route('projects.show', inspection.project.id)"
+                        class="block text-sm font-semibold text-surface-900 hover:text-brand-600 transition-colors truncate"
+                        :title="inspection.project.name">
+                        {{ inspection.project.name }}
+                    </Link>
+                    <Link :href="route('rounds.show', inspection.evaluation_round.id)"
+                        class="block text-xs text-surface-500 hover:text-brand-600 transition-colors truncate mt-0.5"
+                        :title="inspection.evaluation_round.name">
+                        {{ inspection.evaluation_round.name }}
+                    </Link>
+                </div>
+
                 <h3 class="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">{{ $t('inspection.sections') }}</h3>
                 <nav class="space-y-4">
                     <div v-for="(section, sIndex) in sections" :key="section.id" class="space-y-1">
@@ -185,26 +198,33 @@ const activeCategoryIndex = computed(() => {
 
         <!-- Main Header -->
         <template #header>
-            <div class="flex items-center justify-between w-full">
-                <div>
-                    <Breadcrumbs :items="[
-                        { label: $t('nav.workspace'), url: route('projects.index') },
-                        { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
-                        { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
-                        { label: t('project.inspection_label', { id: inspection.sequential_id }) }
-                    ]" />
-                    
-                    <h1 v-if="isActive || isDraft" class="text-2xl font-semibold text-surface-900 truncate mt-1">
-                        {{ toRoman(activeSectionIndex + 1) }}.{{ toAlpha(activeCategoryIndex) }} - {{ activeCategory.name }}
-                    </h1>
-                    <h2 v-else class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
-                        {{ $t('project.inspection_label', { id: inspection.sequential_id }) }}
-                    </h2>
-                    <p class="text-sm text-surface-500 mt-1">{{ $t('inspection.project_round', { project: inspection.project.name, round: inspection.evaluation_round.name }) }}</p>
+            <div class="flex items-center justify-between w-full min-w-0 gap-3">
+                <div class="min-w-0 flex-1">
+                    <!-- Compact breadcrumb: Workspace > Project > Round -->
+                    <nav class="flex items-center gap-1 text-xs text-surface-400 mb-1 overflow-hidden" aria-label="Breadcrumb">
+                        <Link :href="route('projects.index')" class="hover:text-brand-600 transition-colors shrink-0">
+                            {{ $t('nav.workspace') }}
+                        </Link>
+                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <Link :href="route('projects.show', inspection.project.id)"
+                            class="font-semibold text-brand-600 hover:text-brand-700 transition-colors truncate max-w-[120px] sm:max-w-[180px]"
+                            :title="inspection.project.name">
+                            {{ inspection.project.name }}
+                        </Link>
+                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <Link :href="route('rounds.show', inspection.evaluation_round.id)"
+                            class="font-semibold text-surface-600 hover:text-brand-600 transition-colors truncate max-w-[100px] sm:max-w-[160px]"
+                            :title="inspection.evaluation_round.name">
+                            {{ inspection.evaluation_round.name }}
+                        </Link>
+                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <span class="text-surface-500 shrink-0">{{ t('project.inspection_label', { id: inspection.sequential_id }) }}</span>
+                    </nav>
                 </div>
 
-                <div class="flex items-center gap-2 mt-2">
-                    <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')" class="shrink-0">
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')">
                         {{ isActive ? $t('inspection.status.active') : (isClosed ? $t('inspection.status.closed') : $t('inspection.status.draft')) }}
                     </Badge>
                 </div>
@@ -268,6 +288,16 @@ const activeCategoryIndex = computed(() => {
                 <!-- Informações -->
                 <div class="space-y-2">
                     <h3 class="text-sm font-medium text-surface-900">{{ $t('inspection.details') }}</h3>
+                    <p class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">{{ $t('round.project_label') }}: </span>
+                        <Link :href="route('projects.show', inspection.project.id)"
+                            class="text-brand-600 hover:text-brand-700 transition-colors">{{ inspection.project.name }}</Link>
+                    </p>
+                    <p class="text-xs text-surface-500">
+                        <span class="font-medium text-surface-700">{{ $t('round.inspections_label') }}: </span>
+                        <Link :href="route('rounds.show', inspection.evaluation_round.id)"
+                            class="text-surface-700 hover:text-brand-600 transition-colors">{{ inspection.evaluation_round.name }}</Link>
+                    </p>
                     <p v-if="isClosed && inspection.result_snapshots?.length > 0" class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">{{ $t('inspection.score_label') }} </span>
                         <span class="text-brand-600 font-bold">{{ inspection.result_snapshots[0].payload_json.global_score }}%</span>
@@ -299,7 +329,14 @@ const activeCategoryIndex = computed(() => {
         <!-- Form Main Content -->
         <div class="space-y-8" v-if="activeCategory">
             <div class="mb-8">
-                <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">{{ activeCategory.name }}</h2>
+                <!-- Section label above category -->
+                <p class="text-xs font-semibold text-surface-400 uppercase tracking-wider mb-1">
+                    {{ toRoman(activeSectionIndex + 1) }}. {{ activeSection?.name }}
+                </p>
+                <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                    {{ toAlpha(activeCategoryIndex) }}. {{ activeCategory.name }}
+                </h2>
+
                 <p class="text-surface-500 mt-2">
                     {{ $t('inspection.instructions') }}
                 </p>

@@ -154,22 +154,17 @@ class CloseInspectionAction
             $categories = [];
 
             foreach ($section->categories as $cIndex => $category) {
-                // Average category scores
-                $catScores = [];
-                foreach ($individualPayloads as $payload) {
-                    $catScores[] = $payload['sections'][$sIndex]['categories'][$cIndex]['score'] ?? 0;
-                }
-                $avgCatScore = $userCount > 0 ? (int) round(array_sum($catScores) / $userCount) : 0;
-
-                // Question-level scores and divergence
+                // Bug 4 fix: compute category score from raw question scores rather than
+                // averaging already-rounded per-user category scores (avoids double rounding).
                 $questionData = [];
+                $avgQuestionScoresForCat = [];
                 foreach ($category->questions as $question) {
                     $userScoresForQuestion = [];
                     foreach (array_keys($individualPayloads) as $userId) {
                         $response = Response::where([
                             'inspection_id' => $inspection->id,
-                            'question_id' => $question->id,
-                            'user_id' => $userId,
+                            'question_id'   => $question->id,
+                            'user_id'       => $userId,
                         ])->first();
 
                         if ($response) {
@@ -181,20 +176,28 @@ class CloseInspectionAction
                         ? (int) round(array_sum($userScoresForQuestion) / count($userScoresForQuestion))
                         : 0;
 
+                    $avgQuestionScoresForCat[] = $avgQuestionScore;
+
                     $questionData[] = [
-                        'question_id' => $question->id,
+                        'question_id'   => $question->id,
                         'question_text' => $question->text,
-                        'score' => $avgQuestionScore,
+                        'score'         => $avgQuestionScore,
                         ...(count($userScoresForQuestion) > 0
                             ? DivergenceService::forQuestion($userScoresForQuestion)
-                        : ['variance' => 0, 'classification' => 'low']),
+                            : ['variance' => 0, 'classification' => 'low']),
                     ];
                 }
 
+                // Calculate category score from averaged question scores (same formula as individual)
+                $avgCatScore = AggregationService::categoryScore(
+                    $avgQuestionScoresForCat,
+                    $category->questions->count()
+                );
+
                 $categories[] = [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'score' => $avgCatScore,
+                    'id'        => $category->id,
+                    'name'      => $category->name,
+                    'score'     => $avgCatScore,
                     'questions' => $questionData,
                 ];
             }

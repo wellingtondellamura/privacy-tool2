@@ -43,8 +43,6 @@ const saveError = ref(null);
 let saveTimeout = null;
 
 const saveResponse = async () => {
-    // If answer is not set, we don't save. 
-    // If it's the same as existing, we skip (unless it's an auto-save for observation)
     if (!answer.value) return;
 
     isSaving.value = true;
@@ -67,18 +65,44 @@ const saveResponse = async () => {
 
 const triggerSave = () => {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(saveResponse, 500); // Debounce auto-save
+    saveTimeout = setTimeout(saveResponse, 500);
 };
 
-// Auto-save when answer changes immediately
 const selectAnswer = (val) => {
     if (props.disabled) return;
-    if (answer.value === val) return; // Toggle logic if needed, but here we just select
+    if (answer.value === val) return;
     
     answer.value = val;
-    // Debounced text area save logic, immediate for radios
     if (saveTimeout) clearTimeout(saveTimeout);
     saveResponse();
+};
+
+// Color scheme per answer value
+const colorConfig = {
+    high:   { dot: 'bg-emerald-500', selected: 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500', hover: 'hover:bg-emerald-50 hover:border-emerald-300', label: 'text-emerald-900', desc: 'text-emerald-700' },
+    medium: { dot: 'bg-amber-500',   selected: 'bg-amber-50 border-amber-500 ring-1 ring-amber-500',       hover: 'hover:bg-amber-50 hover:border-amber-300',   label: 'text-amber-900',   desc: 'text-amber-700' },
+    low:    { dot: 'bg-rose-500',    selected: 'bg-rose-50 border-rose-500 ring-1 ring-rose-500',           hover: 'hover:bg-rose-50 hover:border-rose-300',     label: 'text-rose-900',    desc: 'text-rose-700' },
+    other:  { dot: 'bg-violet-500',  selected: 'bg-violet-50 border-violet-500 ring-1 ring-violet-500',     hover: 'hover:bg-violet-50 hover:border-violet-300', label: 'text-violet-900',  desc: 'text-violet-700' },
+};
+
+const getButtonClass = (optValue) => {
+    const cfg = colorConfig[optValue] || colorConfig.other;
+    const isSelected = answer.value === optValue;
+    return [
+        'relative flex flex-col flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-left',
+        isSelected ? cfg.selected : `border-surface-200 bg-white ${cfg.hover}`,
+        props.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+    ];
+};
+
+const getLabelClass = (optValue) => {
+    const cfg = colorConfig[optValue] || colorConfig.other;
+    return ['block text-sm font-semibold', answer.value === optValue ? cfg.label : 'text-surface-900'];
+};
+
+const getDescClass = (optValue) => {
+    const cfg = colorConfig[optValue] || colorConfig.other;
+    return ['block text-xs mt-1', answer.value === optValue ? cfg.desc : 'text-surface-500'];
 };
 </script>
 
@@ -93,31 +117,25 @@ const selectAnswer = (val) => {
             <span class="text-xs text-brand-500 font-medium">{{ $t('common.saving') }}</span>
         </div>
 
-        <h4 class="text-lg font-medium text-surface-900 leading-relaxed">
+        <h4 class="text-lg font-medium text-surface-900 leading-relaxed pr-24">
             {{ index }}. {{ question.text }}
         </h4>
 
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <button 
                 v-for="opt in options" 
                 :key="opt.value"
                 type="button"
                 @click="selectAnswer(opt.value)"
                 :disabled="disabled"
-                :class="[
-                    'relative flex flex-col flex-1 px-4 py-3 rounded-lg border focus:outline-none transition-all duration-smooth text-left',
-                    answer === opt.value 
-                        ? 'bg-brand-50 border-brand-500 ring-1 ring-brand-500 z-10' 
-                        : 'border-surface-200 bg-white hover:bg-surface-50 text-surface-900',
-                    disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                ]"
+                :class="getButtonClass(opt.value)"
             >
-                <span :class="['block text-sm font-medium', answer === opt.value ? 'text-brand-900' : 'text-surface-900']">
-                    {{ opt.label }}
+                <!-- Color dot indicator -->
+                <span class="flex items-center gap-2 mb-1">
+                    <span :class="['w-2 h-2 rounded-full shrink-0', colorConfig[opt.value]?.dot || 'bg-violet-500']"></span>
+                    <span :class="getLabelClass(opt.value)">{{ opt.label }}</span>
                 </span>
-                <span v-if="opt.desc" :class="['block text-xs mt-1', answer === opt.value ? 'text-brand-700' : 'text-surface-500']">
-                    {{ opt.desc }}
-                </span>
+                <span v-if="opt.desc" :class="getDescClass(opt.value)">{{ opt.desc }}</span>
             </button>
         </div>
 
@@ -131,7 +149,7 @@ const selectAnswer = (val) => {
         >
             <div v-if="answer === 'other'" class="mt-4">
                 <label :for="'obs-' + question.id" class="block text-sm font-medium text-surface-700 mb-1">
-                    Por favor, especifique
+                    {{ $t('question.specify_label') }}
                 </label>
                 <textarea
                     :id="'obs-' + question.id"
@@ -150,3 +168,4 @@ const selectAnswer = (val) => {
         </p>
     </Card>
 </template>
+

@@ -16,8 +16,8 @@ const getMedalVariant = (medal) => {
     const name = (medal.name || medal).toLowerCase();
     if (name.includes('ouro') || name.includes('gold')) return 'warning';
     if (name.includes('prata') || name.includes('silver')) return 'neutral';
-    if (name.includes('bronze')) return 'warning';
-    if (name.includes('incipiente')) return 'error';
+    if (name.includes('bronze')) return 'primary'; // Bug 5 fix: distinct from gold (warning)
+    if (name.includes('incipiente') || name.includes('incipient')) return 'error';
     return 'primary';
 };
 

@@ -23,6 +23,7 @@
   "common.yes": "Sim",
   "common.no": "Não",
 
+  "nav.workspace": "Workspace",
   "nav.dashboard": "Dashboard",
   "nav.mitra_method": "Método Mitra",
   "nav.manual": "Manual de Uso",
