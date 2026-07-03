@@ -2,13 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Project;
+use App\Models\User;
 use App\Models\RoundBadge;
 use App\Models\InspectionPublication;
 use App\Policies\ProjectPolicy;
@@ -35,11 +33,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(RoundBadge::class, RoundBadgePolicy::class);
         Gate::policy(InspectionPublication::class, PublicationPolicy::class);
-
-        Event::listen(
-            Registered::class,
-            SendEmailVerificationNotification::class,
-        );
 
         Gate::define('access-admin', function (User $user) {
             return $user->is_admin;

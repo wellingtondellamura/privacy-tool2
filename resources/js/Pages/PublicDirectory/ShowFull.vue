@@ -65,12 +65,16 @@ const getMedalImage = (medal) => {
                         <Link :href="route('public.tools.index')" class="w-10 h-10 rounded-full bg-white shadow-sm border border-surface-200 flex items-center justify-center text-surface-400 hover:text-brand-600 hover:border-brand-300 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </Link>
-                        <div>
+                        <div class="min-w-0">
                             <h1 class="text-3xl font-extrabold text-surface-900 tracking-tight">{{ tool.name }}</h1>
-                            <p class="text-xs text-surface-500 font-medium uppercase tracking-widest mt-1">
-                                <a :href="tool.url" target="_blank" class="hover:text-brand-600 transition-colors underline underline-offset-2 capitalize">{{ tool.url }}</a> 
-                                • {{ $t('directory.full_inspection_date', { date: tool.inspection_date }) }}
+                            <p class="text-xs text-surface-500 font-medium mt-1">
+                                {{ $t('directory.full_inspection_date', { date: tool.inspection_date }) }}
                             </p>
+                            <a 
+                                :href="tool.url" 
+                                target="_blank" 
+                                class="text-xs text-brand-600 hover:text-brand-700 transition-colors underline underline-offset-2 break-all"
+                            >{{ tool.url }}</a>
                         </div>
                     </div>
                     
