@@ -377,7 +377,7 @@ const { t } = useI18n();
                 <hr class="border-surface-800 mb-8" />
 
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
-                    <p>&copy; {{ new Date().getFullYear() }} Privacy Tool. {{ $t('welcome.footer_rights') }}</p>
+                    <p>&copy; {{ new Date().getFullYear() }} Mitra Tool. {{ $t('welcome.footer_rights') }}</p>
                     <p class="mt-2 sm:mt-0">{{ $t('welcome.developed_with', { laravel: laravelVersion, php: phpVersion }) }}</p>
                 </div>
             </div>

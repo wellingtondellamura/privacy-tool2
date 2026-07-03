@@ -7,6 +7,7 @@ return [
     'project_deleted' => 'Projeto removido com sucesso.',
     'cannot_change_owner_role' => 'Não é possível alterar o papel do dono do projeto.',
     'member_role_updated' => 'Papel do membro atualizado com sucesso.',
+    'project_settings_updated' => 'Configurações do projeto atualizadas com sucesso.',
 
     // InspectionController
     'round_required' => 'É necessário selecionar uma rodada de avaliação para iniciar uma inspeção.',
@@ -33,6 +34,7 @@ return [
 
     // EvaluationRoundController
     'round_created' => 'Rodada de avaliação criada com sucesso.',
+    'round_updated' => 'Rodada de avaliação atualizada com sucesso.',
     'round_already_closed' => 'Esta rodada já foi fechada.',
     'round_closed' => 'Rodada fechada com sucesso.',
 

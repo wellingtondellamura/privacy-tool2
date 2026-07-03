@@ -40,6 +40,20 @@ const projectForm = useForm({
 const user = usePage().props.auth.user;
 const { t } = useI18n();
 
+const activeTab = ref('overview');
+
+const settingsForm = useForm({
+    require_evidence_for_high: props.project.require_evidence_for_high,
+    consensus_model: props.project.consensus_model || 'owner_decides',
+    is_self_assessment: props.project.is_self_assessment,
+});
+
+const submitSettings = () => {
+    settingsForm.put(route('projects.settings.update', props.project.id), {
+        preserveScroll: true,
+    });
+};
+
 const isRoundCreating = ref(false);
 const roundForm = useForm({
     name: t('project.round_default_name', { date: new Date().toLocaleDateString(t('common.locale_code')) }),
@@ -285,7 +299,31 @@ const revokePublication = () => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Navigation Tabs (Only for owner/members, settings only for owner) -->
+                <div class="border-b border-surface-200" v-if="canManageMembers">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button
+                            @click="activeTab = 'overview'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                            :class="activeTab === 'overview'
+                                ? 'border-brand-500 text-brand-600'
+                                : 'border-transparent text-surface-500 hover:text-surface-700 hover:border-surface-300'"
+                        >
+                            {{ $t('project.overview_tab') }}
+                        </button>
+                        <button
+                            @click="activeTab = 'settings'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                            :class="activeTab === 'settings'
+                                ? 'border-brand-500 text-brand-600'
+                                : 'border-transparent text-surface-500 hover:text-surface-700 hover:border-surface-300'"
+                        >
+                            {{ $t('settings.tab_title') }}
+                        </button>
+                    </nav>
+                </div>
+
+                <div v-show="activeTab === 'overview'" class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <!-- Esquerda: Inspeções e Detalhes da Avaliação -->
                     <div class="md:col-span-2 space-y-6">
                         <Card :title="$t('project.rounds_title')">
@@ -529,6 +567,109 @@ const revokePublication = () => {
                         </div>
 
                     </div>
+                </div>
+
+                <!-- Settings Tab Content (Only for owner/manage-enabled members) -->
+                <div v-if="activeTab === 'settings' && canManageMembers" class="max-w-3xl space-y-6">
+                    <Card :title="$t('settings.title')">
+                        <div class="p-6 space-y-6">
+                            <p class="text-sm text-surface-500">
+                                {{ $t('settings.description') }}
+                            </p>
+
+                            <form @submit.prevent="submitSettings" class="space-y-6">
+                                <!-- Consensus Model -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-surface-900">
+                                        {{ $t('settings.consensus_title') }}
+                                    </label>
+                                    <p class="text-xs text-surface-500">
+                                        {{ $t('settings.consensus_description') }}
+                                    </p>
+                                    <div class="space-y-2 mt-2">
+                                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50/50 border-brand-200': settingsForm.consensus_model === 'owner_decides'}">
+                                            <input type="radio" value="owner_decides" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                                            <div>
+                                                <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.owner_decides') }}</span>
+                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                    {{ $t('settings.consensus_owner_decides_desc') }}
+                                                </span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50/50 border-brand-200': settingsForm.consensus_model === 'evaluator_convergence'}">
+                                            <input type="radio" value="evaluator_convergence" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                                            <div>
+                                                <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.evaluator_convergence') }}</span>
+                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                    {{ $t('settings.consensus_convergence_desc') }}
+                                                </span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50/50 border-brand-200': settingsForm.consensus_model === 'majority_vote'}">
+                                            <input type="radio" value="majority_vote" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
+                                            <div>
+                                                <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.majority_vote') }}</span>
+                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                    {{ $t('settings.consensus_majority_vote_desc') }}
+                                                </span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <hr class="border-surface-200" />
+
+                                <!-- Evidence Requirements -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-surface-900">
+                                        {{ $t('settings.evidence_title') }}
+                                    </label>
+                                    <p class="text-xs text-surface-500">
+                                        {{ $t('settings.evidence_description') }}
+                                    </p>
+                                    <div class="mt-3 flex items-center">
+                                        <input
+                                            id="require_evidence_for_high"
+                                            type="checkbox"
+                                            v-model="settingsForm.require_evidence_for_high"
+                                            class="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                                        />
+                                        <label for="require_evidence_for_high" class="ml-2 block text-xs font-medium text-surface-900 cursor-pointer">
+                                            {{ $t('settings.require_evidence') }}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <hr class="border-surface-200" />
+
+                                <!-- Audit Type -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-surface-900">
+                                        {{ $t('settings.audit_title') }}
+                                    </label>
+                                    <p class="text-xs text-surface-500">
+                                        {{ $t('settings.audit_description') }}
+                                    </p>
+                                    <div class="flex gap-4 mt-2">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" :value="true" v-model="settingsForm.is_self_assessment" class="text-brand-600 focus:ring-brand-500" />
+                                            <span class="text-xs font-medium text-surface-700">{{ $t('settings.self_assessment') }}</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" :value="false" v-model="settingsForm.is_self_assessment" class="text-brand-600 focus:ring-brand-500" />
+                                            <span class="text-xs font-medium text-surface-700">{{ $t('settings.external_audit') }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end pt-4 border-t border-surface-100">
+                                    <Button type="submit" variant="primary" :disabled="settingsForm.processing">
+                                        {{ $t('settings.save') }}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </Card>
                 </div>
 
             </div>

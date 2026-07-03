@@ -3,6 +3,9 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Card from '@/Components/Card.vue';
 import axios from 'axios';
+import KnowledgeTooltip from '@/Components/KnowledgeTooltip.vue';
+
+const isTooltipOpen = ref(false);
 
 const { t } = useI18n();
 
@@ -30,6 +33,10 @@ const props = defineProps({
     options: {
         type: Array,
         required: true,
+    },
+    requireEvidenceForHigh: {
+        type: Boolean,
+        default: false,
     }
 });
 
@@ -44,6 +51,11 @@ let saveTimeout = null;
 
 const saveResponse = async () => {
     if (!answer.value) return;
+
+    if (props.requireEvidenceForHigh && answer.value === 'high' && !observation.value.trim()) {
+        saveError.value = t('question.evidence_required');
+        return;
+    }
 
     isSaving.value = true;
     saveError.value = null;
@@ -117,8 +129,18 @@ const getDescClass = (optValue) => {
             <span class="text-xs text-brand-500 font-medium">{{ $t('common.saving') }}</span>
         </div>
 
-        <h4 class="text-lg font-medium text-surface-900 leading-relaxed pr-24">
-            {{ index }}. {{ question.text }}
+        <h4 class="text-lg font-medium text-surface-900 leading-relaxed pr-24 flex items-center gap-2">
+            <span>{{ index }}. {{ question.text }}</span>
+            <button 
+                type="button" 
+                @click="isTooltipOpen = true" 
+                class="text-brand-500 hover:text-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full shrink-0"
+                :title="$t('tooltip.specialist_guide')"
+            >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
         </h4>
 
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -147,9 +169,9 @@ const getDescClass = (optValue) => {
             leave-from-class="opacity-100 translate-y-0"
             leave-to-class="opacity-0 translate-y-1"
         >
-            <div v-if="answer === 'other'" class="mt-4">
+            <div v-if="answer === 'other' || (requireEvidenceForHigh && answer === 'high')" class="mt-4">
                 <label :for="'obs-' + question.id" class="block text-sm font-medium text-surface-700 mb-1">
-                    {{ $t('question.specify_label') }}
+                    {{ answer === 'high' ? $t('question.evidence_label') : $t('question.specify_label') }}
                 </label>
                 <textarea
                     :id="'obs-' + question.id"
@@ -157,7 +179,7 @@ const getDescClass = (optValue) => {
                     @input="triggerSave"
                     rows="3"
                     :disabled="disabled"
-                    :placeholder="$t('component.observation_placeholder')"
+                    :placeholder="answer === 'high' ? $t('question.evidence_placeholder') : $t('question.specify_placeholder')"
                     class="block w-full rounded-md border-surface-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm transition-colors"
                 ></textarea>
             </div>
@@ -166,6 +188,13 @@ const getDescClass = (optValue) => {
         <p v-if="saveError" class="mt-2 text-sm text-red-600">
             {{ saveError }}
         </p>
+
+        <KnowledgeTooltip 
+            :show="isTooltipOpen"
+            :question="question"
+            :index="index"
+            @close="isTooltipOpen = false"
+        />
     </Card>
 </template>
 

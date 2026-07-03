@@ -7,6 +7,7 @@ import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import DivergenceBadge from '@/Components/DivergenceBadge.vue';
 
 const props = defineProps({
     round: {
@@ -131,15 +132,36 @@ const getMedalImage = (medalName) => {
                                 <span class="text-xl font-bold text-brand-600">{{ section.score }}%</span>
                             </div>
 
-                            <div class="p-6 space-y-4">
-                                <div v-for="(cat, cIndex) in section.categories" :key="cat.id" class="flex items-center justify-between">
-                                    <h5 class="text-surface-700 font-medium text-sm">{{ toAlpha(cIndex) }}. {{ cat.name }}</h5>
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-32 bg-surface-100 rounded-full h-1.5 hidden sm:block">
-                                            <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score}%`"></div>
+                            <div class="p-6 space-y-8">
+                                <div v-for="(cat, cIndex) in section.categories" :key="cat.id">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h5 class="text-surface-700 font-medium text-sm">{{ toAlpha(cIndex) }}. {{ cat.name }}</h5>
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-32 bg-surface-100 rounded-full h-1.5 hidden sm:block">
+                                                <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score}%`"></div>
+                                            </div>
+                                            <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}%</span>
                                         </div>
-                                        <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}%</span>
                                     </div>
+
+                                    <!-- Questions and Divergences (If present in snapshot) -->
+                                    <ul v-if="cat.questions" class="space-y-3 pl-4 border-l-2 border-surface-100">
+                                        <li v-for="q in cat.questions" :key="q.question_id" class="flex flex-col sm:flex-row sm:items-center justify-between bg-surface-50 rounded p-3 gap-3">
+                                            <span class="text-sm text-surface-700 truncate max-w-lg" :title="q.question_text">
+                                                {{ q.question_text }}
+                                            </span>
+                                            
+                                            <div class="flex items-center gap-4 shrink-0 justify-end">
+                                                <div class="text-sm font-semibold text-surface-900 w-12 text-right">
+                                                    Score: {{ q.score }}
+                                                </div>
+                                                <div class="flex items-center gap-2 shrink-0">
+                                                    <DivergenceBadge v-slot="slotProps" v-if="q.classification" :classification="q.classification" />
+                                                    <span class="text-[10px] text-surface-400 font-medium shrink-0">Var: {{ q.variance }}</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </section>
@@ -210,7 +232,7 @@ const getMedalImage = (medalName) => {
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
                     <div class="flex items-center gap-3 opacity-50 mb-4 sm:mb-0">
                         <ApplicationLogo class="h-4 w-auto fill-current" />
-                        <span>&copy; {{ new Date().getFullYear() }} Privacy Tool.</span>
+                        <span>&copy; {{ new Date().getFullYear() }} Mitra Tool.</span>
                     </div>
                     <p>{{ $t('results.footer.developed_with') }}</p>
                 </div>

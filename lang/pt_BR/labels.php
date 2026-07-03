@@ -44,4 +44,6 @@ return [
     'unknown' => 'Desconhecido',
     'audited_at' => 'Auditado em',
     'no_data' => 'Sem Dados',
+    'self_assessment' => 'Autoavaliação',
+    'external_audit' => 'Auditoria Externa',
 ];

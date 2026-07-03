@@ -6,6 +6,7 @@ return [
     'project_deleted' => 'Project removed successfully.',
     'cannot_change_owner_role' => 'Cannot change the owner\'s role.',
     'member_role_updated' => 'Member role updated successfully.',
+    'project_settings_updated' => 'Project settings updated successfully.',
 
     'round_required' => 'You must select an evaluation round to start an inspection.',
     'cannot_add_to_closed_round' => 'Cannot add inspections to a closed round.',
@@ -28,6 +29,7 @@ return [
     'both_rounds_closed' => 'Both rounds must be closed.',
 
     'round_created' => 'Evaluation round created successfully.',
+    'round_updated' => 'Evaluation round updated successfully.',
     'round_already_closed' => 'This round has already been closed.',
     'round_closed' => 'Round closed successfully.',
 

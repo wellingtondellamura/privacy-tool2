@@ -19,6 +19,7 @@ class EvaluationRound extends Model
         'diagnosis',
         'started_at',
         'closed_at',
+        'software_version',
     ];
 
     protected $casts = [
@@ -51,9 +52,24 @@ class EvaluationRound extends Model
         return $this->hasMany(RoundSnapshot::class);
     }
 
+    public function reviewComments(): HasMany
+    {
+        return $this->hasMany(ReviewComment::class);
+    }
+
+    public function consolidatedResponses(): HasMany
+    {
+        return $this->hasMany(ConsolidatedResponse::class);
+    }
+
     public function isClosed(): bool
     {
         return $this->status === 'closed';
+    }
+
+    public function isReviewing(): bool
+    {
+        return $this->status === 'review';
     }
 
     public function isPublished(): bool

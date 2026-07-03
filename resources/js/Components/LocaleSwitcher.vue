@@ -27,7 +27,8 @@ const switchLocale = (event) => {
         @change="switchLocale"
         class="text-sm border-gray-300 rounded-md bg-transparent focus:border-brand-500 focus:ring-brand-500"
     >
-        <option value="pt_BR">🇧🇷 Português</option>
-        <option value="en">🇺🇸 English</option>
+        <option v-for="(label, key) in $page.props.available_locales" :key="key" :value="key">
+            {{ label }}
+        </option>
     </select>
 </template>

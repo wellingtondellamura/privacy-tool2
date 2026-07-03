@@ -17,10 +17,50 @@ class QuestionForm
                     ->label('Categoria')
                     ->relationship('category', 'name')
                     ->required(),
-                Textarea::make('text')
-                    ->label('Texto')
-                    ->required()
-                    ->columnSpanFull(),
+                ...array_map(function ($locale, $label) {
+                    return Textarea::make("text.{$locale}")
+                        ->label("Texto ({$label})")
+                        ->required($locale === config('app.fallback_locale'))
+                        ->afterStateHydrated(function (Textarea $component, ?\Illuminate\Database\Eloquent\Model $record) use ($locale) {
+                            if ($record) {
+                                $component->state($record->getTranslation('text', $locale, false));
+                            }
+                        })
+                        ->columnSpanFull();
+                }, array_keys(config('app.available_locales', [])), config('app.available_locales', [])),
+                ...array_map(function ($locale, $label) {
+                    return Textarea::make("tooltip.{$locale}")
+                        ->label("Tooltip ({$label})")
+                        ->required(false)
+                        ->afterStateHydrated(function (Textarea $component, ?\Illuminate\Database\Eloquent\Model $record) use ($locale) {
+                            if ($record) {
+                                $component->state($record->getTranslation('tooltip', $locale, false));
+                            }
+                        })
+                        ->columnSpanFull();
+                }, array_keys(config('app.available_locales', [])), config('app.available_locales', [])),
+                ...array_map(function ($locale, $label) {
+                    return Textarea::make("good_practice_example.{$locale}")
+                        ->label("Exemplo de Boa Prática ({$label})")
+                        ->required(false)
+                        ->afterStateHydrated(function (Textarea $component, ?\Illuminate\Database\Eloquent\Model $record) use ($locale) {
+                            if ($record) {
+                                $component->state($record->getTranslation('good_practice_example', $locale, false));
+                            }
+                        })
+                        ->columnSpanFull();
+                }, array_keys(config('app.available_locales', [])), config('app.available_locales', [])),
+                ...array_map(function ($locale, $label) {
+                    return Textarea::make("bad_practice_example.{$locale}")
+                        ->label("Exemplo de Má Prática ({$label})")
+                        ->required(false)
+                        ->afterStateHydrated(function (Textarea $component, ?\Illuminate\Database\Eloquent\Model $record) use ($locale) {
+                            if ($record) {
+                                $component->state($record->getTranslation('bad_practice_example', $locale, false));
+                            }
+                        })
+                        ->columnSpanFull();
+                }, array_keys(config('app.available_locales', [])), config('app.available_locales', [])),
                 TextInput::make('order')
                     ->label('Ordem')
                     ->required()

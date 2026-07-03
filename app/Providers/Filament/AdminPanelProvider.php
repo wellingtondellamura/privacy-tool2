@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(\App\Filament\Pages\Auth\Login::class)
-            ->brandName('Privacy Tool')
+            ->brandName('Mitra Tool')
             ->brandLogo(fn () => view('filament.branding.logo'))
             ->brandLogoHeight('3rem')
             ->colors([

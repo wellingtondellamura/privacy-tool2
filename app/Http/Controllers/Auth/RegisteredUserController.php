@@ -34,12 +34,18 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => ['required', 'accepted'],
+            'profile' => ['nullable', 'string', 'in:student,professional,researcher'],
+            'affiliation' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'terms_accepted_at' => now(),
+            'profile' => $request->profile ?: null,
+            'affiliation' => $request->affiliation ?: null,
         ]);
 
         event(new Registered($user));

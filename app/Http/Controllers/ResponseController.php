@@ -30,10 +30,12 @@ class ResponseController extends Controller
             return response()->json(['message' => 'Only evaluators can submit responses.'], 403);
         }
 
+        $requireEvidence = $inspection->project->require_evidence_for_high && $request->input('answer') === 'high';
+
         $validated = $request->validate([
             'question_id' => 'required|exists:questions,id',
             'answer' => 'required|string|in:high,medium,low,other',
-            'observation' => 'nullable|string',
+            'observation' => $requireEvidence ? 'required|string' : 'nullable|string',
         ]);
 
         // Upsert: replace previous answer for same question/user

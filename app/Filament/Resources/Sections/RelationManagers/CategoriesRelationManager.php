@@ -22,10 +22,17 @@ class CategoriesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->schema([
-            TextInput::make('name')
-                ->label('Nome')
-                ->required()
-                ->maxLength(255),
+            ...array_map(function ($locale, $label) {
+                return TextInput::make("name.{$locale}")
+                    ->label("Nome ({$label})")
+                    ->required($locale === config('app.fallback_locale'))
+                    ->maxLength(255)
+                    ->afterStateHydrated(function (TextInput $component, ?\Illuminate\Database\Eloquent\Model $record) use ($locale) {
+                        if ($record) {
+                            $component->state($record->getTranslation('name', $locale, false));
+                        }
+                    });
+            }, array_keys(config('app.available_locales', [])), config('app.available_locales', [])),
             TextInput::make('order')
                 ->label('Ordem')
                 ->numeric()

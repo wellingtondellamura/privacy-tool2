@@ -8,6 +8,7 @@ import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import Input from '@/Components/Input.vue';
 
 const props = defineProps({
     round: {
@@ -16,11 +17,34 @@ const props = defineProps({
     },
 });
 
+const isEditing = ref(false);
+
+const roundForm = useForm({
+    name: props.round.name,
+    software_version: props.round.software_version || '',
+});
+
+const toggleEdit = () => {
+    isEditing.value = !isEditing.value;
+    if (!isEditing.value) {
+        roundForm.reset();
+    }
+};
+
+const updateRound = () => {
+    roundForm.put(route('rounds.update', props.round.id), {
+        onSuccess: () => {
+            isEditing.value = false;
+        },
+    });
+};
+
 const user = usePage().props.auth.user;
 const { t } = useI18n();
 const canManage = props.round.project.owner_id === user.id;
 
 const isDraft = computed(() => props.round.status === 'draft');
+const isReviewing = computed(() => props.round.status === 'review');
 const isClosed = computed(() => props.round.status === 'closed');
 
 const formatDate = (dateString) => {
@@ -32,6 +56,10 @@ const createInspection = () => {
     router.post(route('inspections.store', props.round.project_id), {
         evaluation_round_id: props.round.id
     });
+};
+
+const startReview = () => {
+    router.post(route('rounds.enter-review', props.round.id));
 };
 
 const closeForm = useForm({});
@@ -72,6 +100,7 @@ const translateStatus = (status) => {
     const map = {
         'draft': t('round.status_draft'),
         'active': t('round.status_active'),
+        'review': t('round.status_review'),
         'closed': t('round.status_closed'),
     };
     return map[status] || status;
@@ -114,28 +143,79 @@ const copyToClipboard = (text) => {
                         { label: round.name }
                     ]" />
                     
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
-                            {{ round.name }}
-                        </h2>
-                        <Badge :variant="isClosed ? 'success' : (round.status === 'active' ? 'brand' : 'surface')">
-                            {{ isClosed ? $t('round.status_closed') : (round.status === 'active' ? $t('round.status_active') : $t('round.status_draft')) }}
-                        </Badge>
-                        <Badge v-if="round.public_directory" variant="primary">
-                            {{ $t('round.published_badge', { visibility: round.public_directory.visibility }) }}
-                        </Badge>
+                    <div v-if="!isEditing">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                                {{ round.name }}
+                            </h2>
+                            <button v-if="canManage && !isClosed" @click="toggleEdit" class="text-surface-400 hover:text-brand-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </button>
+                             <Badge :variant="isClosed ? 'success' : (isReviewing ? 'warning' : (round.status === 'active' ? 'brand' : 'surface'))">
+                                 {{ isClosed ? $t('round.status_closed') : (isReviewing ? $t('round.status_review') : (round.status === 'active' ? $t('round.status_active') : $t('round.status_draft'))) }}
+                             </Badge>
+                            <Badge v-if="round.public_directory" variant="primary">
+                                {{ $t('round.published_badge', { visibility: round.public_directory.visibility }) }}
+                            </Badge>
+                        </div>
+                        <p class="text-xs text-surface-500 mt-1 font-semibold flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            <span>
+                                {{ round.software_version ? $t('round.software_version_label', { version: round.software_version }) : $t('round.no_software_version') }}
+                            </span>
+                        </p>
+                        <p class="text-sm text-surface-500 mt-2">
+                            {{ $t('round.management_description') }}
+                        </p>
                     </div>
-                    <p class="text-sm text-surface-500 mt-1">
-                        {{ $t('round.management_description') }}
-                    </p>
+
+                    <div v-else class="mt-2 space-y-4 max-w-xl bg-surface-50 p-4 rounded-xl border border-surface-200 shadow-inner">
+                        <div class="space-y-4">
+                            <Input
+                                :label="$t('round.edit_name')"
+                                v-model="roundForm.name"
+                                :error="roundForm.errors.name"
+                                required
+                            />
+                            <Input
+                                :label="$t('round.edit_software_version')"
+                                v-model="roundForm.software_version"
+                                :error="roundForm.errors.software_version"
+                                :placeholder="$t('round.edit_software_version_placeholder')"
+                            />
+                        </div>
+                        <div class="flex items-center gap-2 pt-2">
+                            <Button size="sm" variant="primary" @click="updateRound" :disabled="roundForm.processing">
+                                {{ $t('common.save') }}
+                            </Button>
+                            <Button size="sm" variant="ghost" @click="toggleEdit">
+                                {{ $t('common.cancel') }}
+                            </Button>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2 mt-2">
-                    <Button v-if="!isClosed && canManage" variant="primary" @click="createInspection">
+                    <!-- Draft state buttons -->
+                    <Button v-if="isDraft && canManage" variant="primary" @click="createInspection">
                         {{ $t('round.new_inspection') }}
                     </Button>
-                    <Button v-if="!isClosed && canManage" variant="danger" @click="$inertia.get(route('rounds.review', round.id))">
+                    <Button v-if="isDraft && canManage && round.inspections.some(i => i.status === 'closed')" variant="warning" @click="startReview">
+                        {{ $t('round.start_review') }}
+                    </Button>
+                    <Button v-if="isDraft && canManage" variant="danger" @click="$inertia.get(route('rounds.review', round.id))">
                         {{ $t('round.close_round') }}
                     </Button>
+
+                    <!-- Review state buttons -->
+                    <Button v-if="isReviewing" :variant="canManage ? 'danger' : 'primary'" @click="$inertia.get(route('rounds.review', round.id))">
+                        {{ $t('round.continue_review') }}
+                    </Button>
+
+                    <!-- Closed state buttons -->
                     <Button v-if="isClosed && canManage" :variant="round.public_directory ? 'primary' : 'outline'" @click="openPublishModal">
                         {{ round.public_directory ? $t('round.adjust_publication') : $t('round.publish_directory') }}
                     </Button>
@@ -156,7 +236,7 @@ const copyToClipboard = (text) => {
                             <div v-if="round.inspections.length === 0" class="py-12 text-center text-surface-500">
                                 {{ $t('round.no_inspections') }}
                                 <br><br>
-                                <Button v-if="!isClosed && canManage" variant="outline" size="sm" @click="createInspection">
+                                <Button v-if="isDraft && canManage" variant="outline" size="sm" @click="createInspection">
                                     {{ $t('round.create_first') }}
                                 </Button>
                             </div>

@@ -204,7 +204,7 @@ const getMedalImage = (medalName) => {
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
                     <div class="flex items-center gap-3 opacity-50 mb-4 sm:mb-0">
                         <ApplicationLogo class="h-4 w-auto fill-current" />
-                        <span>&copy; {{ new Date().getFullYear() }} Privacy Tool.</span>
+                        <span>&copy; {{ new Date().getFullYear() }} Mitra Tool.</span>
                     </div>
                     <p>{{ $t('results.footer.developed_with') }}</p>
                 </div>

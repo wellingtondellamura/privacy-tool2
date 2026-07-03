@@ -7,6 +7,7 @@ import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import DivergenceBadge from '@/Components/DivergenceBadge.vue';
 
 const props = defineProps({
     inspection: {
@@ -159,9 +160,10 @@ const getMedalImage = (medalName) => {
                                                 <div class="text-sm font-semibold text-surface-900 w-12 text-right">
                                                     Score: {{ q.score }}
                                                 </div>
-                                                <Badge v-if="q.classification" :class="[getDivergenceColor(q.classification), 'w-36 justify-center']">
-                                                    {{ formatDivergence(q.classification) }} (Var: {{ q.variance }})
-                                                </Badge>
+                                                <div class="flex items-center gap-2 shrink-0">
+                                                    <DivergenceBadge v-slot="slotProps" v-if="q.classification" :classification="q.classification" />
+                                                    <span class="text-[10px] text-surface-400 font-medium shrink-0">Var: {{ q.variance }}</span>
+                                                </div>
                                             </div>
                                         </li>
                                     </ul>
@@ -235,7 +237,7 @@ const getMedalImage = (medalName) => {
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
                     <div class="flex items-center gap-3 opacity-50 mb-4 sm:mb-0">
                         <ApplicationLogo class="h-4 w-auto fill-current" />
-                        <span>&copy; {{ new Date().getFullYear() }} Privacy Tool.</span>
+                        <span>&copy; {{ new Date().getFullYear() }} Mitra Tool.</span>
                     </div>
                     <p>{{ $t('results.footer.developed_with') }}</p>
                 </div>

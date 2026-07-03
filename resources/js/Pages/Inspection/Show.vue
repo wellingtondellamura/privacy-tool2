@@ -364,6 +364,7 @@ const activeCategoryIndex = computed(() => {
                         :existing-response="responseMap[question.id]"
                         :options="activeSection?.options || []"
                         :disabled="!isActive"
+                        :require-evidence-for-high="inspection.project.require_evidence_for_high"
                         @saved="handleResponseSaved"
                     />
                 </transition-group>

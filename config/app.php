@@ -82,6 +82,11 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    'available_locales' => [
+        'pt_BR' => '🇧🇷 Português',
+        'en' => '🇺🇸 English',
+    ],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

@@ -25,7 +25,11 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false,
-    }
+    },
+    tooltip: {
+        type: String,
+        default: null,
+    },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -41,8 +45,30 @@ const classes = computed(() => {
 
 <template>
     <div>
-        <label v-if="label" class="block text-sm font-medium text-surface-700 mb-1">
+        <label v-if="label" class="flex items-center gap-1.5 text-sm font-medium text-surface-700 mb-1">
             {{ label }}
+            <!-- Tooltip icon for password fields -->
+            <span v-if="tooltip" class="relative group inline-flex items-center">
+                <svg
+                    class="w-3.5 h-3.5 text-surface-400 cursor-help hover:text-brand-500 transition-colors duration-smooth"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    aria-label="tooltip"
+                >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <!-- Tooltip bubble -->
+                <span
+                    class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52
+                           bg-surface-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg
+                           opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                           whitespace-normal text-center z-50"
+                >
+                    {{ tooltip }}
+                    <!-- Arrow -->
+                    <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surface-900"></span>
+                </span>
+            </span>
         </label>
         <div class="relative rounded-md shadow-sm">
             <input 
@@ -59,3 +85,4 @@ const classes = computed(() => {
         </p>
     </div>
 </template>
+

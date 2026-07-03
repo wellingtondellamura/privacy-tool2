@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
+import ProvenanceBadge from '@/Components/ProvenanceBadge.vue';
 
 const props = defineProps({
     tool: Object,
@@ -82,7 +83,7 @@ const getMedalImage = (medal) => {
                     </div>
                 </div>
 
-                <!-- Medal & Summary -->
+                <!-- Medal, Summary & Provenance -->
                 <div class="grid md:grid-cols-3 gap-6">
                     <Card class="md:col-span-1 p-8 flex flex-col items-center justify-center text-center space-y-4">
                         <div class="text-[10px] font-bold text-surface-400 uppercase tracking-widest">{{ $t('directory.full_classification') }}</div>
@@ -95,21 +96,30 @@ const getMedalImage = (medal) => {
                              <Badge :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
                                 {{ tool.report.medal.name || tool.report.medal }}
                             </Badge>
-                            <p class="text-xs text-surface-400 font-medium mt-2 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count }) }}</p>
+                            <p class="text-xs text-surface-400 font-medium mt-2 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count || tool.inspection_count }) }}</p>
                         </div>
                         <div v-else class="text-surface-400 italic text-sm">{{ $t('directory.full_no_medal') }}</div>
                     </Card>
 
-                    <Card v-if="tool.report.diagnosis" class="md:col-span-2 p-8 relative overflow-hidden flex flex-col justify-center">
+                    <Card v-if="tool.report.diagnosis" class="md:col-span-1 p-8 relative overflow-hidden flex flex-col justify-center">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
                         <h2 class="text-xs font-bold text-brand-600 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                             {{ $t('directory.full_conclusion') }}
                         </h2>
-                        <div class="text-lg text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium relative z-10">
+                        <div class="text-base text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium relative z-10">
                             "{{ tool.report.diagnosis }}"
                         </div>
                     </Card>
+
+                    <ProvenanceBadge 
+                        :is-self-assessment="tool.is_self_assessment"
+                        :software-version="tool.software_version"
+                        :user-count="tool.user_count_total || tool.user_count || 0"
+                        :inspection-count="tool.inspection_count"
+                        :inspection-date="tool.inspection_date"
+                        :class="tool.report.diagnosis ? 'md:col-span-1' : 'md:col-span-2'"
+                    />
                 </div>
 
                 <!-- Sections Detail -->

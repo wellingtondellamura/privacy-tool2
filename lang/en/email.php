@@ -3,7 +3,7 @@
 return [
     'invitation_subject' => 'You have been invited to the project: :project',
     'invitation_heading' => 'Collaboration Invitation',
-    'invitation_body' => 'You have been invited to participate in the project **:project** on Privacy Tool.',
+    'invitation_body' => 'You have been invited to participate in the project **:project** on Mitra Tool.',
     'invitation_role' => 'Your access level will be: **:role**.',
     'invitation_existing_user' => 'Since you already have an account in our system, simply log in and accept the invitation through your Dashboard.',
     'invitation_login_button' => 'Log In and Accept',

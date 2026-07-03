@@ -3,7 +3,7 @@
 return [
     'invitation_subject' => 'Você foi convidado para o projeto: :project',
     'invitation_heading' => 'Convite para colaboração',
-    'invitation_body' => 'Você foi convidado para participar do projeto **:project** na ferramenta Privacy Tool.',
+    'invitation_body' => 'Você foi convidado para participar do projeto **:project** na ferramenta Mitra Tool.',
     'invitation_role' => 'Seu nível de acesso será: **:role**.',
     'invitation_existing_user' => 'Como você já possui uma conta em nosso sistema, basta realizar o login e aceitar o convite através do seu Dashboard.',
     'invitation_login_button' => 'Fazer Login e Aceitar',

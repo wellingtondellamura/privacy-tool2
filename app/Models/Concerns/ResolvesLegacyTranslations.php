@@ -55,14 +55,13 @@ trait ResolvesLegacyTranslations
     {
         $locale = app()->getLocale();
         $fallbackLocale = config('app.fallback_locale');
+        $availableLocales = array_keys(config('app.available_locales', []));
 
-        return array_values(array_unique(array_filter([
+        return array_values(array_unique(array_filter(array_merge([
             $locale,
             is_string($locale) ? str_replace('-', '_', $locale) : null,
             $fallbackLocale,
             is_string($fallbackLocale) ? str_replace('-', '_', $fallbackLocale) : null,
-            'pt_BR',
-            'en',
-        ])));
+        ], $availableLocales))));
     }
 }

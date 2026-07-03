@@ -29,6 +29,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'is_admin',
         'last_login_at',
         'locale',
+        'terms_accepted_at',
+        'profile',
+        'affiliation',
     ];
 
     /**
@@ -53,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'last_login_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 

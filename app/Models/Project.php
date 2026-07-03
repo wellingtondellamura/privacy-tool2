@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Enums\ConsensusModel;
+
 class Project extends Model
 {
     use HasFactory, SoftDeletes;
@@ -20,6 +22,15 @@ class Project extends Model
         'owner_id',
         'icon',
         'color',
+        'require_evidence_for_high',
+        'consensus_model',
+        'is_self_assessment',
+    ];
+
+    protected $casts = [
+        'require_evidence_for_high' => 'boolean',
+        'consensus_model' => ConsensusModel::class,
+        'is_self_assessment' => 'boolean',
     ];
 
     public function owner(): BelongsTo

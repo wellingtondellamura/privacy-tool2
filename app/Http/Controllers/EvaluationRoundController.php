@@ -20,10 +20,12 @@ class EvaluationRoundController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'software_version' => 'nullable|string|max:255',
         ]);
 
         $round = $project->evaluationRounds()->create([
             'name' => $validated['name'],
+            'software_version' => $validated['software_version'] ?? null,
             'status' => 'draft',
         ]);
 
@@ -58,23 +60,60 @@ class EvaluationRoundController extends Controller
      */
     public function review(EvaluationRound $round, CloseRoundAction $action)
     {
-        Gate::authorize('update', $round->project);
+        Gate::authorize('view', $round->project);
 
-        if ($round->status !== 'draft') {
+        if ($round->status !== 'draft' && $round->status !== 'review') {
             return redirect()->route('rounds.show', $round->id);
         }
 
-        $round->load(['project', 'inspections.user', 'inspections.resultSnapshots' => function ($query) {
-            $query->whereNull('user_id');
-        }]);
+        $round->load([
+            'project',
+            'inspections.user',
+            'inspections.resultSnapshots' => function ($query) {
+                $query->whereNull('user_id');
+            },
+            'reviewComments.user',
+            'consolidatedResponses.decidedBy'
+        ]);
 
         // Helper calculation for preview (without saving snapshot)
         $previewPayload = $action->calculatePreviewPayload($round);
 
+        $inspectionIds = $round->inspections()->where('status', 'closed')->pluck('id')->toArray();
+        $evaluatorResponses = \App\Models\Response::whereIn('inspection_id', $inspectionIds)
+            ->with('user')
+            ->get()
+            ->groupBy('question_id')
+            ->map(fn($group) => $group->map(fn($r) => [
+                'user_id' => $r->user_id,
+                'user_name' => $r->user->name,
+                'answer' => $r->answer,
+                'observation' => $r->observation,
+            ]));
+
         return Inertia::render('EvaluationRound/Review', [
             'round' => $round,
             'preview' => $previewPayload,
+            'evaluatorResponses' => $evaluatorResponses,
         ]);
+    }
+
+    /**
+     * POST /rounds/{round}/enter-review — Put the round into the review phase.
+     */
+    public function enterReview(EvaluationRound $round)
+    {
+        Gate::authorize('update', $round->project);
+
+        if ($round->status !== 'draft') {
+            return redirect()->back()->withErrors(['status' => 'Round is not in draft state.']);
+        }
+
+        $round->update([
+            'status' => 'review',
+        ]);
+
+        return redirect()->route('rounds.show', $round->id)->with('success', 'Fase de revisão/sensemaking iniciada.');
     }
 
     /**
@@ -90,7 +129,7 @@ class EvaluationRoundController extends Controller
             'visibility' => 'nullable|string|in:score_public,full_public',
         ]);
 
-        if ($round->status !== 'draft') {
+        if ($round->status !== 'draft' && $round->status !== 'review') {
             return redirect()->back()->withErrors(['status' => __('messages.round_already_closed')]);
         }
 
@@ -115,5 +154,22 @@ class EvaluationRoundController extends Controller
         }
 
         return redirect()->route('rounds.show', $round->id)->with('success', __('messages.round_closed'));
+    }
+
+    /**
+     * PUT /rounds/{round} — Update evaluation round.
+     */
+    public function update(Request $request, EvaluationRound $round)
+    {
+        Gate::authorize('update', $round->project);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'software_version' => 'nullable|string|max:255',
+        ]);
+
+        $round->update($validated);
+
+        return redirect()->back()->with('success', __('messages.round_updated') ?? 'Rodada atualizada com sucesso.');
     }
 }

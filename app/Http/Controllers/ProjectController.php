@@ -155,4 +155,22 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', __('messages.member_role_updated'));
     }
+
+    /**
+     * PUT /projects/{project}/settings — Update project settings.
+     */
+    public function updateSettings(Request $request, Project $project)
+    {
+        Gate::authorize('update', $project);
+
+        $validated = $request->validate([
+            'require_evidence_for_high' => 'required|boolean',
+            'consensus_model' => 'required|string|in:owner_decides,evaluator_convergence,majority_vote',
+            'is_self_assessment' => 'required|boolean',
+        ]);
+
+        $project->update($validated);
+
+        return redirect()->back()->with('success', __('messages.project_settings_updated'));
+    }
 }

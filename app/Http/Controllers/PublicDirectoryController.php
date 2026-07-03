@@ -95,6 +95,10 @@ class PublicDirectoryController extends Controller
                     'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
                     'user_count' => $payload['user_count'] ?? 0,
                     'diagnosis' => $publication->evaluationRound->diagnosis,
+                    'is_self_assessment' => (bool) ($payload['is_self_assessment'] ?? $project->is_self_assessment),
+                    'software_version' => $payload['software_version'] ?? $publication->evaluationRound->software_version,
+                    'user_count_total' => $payload['user_count_total'] ?? $payload['user_count'] ?? 0,
+                    'inspection_count' => $payload['inspection_count'] ?? 0,
                 ]
             ]);
         }
@@ -112,6 +116,10 @@ class PublicDirectoryController extends Controller
                 'report' => $safePayload,
                 'inspection_date' => $publication->evaluationRound->closed_at?->format('d/m/Y'),
                 'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
+                'is_self_assessment' => (bool) ($payload['is_self_assessment'] ?? $project->is_self_assessment),
+                'software_version' => $payload['software_version'] ?? $publication->evaluationRound->software_version,
+                'user_count_total' => $payload['user_count_total'] ?? $payload['user_count'] ?? 0,
+                'inspection_count' => $payload['inspection_count'] ?? 0,
             ]
         ]);
     }

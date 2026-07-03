@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\EvaluationRound;
 use App\Models\RoundSnapshot;
 use App\Services\AggregationService;
+use App\Services\DivergenceService;
 use Illuminate\Support\Facades\DB;
 
 class CloseRoundAction
@@ -26,8 +27,10 @@ class CloseRoundAction
             return false;
         }
 
+        $round->loadMissing('project');
+
         return DB::transaction(function () use ($round, $inspections) {
-            $roundPayload = $this->calculateRoundPayload($inspections);
+            $roundPayload = $this->calculateRoundPayload($inspections, $round);
 
             RoundSnapshot::create([
                 'evaluation_round_id' => $round->id,
@@ -55,13 +58,15 @@ class CloseRoundAction
             return ['global_score' => 0, 'medal' => ['name' => 'no_data'], 'sections' => []];
         }
 
-        return $this->calculateRoundPayload($inspections);
+        $round->loadMissing('project');
+
+        return $this->calculateRoundPayload($inspections, $round);
     }
 
     /**
      * Merge multiple inspection consolidated payloads into one round payload.
      */
-    public function calculateRoundPayload($inspections): array
+    public function calculateRoundPayload($inspections, EvaluationRound $round): array
     {
         $payloads = $inspections->map(fn($i) => $i->resultSnapshots->first()?->payload_json)->filter();
         $count = $payloads->count();
@@ -75,35 +80,51 @@ class CloseRoundAction
         $template = $payloads->first();
         $sections = [];
 
+        // Fetch consensus strategies
+        $consensusModel = $round->project->consensus_model;
+        if (!$consensusModel instanceof \App\Enums\ConsensusModel) {
+            $consensusModel = \App\Enums\ConsensusModel::tryFrom($consensusModel) ?? \App\Enums\ConsensusModel::OWNER_DECIDES;
+        }
+        $resolvedAnswers = $consensusModel->strategy()->resolve($round);
+
         foreach ($template['sections'] as $sIndex => $templateSection) {
             $categories = [];
             foreach ($templateSection['categories'] as $cIndex => $templateCategory) {
                 
-                // Average category scores across all inspections
-                $catScores = $payloads->map(fn($p) => $p['sections'][$sIndex]['categories'][$cIndex]['score'] ?? 0);
-                $avgCatScore = (int) round($catScores->sum() / $count);
-
-                // Average question scores
+                // Average question scores or use resolved consensus scores
                 $questions = [];
                 foreach ($templateCategory['questions'] as $qIndex => $templateQuestion) {
+                    $qId = $templateQuestion['question_id'];
                     $qScores = $payloads->map(fn($p) => $p['sections'][$sIndex]['categories'][$cIndex]['questions'][$qIndex]['score'] ?? 0);
-                    $avgQScores = (int) round($qScores->sum() / $count);
-                    
-                    $levelValue = match (true) {
-                        $avgQScores >= 91 => 'high',
-                        $avgQScores >= 41 => 'medium',
-                        default => 'low',
-                    };
+                    $divergence = DivergenceService::forQuestion($qScores->toArray());
+
+                    if (isset($resolvedAnswers[$qId])) {
+                        $ansVal = $resolvedAnswers[$qId];
+                        $answerLevel = \App\Enums\AnswerLevel::tryFrom($ansVal) ?? \App\Enums\AnswerLevel::OTHER;
+                        $qScore = $answerLevel->score() ?? 0;
+                        $levelValue = $answerLevel->value;
+                    } else {
+                        $qScore = (int) round($qScores->sum() / $count);
+                        $levelValue = match (true) {
+                            $qScore >= 91 => 'high',
+                            $qScore >= 41 => 'medium',
+                            default => 'low',
+                        };
+                    }
 
                     $questions[] = [
-                        'question_id'   => $templateQuestion['question_id'],
-                        'question_text' => $templateQuestion['question_text'] ?? '', // Bug 2 fix: preserve question text
+                        'question_id'   => $qId,
+                        'question_text' => $templateQuestion['question_text'] ?? '',
                         'level'         => $levelValue,
-                        'score'         => $avgQScores,
-                        'variance'      => 0,
-                        'classification' => 'low',
+                        'score'         => $qScore,
+                        'variance'      => $divergence['variance'],
+                        'classification' => $divergence['classification'],
                     ];
                 }
+
+                // Recalculate category score dynamically based on the finalized question scores
+                $catQuestionScores = array_filter(array_column($questions, 'score'), fn($s) => $s !== null);
+                $avgCatScore = AggregationService::categoryScore($catQuestionScores, count($questions));
 
                 $categories[] = [
                     'id' => $templateCategory['id'],
@@ -113,9 +134,9 @@ class CloseRoundAction
                 ];
             }
 
-            // Average section scores
-            $secScores = $payloads->map(fn($p) => $p['sections'][$sIndex]['score'] ?? 0);
-            $avgSecScore = (int) round($secScores->sum() / $count);
+            // Recalculate section score based on category scores
+            $secScores = array_column($categories, 'score');
+            $avgSecScore = AggregationService::sectionScore($secScores);
 
             $sections[] = [
                 'id' => $templateSection['id'],
@@ -141,6 +162,9 @@ class CloseRoundAction
             'inspection_count' => $count,
             'user_count_total' => $payloads->sum('user_count'),
             'individual_scores' => $payloads->pluck('global_score')->shuffle()->toArray(),
+            'is_self_assessment' => $round->project->is_self_assessment,
+            'software_version' => $round->software_version,
+            'closed_at' => $round->closed_at ? $round->closed_at->toIso8601String() : now()->toIso8601String(),
         ];
     }
 }

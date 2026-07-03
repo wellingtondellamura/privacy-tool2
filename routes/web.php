@@ -32,6 +32,15 @@ Route::get('/manual', function () {
     return Inertia::render('Manual');
 })->name('manual');
 
+Route::get('/terms-of-use', function () {
+    return Inertia::render('TermsOfUse');
+})->name('terms.use');
+
+Route::get('/privacy-policy', function () {
+    return Inertia::render('PrivacyPolicy');
+})->name('privacy.policy');
+
+
 Route::get('/dashboard', function () {
     return redirect()->route('projects.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -72,6 +81,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/projects/{project}/members/{user}', [ProjectController::class, 'updateMemberRole'])
         ->name('projects.members.update');
 
+    Route::put('/projects/{project}/settings', [ProjectController::class, 'updateSettings'])
+        ->name('projects.settings.update');
+
     // Inspection routes (spec.md 7.3)
     Route::post('/projects/{project}/inspections', [InspectionController::class, 'store'])
         ->name('inspections.store');
@@ -87,6 +99,8 @@ Route::middleware('auth')->group(function () {
         ->name('projects.rounds.store');
     Route::get('/rounds/{round}', [EvaluationRoundController::class, 'show'])
         ->name('rounds.show');
+    Route::put('/rounds/{round}', [EvaluationRoundController::class, 'update'])
+        ->name('rounds.update');
     Route::post('/rounds/{round}/close', [EvaluationRoundController::class, 'close'])
         ->name('rounds.close');
 
@@ -105,6 +119,16 @@ Route::middleware('auth')->group(function () {
         ->name('rounds.results');
     Route::get('/rounds/{round}/review', [EvaluationRoundController::class, 'review'])
         ->name('rounds.review');
+    Route::post('/rounds/{round}/enter-review', [EvaluationRoundController::class, 'enterReview'])
+        ->name('rounds.enter-review');
+    Route::post('/rounds/{round}/comments', [\App\Http\Controllers\ReviewCommentController::class, 'store'])
+        ->name('rounds.comments.store');
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\ReviewCommentController::class, 'destroy'])
+        ->name('rounds.comments.destroy');
+    Route::post('/rounds/{round}/consolidate', [\App\Http\Controllers\ConsolidatedResponseController::class, 'store'])
+        ->name('rounds.consolidate.store');
+    Route::delete('/rounds/{round}/consolidate/{questionId}', [\App\Http\Controllers\ConsolidatedResponseController::class, 'destroy'])
+        ->name('rounds.consolidate.destroy');
     Route::get('/rounds/{round}/comparison/{other}', [ResultController::class, 'roundComparison'])
         ->name('rounds.comparison');
 

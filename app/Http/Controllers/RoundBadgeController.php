@@ -89,6 +89,9 @@ class RoundBadgeController extends Controller
         $payload = $snapshot->payload_json;
 
         $medalKey = $payload['medal']['name'];
+        $isSelf = (bool) ($payload['is_self_assessment'] ?? $round->project->is_self_assessment);
+        $auditLabel = $isSelf ? __('labels.self_assessment') : __('labels.external_audit');
+        $softwareVersion = $payload['software_version'] ?? $round->software_version;
 
         return response()->json([
             'project_name' => $round->project->name,
@@ -100,6 +103,9 @@ class RoundBadgeController extends Controller
             'audited_label' => __('labels.audited_at'),
             'public_url' => route('public.tools.show', $round->publicDirectory->slug),
             'style' => $badge->style,
+            'is_self_assessment' => $isSelf,
+            'audit_type_label' => $auditLabel,
+            'software_version' => $softwareVersion,
         ])->setCache([
             'public' => true,
             'max_age' => 300, // 5 minutes
@@ -136,11 +142,15 @@ class RoundBadgeController extends Controller
             badgeDiv.className = 'privacy-tool-badge privacy-tool-badge-' + data.style;
             
             let html = `
-                <a href="\${data.public_url}" target="_blank" style="text-decoration:none; color:inherit; font-family:sans-serif;">
-                    <div style="border:1px solid #ccc; border-radius:8px; padding:10px; display:inline-block; background:#fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <div style="font-size:12px; color:#666;">\${data.project_name}</div>
-                        <div style="font-weight:bold; font-size:16px; margin:4px 0;">\${data.medal} (\${data.global_score}%)</div>
-                        <div style="font-size:10px; color:#999;">\${data.audited_label} \${data.date}</div>
+                <a href="\${data.public_url}" target="_blank" style="text-decoration:none; color:inherit; font-family:sans-serif; display:inline-block;">
+                    <div style="border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:inline-block; background:#fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border-top: 4px solid \${data.medal_key === 'gold' ? '#fbbf24' : (data.medal_key === 'silver' ? '#94a3b8' : '#b45309')}; min-width: 200px;">
+                        <div style="font-size:12px; font-weight:600; color:#475569;">\${data.project_name}</div>
+                        <div style="font-weight:bold; font-size:18px; margin:6px 0; color:#0f172a;">\${data.medal} (\${data.global_score}%)</div>
+                        <div style="font-size:10px; color:#64748b; margin-bottom:4px;">\${data.audited_label} \${data.date}</div>
+                        <div style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px; \${data.is_self_assessment ? 'background:#fef3c7; color:#d97706;' : 'background:#dcfce7; color:#15803d;' }">
+                            \${data.audit_type_label}
+                        </div>
+                        \${data.software_version ? `<div style="font-size:10px; color:#94a3b8; margin-top:6px;">v\${data.software_version}</div>` : ''}
                     </div>
                 </a>
             `;
