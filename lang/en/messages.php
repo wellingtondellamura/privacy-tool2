@@ -10,8 +10,11 @@ return [
 
     'round_required' => 'You must select an evaluation round to start an inspection.',
     'cannot_add_to_closed_round' => 'Cannot add inspections to a closed round.',
+    'already_has_inspection_in_round' => 'You already have an inspection in this round. Each member can only create one inspection per round.',
     'inspection_activated' => 'Inspection started and moved to Active status.',
     'only_responsible_can_change' => 'Only the responsible person can change the inspection status.',
+    'only_responsible_can_respond' => 'Only the responsible member can submit responses to this inspection.',
+    'evaluator_own_inspection_only' => 'Evaluators can only view their own inspection.',
     'inspection_closed' => 'Inspection finalized and snapshots generated.',
 
     'invitation_sent' => 'Invitation sent successfully to :email.',

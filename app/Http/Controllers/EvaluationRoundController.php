@@ -40,7 +40,7 @@ class EvaluationRoundController extends Controller
         Gate::authorize('view', $round->project);
 
         $round->load([
-            'project',
+            'project.members.user',
             'inspections.user',
             'inspections.publication',
             'snapshots' => function ($query) {
@@ -50,8 +50,12 @@ class EvaluationRoundController extends Controller
             'badge'
         ]);
 
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $currentUserRole = $round->project->getMemberRole($user);
+
         return Inertia::render('EvaluationRound/Show', [
             'round' => $round,
+            'currentUserRole' => $currentUserRole,
         ]);
     }
 
@@ -79,17 +83,24 @@ class EvaluationRoundController extends Controller
         // Helper calculation for preview (without saving snapshot)
         $previewPayload = $action->calculatePreviewPayload($round);
 
-        $inspectionIds = $round->inspections()->where('status', 'closed')->pluck('id')->toArray();
-        $evaluatorResponses = \App\Models\Response::whereIn('inspection_id', $inspectionIds)
-            ->with('user')
-            ->get()
-            ->groupBy('question_id')
-            ->map(fn($group) => $group->map(fn($r) => [
-                'user_id' => $r->user_id,
-                'user_name' => $r->user->name,
-                'answer' => $r->answer,
-                'observation' => $r->observation,
-            ]));
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $isOwner = $round->project->owner_id === $user->id;
+        $showEvaluations = $isOwner || $round->project->show_evaluations_to_all;
+
+        $evaluatorResponses = [];
+        if ($showEvaluations) {
+            $inspectionIds = $round->inspections()->where('status', 'closed')->pluck('id')->toArray();
+            $evaluatorResponses = \App\Models\Response::whereIn('inspection_id', $inspectionIds)
+                ->with('user')
+                ->get()
+                ->groupBy('question_id')
+                ->map(fn($group) => $group->map(fn($r) => [
+                    'user_id' => $r->user_id,
+                    'user_name' => $r->user->name,
+                    'answer' => $r->answer,
+                    'observation' => $r->observation,
+                ]));
+        }
 
         return Inertia::render('EvaluationRound/Review', [
             'round' => $round,

@@ -133,8 +133,11 @@ const getDescClass = (optValue) => {
             <span>{{ index }}. {{ question.text }}</span>
             <button 
                 type="button" 
-                @click="isTooltipOpen = true" 
-                class="text-brand-500 hover:text-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full shrink-0"
+                @click="isTooltipOpen = !isTooltipOpen" 
+                class="transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full shrink-0"
+                :class="isTooltipOpen
+                    ? 'text-brand-700 bg-brand-100 ring-2 ring-brand-300 ring-offset-1'
+                    : 'text-brand-400 hover:text-brand-600 hover:bg-brand-50'"
                 :title="$t('tooltip.specialist_guide')"
             >
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,7 +158,7 @@ const getDescClass = (optValue) => {
                 <!-- Color dot indicator -->
                 <span class="flex items-center gap-2 mb-1">
                     <span :class="['w-2 h-2 rounded-full shrink-0', colorConfig[opt.value]?.dot || 'bg-violet-500']"></span>
-                    <span :class="getLabelClass(opt.value)">{{ opt.label }}</span>
+                    <span :class="getLabelClass(opt.value)">{{ opt.labelKey ? $t(opt.labelKey) : opt.label }}</span>
                 </span>
                 <span v-if="opt.desc" :class="getDescClass(opt.value)">{{ opt.desc }}</span>
             </button>
@@ -185,16 +188,17 @@ const getDescClass = (optValue) => {
             </div>
         </transition>
 
-        <p v-if="saveError" class="mt-2 text-sm text-red-600">
-            {{ saveError }}
-        </p>
-
+        <!-- Inline Specialist Guide accordion panel -->
         <KnowledgeTooltip 
             :show="isTooltipOpen"
             :question="question"
             :index="index"
             @close="isTooltipOpen = false"
         />
+
+        <p v-if="saveError" class="mt-2 text-sm text-red-600">
+            {{ saveError }}
+        </p>
     </Card>
 </template>
 

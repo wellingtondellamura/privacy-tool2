@@ -1,14 +1,11 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import Input from '@/Components/Input.vue';
+import Button from '@/Components/Button.vue';
 
 const { t } = useI18n();
-
 const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
 
@@ -25,11 +22,11 @@ const updatePassword = () => {
         onError: () => {
             if (form.errors.password) {
                 form.reset('password', 'password_confirmation');
-                passwordInput.value.focus();
+                passwordInput.value?.focus();
             }
             if (form.errors.current_password) {
                 form.reset('current_password');
-                currentPasswordInput.value.focus();
+                currentPasswordInput.value?.focus();
             }
         },
     });
@@ -37,86 +34,51 @@ const updatePassword = () => {
 </script>
 
 <template>
-    <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ $t('profile.update_password_title') }}
-            </h2>
+    <section class="space-y-6">
+        <div>
+            <h2 class="text-base font-semibold text-surface-900">{{ $t('profile.update_password_title') }}</h2>
+            <p class="mt-1 text-sm text-surface-500">{{ $t('profile.update_password_description') }}</p>
+        </div>
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ $t('profile.update_password_description') }}
-            </p>
-        </header>
+        <form @submit.prevent="updatePassword" class="space-y-5">
+            <Input
+                id="current-password"
+                ref="currentPasswordInput"
+                :label="$t('profile.current_password')"
+                v-model="form.current_password"
+                type="password"
+                autocomplete="current-password"
+                :error="form.errors.current_password"
+            />
+            <Input
+                id="new-password"
+                ref="passwordInput"
+                :label="$t('profile.new_password')"
+                v-model="form.password"
+                type="password"
+                autocomplete="new-password"
+                :error="form.errors.password"
+            />
+            <Input
+                id="confirm-password"
+                :label="$t('profile.confirm_password')"
+                v-model="form.password_confirmation"
+                type="password"
+                autocomplete="new-password"
+                :error="form.errors.password_confirmation"
+            />
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
-            <div>
-                <InputLabel for="current_password" :value="$t('profile.current_password')" />
-
-                <TextInput
-                    id="current_password"
-                    ref="currentPasswordInput"
-                    v-model="form.current_password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="current-password"
-                />
-
-                <InputError
-                    :message="form.errors.current_password"
-                    class="mt-2"
-                />
-            </div>
-
-            <div>
-                <InputLabel for="password" :value="$t('profile.new_password')" />
-
-                <TextInput
-                    id="password"
-                    ref="passwordInput"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError :message="form.errors.password" class="mt-2" />
-            </div>
-
-            <div>
-                <InputLabel
-                    for="password_confirmation"
-                    :value="$t('profile.confirm_password')"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">{{ $t('common.save') }}</PrimaryButton>
-
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
-                >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
+            <div class="flex items-center gap-4 pt-2">
+                <Button type="submit" variant="primary" :disabled="form.processing">
+                    {{ $t('common.save') }}
+                </Button>
+                <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 translate-y-1" leave-active-class="transition ease-in duration-150" leave-to-class="opacity-0">
+                    <span v-if="form.recentlySuccessful" class="inline-flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
                         {{ $t('common.saved') }}
-                    </p>
+                    </span>
                 </Transition>
             </div>
         </form>

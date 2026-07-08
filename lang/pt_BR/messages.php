@@ -12,8 +12,11 @@ return [
     // InspectionController
     'round_required' => 'É necessário selecionar uma rodada de avaliação para iniciar uma inspeção.',
     'cannot_add_to_closed_round' => 'Não é possível adicionar inspeções a uma rodada que já está fechada.',
+    'already_has_inspection_in_round' => 'Você já possui uma inspeção nesta rodada. Cada membro pode criar apenas uma inspeção por rodada.',
     'inspection_activated' => 'Inspeção iniciada e mudou para status Ativa.',
     'only_responsible_can_change' => 'Apenas o responsável pela inspeção pode mudar seu status.',
+    'only_responsible_can_respond' => 'Apenas o responsável pela inspeção pode submeter respostas.',
+    'evaluator_own_inspection_only' => 'Avaliadores só podem visualizar a própria inspeção.',
     'inspection_closed' => 'Inspeção finalizada e instantâneos gerados.',
 
     // InvitationController

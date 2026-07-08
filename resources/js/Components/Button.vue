@@ -37,11 +37,14 @@ const classes = computed(() => {
 
     // Color variants
     let variant = {
-        'primary': 'bg-brand-600 text-white shadow-tactile hover:bg-brand-700 hover:shadow-tactile-hover focus:ring-brand-500 active:shadow-tactile-active active:translate-y-[1px]',
+        'primary':   'bg-brand-600 text-white shadow-tactile hover:bg-brand-700 hover:shadow-tactile-hover focus:ring-brand-500 active:shadow-tactile-active active:translate-y-[1px]',
         'secondary': 'bg-surface-100 text-surface-800 hover:bg-surface-200 focus:ring-surface-500 active:translate-y-[1px]',
-        'outline': 'border border-surface-300 text-surface-700 hover:bg-surface-50 focus:ring-surface-500 active:bg-surface-100 active:translate-y-[1px]',
-        'ghost': 'text-surface-600 hover:bg-surface-100 hover:text-surface-900 focus:ring-surface-500 active:bg-surface-200',
-        'danger': 'bg-red-600 text-white shadow-tactile hover:bg-red-700 hover:shadow-tactile-hover focus:ring-red-500 active:shadow-tactile-active active:translate-y-[1px]',
+        'outline':   'border border-surface-300 text-surface-700 hover:bg-surface-50 focus:ring-surface-500 active:bg-surface-100 active:translate-y-[1px]',
+        'ghost':     'text-surface-600 hover:bg-surface-100 hover:text-surface-900 focus:ring-surface-500 active:bg-surface-200',
+        'danger':    'bg-red-600 text-white shadow-tactile hover:bg-red-700 hover:shadow-tactile-hover focus:ring-red-500 active:shadow-tactile-active active:translate-y-[1px]',
+        'success':   'bg-emerald-600 text-white shadow-tactile hover:bg-emerald-700 hover:shadow-tactile-hover focus:ring-emerald-500 active:shadow-tactile-active active:translate-y-[1px]',
+        'warning':   'bg-amber-500 text-white shadow-tactile hover:bg-amber-600 hover:shadow-tactile-hover focus:ring-amber-400 active:shadow-tactile-active active:translate-y-[1px]',
+        'info':      'bg-indigo-600 text-white shadow-tactile hover:bg-indigo-700 hover:shadow-tactile-hover focus:ring-indigo-500 active:shadow-tactile-active active:translate-y-[1px]',
     }[props.variant];
 
     let disabled = props.disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '';

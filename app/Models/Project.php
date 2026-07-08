@@ -25,12 +25,14 @@ class Project extends Model
         'require_evidence_for_high',
         'consensus_model',
         'is_self_assessment',
+        'show_evaluations_to_all',
     ];
 
     protected $casts = [
         'require_evidence_for_high' => 'boolean',
         'consensus_model' => ConsensusModel::class,
         'is_self_assessment' => 'boolean',
+        'show_evaluations_to_all' => 'boolean',
     ];
 
     public function owner(): BelongsTo

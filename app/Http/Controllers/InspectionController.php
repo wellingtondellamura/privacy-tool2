@@ -33,6 +33,15 @@ class InspectionController extends Controller
             return redirect()->back()->withErrors(['status' => __('messages.cannot_add_to_closed_round')]);
         }
 
+        // Rule: only one inspection per member per round.
+        $alreadyExists = Inspection::where('evaluation_round_id', $round->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()->back()->withErrors(['inspection' => __('messages.already_has_inspection_in_round')]);
+        }
+
         $activeVersion = QuestionnaireVersion::getActive();
 
         if (!$activeVersion) {
@@ -57,13 +66,23 @@ class InspectionController extends Controller
     {
         Gate::authorize('view', $inspection->project);
 
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $role = $inspection->project->getMemberRole($user);
+
+        // Golden rule: evaluators can only view their own inspection.
+        // Owners and observers can view any inspection.
+        if ($role === 'evaluator' && $inspection->user_id !== $user->id) {
+            return redirect()->route('rounds.show', $inspection->evaluation_round_id)
+                ->withErrors(['access' => __('messages.evaluator_own_inspection_only')]);
+        }
+
         $inspection->load([
             'questionnaireVersion.sections.categories.questions',
             'project',
             'user',
             'evaluationRound',
-            'responses' => function ($query) {
-                $query->where('user_id', Auth::id());
+            'responses' => function ($query) use ($user) {
+                $query->where('user_id', $user->id);
             },
             'resultSnapshots' => function ($query) {
                 $query->whereNull('user_id'); // Consolidado

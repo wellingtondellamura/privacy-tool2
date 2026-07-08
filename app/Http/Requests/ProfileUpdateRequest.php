@@ -25,6 +25,8 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'affiliation' => ['nullable', 'string', 'max:255'],
+            'profile'     => ['nullable', 'string', 'in:student,professional,researcher'],
         ];
     }
 }

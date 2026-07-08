@@ -1,41 +1,33 @@
 <script setup>
-import DangerButton from '@/Components/DangerButton.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import Modal from '@/Components/Modal.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import Input from '@/Components/Input.vue';
+import Button from '@/Components/Button.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 
 const { t } = useI18n();
-
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
 
-const form = useForm({
-    password: '',
-});
+const form = useForm({ password: '' });
 
 const confirmUserDeletion = () => {
     confirmingUserDeletion.value = true;
-
-    nextTick(() => passwordInput.value.focus());
+    nextTick(() => passwordInput.value?.focus());
 };
 
 const deleteUser = () => {
     form.delete(route('profile.destroy'), {
         preserveScroll: true,
         onSuccess: () => closeModal(),
-        onError: () => passwordInput.value.focus(),
+        onError: () => passwordInput.value?.focus(),
         onFinish: () => form.reset(),
     });
 };
 
 const closeModal = () => {
     confirmingUserDeletion.value = false;
-
     form.clearErrors();
     form.reset();
 };
@@ -43,65 +35,39 @@ const closeModal = () => {
 
 <template>
     <section class="space-y-6">
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ $t('profile.delete_title') }}
-            </h2>
+        <div>
+            <h2 class="text-base font-semibold text-red-700">{{ $t('profile.delete_title') }}</h2>
+            <p class="mt-1 text-sm text-surface-500">{{ $t('profile.delete_warning') }}</p>
+        </div>
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ $t('profile.delete_warning') }}
-            </p>
-        </header>
+        <Button variant="danger" @click="confirmUserDeletion">
+            {{ $t('profile.delete_button') }}
+        </Button>
 
-        <DangerButton @click="confirmUserDeletion">{{ $t('profile.delete_button') }}</DangerButton>
-
-        <Modal :show="confirmingUserDeletion" @close="closeModal">
-            <div class="p-6">
-                <h2
-                    class="text-lg font-medium text-gray-900"
-                >
-                    {{ $t('profile.delete_confirm_title') }}
-                </h2>
-
-                <p class="mt-1 text-sm text-gray-600">
-                    {{ $t('profile.delete_confirm_description') }}
-                </p>
-
-                <div class="mt-6">
-                    <InputLabel
-                        for="password"
-                        :value="$t('profile.password')"
-                        class="sr-only"
-                    />
-
-                    <TextInput
-                        id="password"
+        <ConfirmModal
+            :show="confirmingUserDeletion"
+            :title="$t('profile.delete_confirm_title')"
+            :message="$t('profile.delete_confirm_description')"
+            :confirm-text="$t('profile.delete_button')"
+            :cancel-text="$t('common.cancel')"
+            confirm-variant="danger"
+            @confirm="deleteUser"
+            @close="closeModal"
+        >
+            <template #default>
+                <div class="mt-4">
+                    <Input
+                        id="delete-password"
                         ref="passwordInput"
+                        :label="$t('profile.password')"
                         v-model="form.password"
                         type="password"
-                        class="mt-1 block w-3/4"
                         :placeholder="$t('profile.password')"
+                        :error="form.errors.password"
                         @keyup.enter="deleteUser"
                     />
-
-                    <InputError :message="form.errors.password" class="mt-2" />
                 </div>
-
-                <div class="mt-6 flex justify-end">
-                    <SecondaryButton @click="closeModal">
-                        {{ $t('common.cancel') }}
-                    </SecondaryButton>
-
-                    <DangerButton
-                        class="ms-3"
-                        :class="{ 'opacity-25': form.processing }"
-                        :disabled="form.processing"
-                        @click="deleteUser"
-                    >
-                        {{ $t('profile.delete_button') }}
-                    </DangerButton>
-                </div>
-            </div>
-        </Modal>
+            </template>
+        </ConfirmModal>
     </section>
 </template>

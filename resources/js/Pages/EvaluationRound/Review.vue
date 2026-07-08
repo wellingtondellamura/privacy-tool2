@@ -312,7 +312,8 @@ const consensusModelLabel = computed(() => {
                             </Card>
 
                             <!-- Evaluator Responses list (Side-by-side / Stacks) -->
-                            <div class="space-y-2">
+                            <!-- Only shown to owner OR when show_evaluations_to_all is enabled (backend controls data) -->
+                            <div class="space-y-2" v-if="canManage || activeEvaluatorResponses.length > 0">
                                 <h4 class="text-xs font-bold text-surface-500 uppercase tracking-wider px-1">
                                     {{ t('review.evaluator_scores', 'Notas e Evidências dos Avaliadores') }}
                                 </h4>
@@ -340,6 +341,10 @@ const consensusModelLabel = computed(() => {
                                         </span>
                                     </div>
                                 </div>
+                            </div>
+                            <!-- Message for evaluators when responses are hidden -->
+                            <div v-else class="p-4 bg-surface-50 rounded-2xl border border-surface-200 text-xs text-surface-500 italic">
+                                {{ t('review.evaluations_hidden', 'As avaliações individuais não estão visíveis para preservar a independência dos avaliadores.') }}
                             </div>
 
                             <!-- Resolution Actions Panel based on consensus strategy -->

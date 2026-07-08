@@ -75,11 +75,11 @@ class ProjectController extends Controller
     {
         Gate::authorize('view', $project);
 
-        $project->load([
-            'members.user', 
-            'invitations' => function ($query) {
-                $query->orderBy('created_at', 'desc');
-            },
+        $user = Auth::user();
+        $isOwner = $project->owner_id === $user->id;
+
+        $relations = [
+            'members.user',
             'inspections' => function ($query) {
                 $query->with(['user', 'publication'])->orderBy('created_at', 'desc');
             },
@@ -87,12 +87,24 @@ class ProjectController extends Controller
                 $query->with(['snapshots' => function($q) { $q->latest(); }, 'publicDirectory'])
                       ->orderBy('created_at', 'desc');
             }
-        ]);
+        ];
 
-        // Annotate invitations if the user already has an account
-        $project->invitations->each(function ($invitation) {
-            $invitation->has_account = \App\Models\User::where('email', $invitation->email)->exists();
-        });
+        // Only load invitations for the project owner
+        if ($isOwner) {
+            $relations['invitations'] = function ($query) {
+                // Bug 1 fix: exclude already-accepted invitations
+                $query->whereNull('accepted_at')->orderBy('created_at', 'desc');
+            };
+        }
+
+        $project->load($relations);
+
+        // Annotate invitations if the user already has an account (owner only)
+        if ($isOwner) {
+            $project->invitations->each(function ($invitation) {
+                $invitation->has_account = \App\Models\User::where('email', $invitation->email)->exists();
+            });
+        }
 
         return Inertia::render('Project/Show', [
             'project' => $project,
@@ -167,6 +179,7 @@ class ProjectController extends Controller
             'require_evidence_for_high' => 'required|boolean',
             'consensus_model' => 'required|string|in:owner_decides,evaluator_convergence,majority_vote',
             'is_self_assessment' => 'required|boolean',
+            'show_evaluations_to_all' => 'sometimes|boolean',
         ]);
 
         $project->update($validated);

@@ -15,6 +15,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    currentUserRole: {
+        type: String,
+        default: null,
+    },
 });
 
 const isEditing = ref(false);
@@ -43,9 +47,31 @@ const user = usePage().props.auth.user;
 const { t } = useI18n();
 const canManage = props.round.project.owner_id === user.id;
 
+// Bug 4 & 5: role-based computed flags
 const isDraft = computed(() => props.round.status === 'draft');
 const isReviewing = computed(() => props.round.status === 'review');
 const isClosed = computed(() => props.round.status === 'closed');
+
+const isObserver = computed(() => props.currentUserRole === 'observer');
+const isEvaluator = computed(() => props.currentUserRole === 'evaluator');
+
+// Evaluators can create 1 inspection per round; check if they already have one
+const userAlreadyHasInspection = computed(() =>
+    props.round.inspections.some(i => i.user?.id === user.id)
+);
+
+// Role-based visibility: owner and observer can view any inspection;
+// evaluators can only view their own.
+const canViewInspection = (inspection) => {
+    if (canManage || isObserver.value) return true;
+    return inspection.user?.id === user.id;
+};
+
+// Rule: every member (including owner) can create at most 1 inspection per round.
+// Observers can never create inspections.
+const canCreateInspection = computed(() =>
+    isDraft.value && !isObserver.value && !userAlreadyHasInspection.value
+);
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -200,26 +226,26 @@ const copyToClipboard = (text) => {
                 </div>
                 <div class="flex items-center gap-2 mt-2">
                     <!-- Draft state buttons -->
-                    <Button v-if="isDraft && canManage" variant="primary" @click="createInspection">
+                    <Button v-if="canCreateInspection" variant="primary" @click="createInspection">
                         {{ $t('round.new_inspection') }}
                     </Button>
                     <Button v-if="isDraft && canManage && round.inspections.some(i => i.status === 'closed')" variant="warning" @click="startReview">
                         {{ $t('round.start_review') }}
                     </Button>
-                    <Button v-if="isDraft && canManage" variant="danger" @click="$inertia.get(route('rounds.review', round.id))">
+                    <Button v-if="isDraft && canManage" variant="warning" @click="$inertia.get(route('rounds.review', round.id))">
                         {{ $t('round.close_round') }}
                     </Button>
 
                     <!-- Review state buttons -->
-                    <Button v-if="isReviewing" :variant="canManage ? 'danger' : 'primary'" @click="$inertia.get(route('rounds.review', round.id))">
+                    <Button v-if="isReviewing" :variant="canManage ? 'warning' : 'outline'" @click="$inertia.get(route('rounds.review', round.id))">
                         {{ $t('round.continue_review') }}
                     </Button>
 
                     <!-- Closed state buttons -->
-                    <Button v-if="isClosed && canManage" :variant="round.public_directory ? 'primary' : 'outline'" @click="openPublishModal">
+                    <Button v-if="isClosed && canManage" :variant="round.public_directory ? 'outline' : 'success'" @click="openPublishModal">
                         {{ round.public_directory ? $t('round.adjust_publication') : $t('round.publish_directory') }}
                     </Button>
-                    <Button v-if="isClosed" variant="outline" class="!bg-brand-50 !text-brand-700 !border-brand-100" @click="$inertia.get(route('rounds.results', round.id))">
+                    <Button v-if="isClosed" variant="info" @click="$inertia.get(route('rounds.results', round.id))">
                          {{ $t('round.consolidated_result') }}
                     </Button>
                 </div>
@@ -236,17 +262,26 @@ const copyToClipboard = (text) => {
                             <div v-if="round.inspections.length === 0" class="py-12 text-center text-surface-500">
                                 {{ $t('round.no_inspections') }}
                                 <br><br>
-                                <Button v-if="isDraft && canManage" variant="outline" size="sm" @click="createInspection">
+                                <Button v-if="canCreateInspection" variant="primary" size="sm" @click="createInspection">
                                     {{ $t('round.create_first') }}
                                 </Button>
+                                <!-- Observer message when no inspections -->
+                                <p v-if="isObserver" class="text-xs text-surface-400 mt-2">
+                                    {{ $t('round.observer_no_action') }}
+                                </p>
                             </div>
                             
                             <div v-if="round.inspections.length > 0">
-                                <ul class="divide-y divide-surface-100">
+                            <ul class="divide-y divide-surface-100">
                                     <li v-for="inspection in round.inspections" :key="inspection.id" 
-                                        class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
+                                        class="py-4 flex justify-between items-center px-4 -mx-4 rounded-lg transition-colors"
+                                        :class="canViewInspection(inspection) ? 'hover:bg-surface-50 cursor-pointer group' : 'opacity-75'"
                                     >
-                                        <div class="cursor-pointer flex-grow" @click="$inertia.get(route('inspections.show', inspection.id))">
+                                        <div 
+                                            class="flex-grow"
+                                            :class="canViewInspection(inspection) ? 'cursor-pointer' : 'cursor-default'"
+                                            @click="canViewInspection(inspection) && $inertia.get(route('inspections.show', inspection.id))"
+                                        >
                                             <p class="text-sm font-medium text-surface-900">
                                                 {{ $t('round.inspection_label', { id: inspection.sequential_id }) }}
                                             </p>
@@ -255,20 +290,47 @@ const copyToClipboard = (text) => {
                                             </p>
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <Badge :variant="inspection.status === 'closed' ? 'success' : 'surface'">
-                                                {{ translateStatus(inspection.status) }}
+                                            <!-- Status Badge with semantic color -->
+                                            <Badge :variant="inspection.status">
+                                                <span class="flex items-center gap-1">
+                                                    <!-- dot indicator -->
+                                                    <span class="w-1.5 h-1.5 rounded-full"
+                                                        :class="{
+                                                            'bg-slate-400': inspection.status === 'draft',
+                                                            'bg-blue-500': inspection.status === 'active',
+                                                            'bg-emerald-500': inspection.status === 'closed',
+                                                        }"
+                                                    ></span>
+                                                    {{ translateStatus(inspection.status) }}
+                                                </span>
                                             </Badge>
-                                            <Button size="xs" variant="ghost" @click.stop="$inertia.get(route('inspections.show', inspection.id))">
+                                            <!-- Owner / Observer: always see [Ver] -->
+                                            <button
+                                                v-if="canViewInspection(inspection)"
+                                                @click.stop="$inertia.get(route('inspections.show', inspection.id))"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150
+                                                    bg-white border-surface-200 text-surface-600 hover:bg-brand-50 hover:border-brand-300 hover:text-brand-700 shadow-sm hover:shadow"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
                                                 {{ $t('common.view') }}
-                                            </Button>
+                                            </button>
+                                            <!-- Evaluator viewing someone else's inspection: restricted indicator -->
+                                            <span v-else class="inline-flex items-center gap-1 text-[10px] font-medium text-surface-400 bg-surface-100 rounded-full px-2 py-0.5">
+                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                {{ $t('round.restricted_access') }}
+                                            </span>
                                         </div>
                                     </li>
                                 </ul>
 
                                 <div v-if="round.inspections.some(i => i.status === 'closed')" class="mt-6 pt-6 border-t border-surface-100 flex justify-end">
                                     <Button 
-                                        variant="outline" 
-                                        class="!bg-brand-50 !text-brand-700 !border-brand-100" 
+                                        variant="info" 
                                         @click="$inertia.get(route('results.team', round.inspections.filter(i => i.status === 'closed').sort((a,b) => b.id - a.id)[0].id))"
                                     >
                                         {{ $t('round.team_result') }}
@@ -309,6 +371,40 @@ const copyToClipboard = (text) => {
                             </div>
                         </Card>
 
+                        <!-- Project Members Card -->
+                        <Card :title="$t('project.members_title')">
+                            <ul class="divide-y divide-surface-100">
+                                <li v-for="member in round.project.members" :key="member.id" class="py-3 flex items-center justify-between px-6">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 rounded-full bg-surface-200 flex items-center justify-center text-surface-600 font-bold text-xs ring-2 ring-white">
+                                            {{ member.user.name.charAt(0) }}
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-surface-900">{{ member.user.name }}</p>
+                                            <p class="text-xs text-surface-500">{{ member.user.email }}</p>
+                                        </div>
+                                    </div>
+                                    <Badge :variant="member.role === 'owner' ? 'brand' : 'surface'">
+                                        {{ member.role === 'owner' ? $t('workspace.role_owner') : (member.role === 'evaluator' ? $t('workspace.role_evaluator') : $t('workspace.role_observer')) }}
+                                    </Badge>
+                                </li>
+                            </ul>
+                        </Card>
+
+                        <!-- Product URL -->
+                        <div v-if="round.project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between">
+                            <div class="text-sm">
+                                <span class="block font-medium text-surface-900">{{ $t('project.product_url') }}</span>
+                                <a :href="round.project.url" target="_blank" class="text-brand-600 hover:underline break-all block">
+                                    {{ round.project.url }}
+                                </a>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-surface-400 flex-shrink-0 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                            </svg>
+                        </div>
+
                         <!-- Selo Embeddable Card (RN-BADGE-01) -->
                         <Card v-if="isClosed" :title="$t('round.badge_title')">
                             <div class="space-y-4 px-6 py-4">
@@ -320,7 +416,7 @@ const copyToClipboard = (text) => {
                                     <p class="text-xs text-surface-500">
                                         {{ $t('round.badge_description') }}
                                     </p>
-                                    <Button variant="primary" size="sm" class="w-full" @click="$inertia.post(route('rounds.badge.store', round.id))">
+                                    <Button variant="success" size="sm" class="w-full" @click="$inertia.post(route('rounds.badge.store', round.id))">
                                         {{ $t('round.generate_badge') }}
                                     </Button>
                                 </div>

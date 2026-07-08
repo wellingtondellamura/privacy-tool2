@@ -22,6 +22,11 @@ class ResponseController extends Controller
             return response()->json(['message' => 'Inspection is not active. Cannot submit responses.'], 422);
         }
 
+        // Golden rule: only the inspection's responsible member can submit responses
+        if ($inspection->user_id !== Auth::id()) {
+            return response()->json(['message' => __('messages.only_responsible_can_respond')], 403);
+        }
+
         // Only evaluators can respond
         $user = Auth::user();
         $role = $inspection->project->getMemberRole($user);
