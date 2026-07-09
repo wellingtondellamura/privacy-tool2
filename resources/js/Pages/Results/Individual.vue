@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
@@ -20,6 +21,24 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+
+const user = usePage().props.auth.user;
+
+const isOwner = computed(() => props.inspection.project.owner_id === user.id);
+const isEvaluator = computed(() => !isOwner.value && props.inspection.user_id === user.id);
+
+const canViewTeamResult = computed(() => {
+    if (props.inspection.evaluation_round.status === 'closed') {
+        return true;
+    }
+    if (isOwner.value) {
+        return true;
+    }
+    if (!isEvaluator.value) {
+        return true;
+    }
+    return false;
+});
 
 const getMedalColor = (medalName) => {
     const colors = {
@@ -80,7 +99,7 @@ const getMedalImage = (medalName) => {
                     <Button variant="outline" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
                         {{ $t('results.back_to_round') }}
                     </Button>
-                    <div v-if="inspection.status === 'closed'">
+                    <div v-if="inspection.status === 'closed' && canViewTeamResult">
                         <Button variant="outline" @click="$inertia.get(route('results.team', inspection.id))">
                             {{ $t('results.view_team') }}
                         </Button>

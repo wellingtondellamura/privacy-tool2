@@ -124,6 +124,10 @@ class EvaluationRoundController extends Controller
             'status' => 'review',
         ]);
 
+        foreach ($round->project->participants as $participant) {
+            \Illuminate\Support\Facades\Mail::to($participant)->send(new \App\Mail\RoundReviewStarted($round, $participant));
+        }
+
         return redirect()->route('rounds.show', $round->id)->with('success', 'Fase de revisão/sensemaking iniciada.');
     }
 

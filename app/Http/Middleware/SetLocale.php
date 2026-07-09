@@ -10,12 +10,21 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $locale = null;
+
         if ($user = $request->user()) {
-            app()->setLocale($user->locale ?? config('app.fallback_locale', 'en'));
-        } else {
-            $preferred = $request->getPreferredLanguage(['pt_BR', 'en']);
-            app()->setLocale($preferred ?? config('app.fallback_locale', 'en'));
+            $locale = $user->locale;
         }
+
+        if (!$locale) {
+            $locale = session('locale');
+        }
+
+        if (!$locale) {
+            $locale = $request->getPreferredLanguage(['pt_BR', 'en']);
+        }
+
+        app()->setLocale($locale ?? config('app.fallback_locale', 'en'));
 
         return $next($request);
     }

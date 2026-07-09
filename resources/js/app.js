@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { createI18nInstance } from './plugins/i18n';
+import { router } from '@inertiajs/vue3';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,6 +20,13 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const locale = props.initialPage.props.locale ?? 'en';
         const i18n = createI18nInstance(locale);
+
+        router.on('navigate', (event) => {
+            const newLocale = event.detail.page.props.locale;
+            if (newLocale && i18n.global.locale.value !== newLocale) {
+                i18n.global.locale.value = newLocale;
+            }
+        });
 
         return createApp({ render: () => h(App, props) })
             .use(plugin)

@@ -22,7 +22,13 @@ const verificationLinkSent = computed(
 </script>
 
 <template>
-    <GuestLayout>
+    <GuestLayout
+        :title="$t('auth.verify_email_title')"
+        :description="$t('auth.verify_email_desc_left')"
+        illustration-type="verify"
+        :right-title="$t('auth.verify_email_title')"
+        :loading="form.processing"
+    >
         <Head :title="$t('auth.verify_email_title')" />
 
         <div class="mb-6 text-sm text-surface-600 leading-relaxed">

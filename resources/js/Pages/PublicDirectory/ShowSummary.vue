@@ -32,6 +32,15 @@ const getMedalImage = (medal) => {
     
     return null;
 };
+
+const getConsensusModelLabel = (model) => {
+    switch(model) {
+        case 'owner_decides': return t('models.owner_decides', 'Decisão do Coordenador');
+        case 'evaluator_convergence': return t('models.evaluator_convergence', 'Convergência de Avaliadores');
+        case 'majority_vote': return t('models.majority_vote', 'Voto da Maioria');
+        default: return model;
+    }
+};
 </script>
 
 <template>
@@ -73,6 +82,39 @@ const getMedalImage = (medal) => {
                                 </div>
                                 <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_classification') }}</div>
                             </div>
+                        </div>
+
+                        <!-- Summary Info Pills -->
+                        <div class="pt-6 border-t border-surface-700/50 flex flex-wrap justify-center items-center gap-4 text-xs font-medium text-surface-300">
+                            <!-- Evaluators -->
+                            <div class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
+                                <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                {{ tool.user_count_total }} {{ tool.user_count_total === 1 ? $t('directory.evaluator_singular', 'Avaliador') : $t('directory.evaluator_plural', 'Avaliadores') }}
+                            </div>
+                            
+                            <!-- Internal/External -->
+                            <div class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
+                                <svg v-if="tool.is_self_assessment" class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <svg v-else class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ tool.is_self_assessment ? $t('directory.provenance_self', 'Autoavaliação') : $t('directory.provenance_external', 'Auditoria Externa') }}
+                            </div>
+                            
+                            <!-- Consensus Model -->
+                            <a href="https://mitra.ufca.edu.br" target="_blank" class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner hover:bg-surface-700 hover:text-white transition-colors group">
+                                <svg class="w-4 h-4 text-brand-400 group-hover:text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                </svg>
+                                {{ getConsensusModelLabel(tool.consensus_model) }}
+                                <svg class="w-3 h-3 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -60,6 +60,12 @@ Route::get('/badge/{token}.js', [RoundBadgeController::class, 'publicScript'])
 Route::get('/badge/{token}', [RoundBadgeController::class, 'publicShow'])
     ->name('badge.show');
 
+Route::post('/locale', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate(['locale' => 'required|in:pt_BR,en']);
+    session(['locale' => $validated['locale']]);
+    return back();
+})->name('locale.update');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -1,9 +1,7 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import Input from '@/Components/Input.vue';
+import Button from '@/Components/Button.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
@@ -18,36 +16,41 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
+    <GuestLayout
+        :title="$t('auth.confirm_password_title')"
+        :description="$t('auth.confirm_password_desc_left')"
+        illustration-type="confirm"
+        :right-title="$t('auth.confirm_password_title')"
+        :loading="form.processing"
+    >
         <Head :title="$t('auth.confirm_password_title')" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-6 text-sm text-surface-600 leading-relaxed">
             {{ $t('auth.confirm_password_description') }}
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="password" :value="$t('auth.password')" />
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    autofocus
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
+        <form @submit.prevent="submit" class="space-y-6">
+            <Input
+                :label="$t('auth.password')"
+                id="password"
+                type="password"
+                v-model="form.password"
+                required
+                autocomplete="current-password"
+                autofocus
+                :error="form.errors.password"
+                placeholder="••••••••"
+            />
 
-            <div class="mt-4 flex justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+            <div class="pt-2 flex justify-end">
+                <Button
+                    type="submit"
+                    variant="primary"
                     :disabled="form.processing"
+                    class="w-full cursor-pointer"
                 >
                     {{ $t('common.confirm') }}
-                </PrimaryButton>
+                </Button>
             </div>
         </form>
     </GuestLayout>

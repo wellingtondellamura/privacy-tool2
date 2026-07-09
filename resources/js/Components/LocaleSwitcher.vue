@@ -15,8 +15,10 @@ const switchLocale = (event) => {
             preserveScroll: true,
         });
     } else {
-        localStorage.setItem('locale', newLocale);
-        router.reload();
+        router.post(route('locale.update'), { locale: newLocale }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
     }
 };
 </script>

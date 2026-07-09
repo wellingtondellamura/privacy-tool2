@@ -99,6 +99,7 @@ class PublicDirectoryController extends Controller
                     'software_version' => $payload['software_version'] ?? $publication->evaluationRound->software_version,
                     'user_count_total' => $payload['user_count_total'] ?? $payload['user_count'] ?? 0,
                     'inspection_count' => $payload['inspection_count'] ?? 0,
+                    'consensus_model' => $project->consensus_model instanceof \App\Enums\ConsensusModel ? $project->consensus_model->value : $project->consensus_model,
                 ]
             ]);
         }
@@ -120,6 +121,7 @@ class PublicDirectoryController extends Controller
                 'software_version' => $payload['software_version'] ?? $publication->evaluationRound->software_version,
                 'user_count_total' => $payload['user_count_total'] ?? $payload['user_count'] ?? 0,
                 'inspection_count' => $payload['inspection_count'] ?? 0,
+                'consensus_model' => $project->consensus_model instanceof \App\Enums\ConsensusModel ? $project->consensus_model->value : $project->consensus_model,
             ]
         ]);
     }

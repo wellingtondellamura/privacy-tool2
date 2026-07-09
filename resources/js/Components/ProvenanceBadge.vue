@@ -23,10 +23,23 @@ const props = defineProps({
     inspectionDate: {
         type: String,
         default: null
+    },
+    consensusModel: {
+        type: String,
+        default: null
     }
 });
 
 const { t } = useI18n();
+
+const getConsensusModelLabel = (model) => {
+    switch(model) {
+        case 'owner_decides': return t('models.owner_decides', 'Decisão do Coordenador');
+        case 'evaluator_convergence': return t('models.evaluator_convergence', 'Convergência de Avaliadores');
+        case 'majority_vote': return t('models.majority_vote', 'Voto da Maioria');
+        default: return model;
+    }
+};
 
 const auditLabel = computed(() => {
     return props.isSelfAssessment 
@@ -92,6 +105,21 @@ const auditLabel = computed(() => {
                         <span class="text-[10px] text-surface-400 block font-medium">
                             ({{ inspectionCount }} {{ inspectionCount === 1 ? t('directory.inspection_singular', 'inspeção') : t('directory.inspection_plural', 'inspeções') }})
                         </span>
+                    </span>
+                </div>
+                
+                <!-- Consensus Model -->
+                <div v-if="consensusModel" class="p-3 bg-surface-50 rounded-xl border border-surface-100 flex flex-col justify-between md:col-span-2">
+                    <span class="text-[10px] font-bold text-surface-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        {{ t('directory.provenance_consensus_model', 'Modelo de Consenso') }}
+                        <a href="https://mitra.ufca.edu.br" target="_blank" title="Saiba mais sobre os modelos de consenso" class="text-brand-500 hover:text-brand-600">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </a>
+                    </span>
+                    <span class="font-bold text-surface-700">
+                        {{ getConsensusModelLabel(consensusModel) }}
                     </span>
                 </div>
             </div>

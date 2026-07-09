@@ -122,6 +122,7 @@ const getMedalImage = (medal) => {
                         :user-count="tool.user_count_total || tool.user_count || 0"
                         :inspection-count="tool.inspection_count"
                         :inspection-date="tool.inspection_date"
+                        :consensus-model="tool.consensus_model"
                         :class="tool.report.diagnosis ? 'md:col-span-1' : 'md:col-span-2'"
                     />
                 </div>

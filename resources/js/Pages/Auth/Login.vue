@@ -28,7 +28,13 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
+    <GuestLayout
+        :title="$t('auth.welcome_back_title')"
+        :description="$t('auth.welcome_back_desc')"
+        illustration-type="login"
+        :right-title="$t('auth.login_title')"
+        :loading="form.processing"
+    >
         <Head :title="$t('auth.login_title')" />
 
         <div v-if="status" class="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800">
