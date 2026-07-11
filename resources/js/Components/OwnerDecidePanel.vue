@@ -30,8 +30,10 @@ const form = useForm({
 });
 
 const selectAnswer = (ans) => {
+    console.log("SELECT ANSWER CLICKED:", ans, "questionId:", props.questionId, "roundId:", props.roundId, "canManage:", props.canManage);
     if (!props.canManage) return;
     
+    form.question_id = props.questionId;
     form.final_answer = ans;
     form.post(route('rounds.consolidate.store', props.roundId), {
         preserveScroll: true,

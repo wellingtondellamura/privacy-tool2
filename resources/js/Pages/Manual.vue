@@ -65,6 +65,7 @@ const sections = [
             { subtitleKey: 'manual.sec_projetos_sub1', textKey: 'manual.sec_projetos_text1' },
             { subtitleKey: 'manual.sec_projetos_sub2', textKey: 'manual.sec_projetos_text2' },
             { subtitleKey: 'manual.sec_projetos_sub3', textKey: 'manual.sec_projetos_text3' },
+            { subtitleKey: 'manual.sec_projetos_sub4', textKey: 'manual.sec_projetos_text4' },
         ]
     },
     {
@@ -81,6 +82,7 @@ const sections = [
             { subtitleKey: 'manual.sec_rodadas_sub1', textKey: 'manual.sec_rodadas_text1' },
             { subtitleKey: 'manual.sec_rodadas_sub2', textKey: 'manual.sec_rodadas_text2' },
             { subtitleKey: 'manual.sec_rodadas_sub3', textKey: 'manual.sec_rodadas_text3' },
+            { subtitleKey: 'manual.sec_rodadas_sub4', textKey: 'manual.sec_rodadas_text4' },
         ]
     },
     {
@@ -113,6 +115,7 @@ const sections = [
             { subtitleKey: 'manual.sec_diretorio_sub1', textKey: 'manual.sec_diretorio_text1' },
             { subtitleKey: 'manual.sec_diretorio_sub2', textKey: 'manual.sec_diretorio_text2' },
             { subtitleKey: 'manual.sec_diretorio_sub3', textKey: 'manual.sec_diretorio_text3' },
+            { subtitleKey: 'manual.sec_diretorio_sub4', textKey: 'manual.sec_diretorio_text4' },
         ]
     },
     {

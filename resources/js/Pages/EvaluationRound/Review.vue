@@ -145,6 +145,7 @@ const activeEvaluatorResponses = computed(() => {
 
 // Close/consolidate submission
 const submitClose = () => {
+    console.log("SUBMIT CLOSE TRIGGERED! Round ID:", props.round.id, "Diagnosis:", closeForm.diagnosis);
     closeForm.post(route('rounds.close', props.round.id));
 };
 

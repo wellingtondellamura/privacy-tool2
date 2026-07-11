@@ -119,6 +119,19 @@ A tela de projeto exibe:
 - O **dono** pode editar os dados do projeto a qualquer momento.
 - A exclusão é reversível (soft delete).
 
+### Configurações Avançadas do Projeto
+O **dono** do projeto pode acessar a aba **"Configurações"** na tela de detalhes do projeto para parametrizar o comportamento e as regras de avaliação da Mitra Tool:
+
+1. **Requisito de Evidências**: Permite exigir obrigatoriamente que os avaliadores adicionem uma justificativa textual (observação) para qualquer resposta marcada como **"Suficiente (100 pontos)"**. Útil para auditorias rigorosas onde cada conformidade declarada deve vir acompanhada de evidências claras.
+2. **Modelo de Consenso**: Define a estratégia matemática ou workflow de resolução para consolidar as respostas quando houver divergências de pontuação entre múltiplos avaliadores em uma rodada:
+   - **Dono Decide**: Caso haja discordâncias, o dono do projeto revisará as notas divergentes e escolherá manualmente a resposta final consolidada na tela de revisão da rodada.
+   - **Convergência dos Avaliadores**: Os avaliadores deverão discutir em um chat integrado para cada questão em conflito e reavaliar/ajustar suas próprias notas individuais até que haja convergência.
+   - **Voto Majoritário**: O sistema calcula automaticamente a nota mais votada. Empates são resolvidos a favor da nota mais conservadora (menor valor).
+3. **Tipo de Auditoria**:
+   - **Autoavaliação (Interna)**: A própria equipe interna do software realiza a inspeção.
+   - **Auditoria Externa (Independente)**: Avaliação conduzida por um auditor ou consultoria externa e independente. Essa informação gera um selo diferenciado de proveniência.
+4. **Visibilidade das Avaliações**: Define se as avaliações de todos os avaliadores podem ser visualizadas a qualquer momento por outros membros ou se devem permanecer ocultas até o encerramento do preenchimento, visando evitar viés de confirmação e influência mútua (independência das avaliações).
+
 ---
 
 ## 5. Convites e Membros
@@ -170,6 +183,20 @@ stateDiagram-v2
    - **Apenas Score** — mostra apenas pontuações e medalhas.
    - **Relatório Completo** — exibe todo o detalhamento por pergunta.
 6. Confirme para **fechar a rodada** e gerar o snapshot consolidado.
+
+### Informar Versão do Software
+Durante a criação ou edição da rodada, é possível registrar a **Versão do Software Avaliado** (ex: `1.0.0` ou `v2.1.3`). Isso garante que os resultados daquela rodada fiquem atrelados a um release específico do produto.
+
+### Painel de Divergências e Resolução de Conflitos
+Quando uma rodada possui mais de uma inspeção fechada por avaliadores diferentes, é comum que existam divergências de notas em certas perguntas. O sistema detecta e classifica a dispersão das notas em três níveis baseados na variância estatística das respostas:
+- **Divergência Baixa**
+- **Divergência Média**
+- **Divergência Alta**
+
+Durante a fase de **Revisão e Fechamento** da rodada, o **Painel de Divergências** ajuda os membros a tratarem esses conflitos dependendo do **Modelo de Consenso** ativo no projeto:
+- **Sob o modelo de Dono Decide**: O dono do projeto visualizará um painel de resolução na tela de revisão, podendo clicar em cada questão em conflito e definir de forma definitiva a resposta oficial consolidada.
+- **Sob o modelo de Voto Majoritário**: O sistema calcula a nota mais votada e resolve empates de forma conservadora (a menor pontuação prevalece). Não há necessidade de ação manual para fechamento.
+- **Sob o modelo de Convergência**: Os avaliadores e o dono podem discutir os argumentos e evidências no **Workspace de Resolução de Conflitos** por meio de um **Chat de Discussão (Conflict Thread)** exclusivo para cada pergunta sob divergência. À medida que chegam a acordos, os avaliadores podem ajustar suas notas em suas respectivas inspeções até que o conflito seja resolvido e a rodada possa ser concluída com consenso.
 
 ---
 
@@ -314,6 +341,13 @@ O sistema permite comparar resultados entre inspeções ou rodadas para acompanh
 
 ### Gerenciar Publicação
 - O dono pode **atualizar a visibilidade** ou **remover** a publicação a qualquer momento.
+
+### Transparência e Proveniência no Diretório Público
+Ao consultar um relatório no diretório público, os visitantes poderão ver indicadores de integridade e detalhes adicionais sobre o processo de auditoria (Provenance Badge):
+- **Tipo de Auditoria (Proveniência)**: Indicação clara se o resultado foi fruto de uma **Autoavaliação** interna ou de uma **Auditoria Externa**.
+- **Versão do Software**: Qual versão específica do software foi auditada naquela rodada.
+- **Participação**: Número total de avaliadores e de inspeções fechadas que compuseram a nota média da rodada.
+- **Modelo de Consenso**: Qual modelo de resolução de divergências (Voto Majoritário, Dono Decide, Convergência) foi configurado para gerar aquele score consolidado.
 
 > [!IMPORTANT]
 > O sistema **sanitiza** automaticamente os dados públicos, removendo `user_id`, `observation` e `comments` para proteger a privacidade dos avaliadores.
