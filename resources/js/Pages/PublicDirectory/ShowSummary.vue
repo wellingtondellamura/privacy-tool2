@@ -10,7 +10,7 @@ const props = defineProps({
     tool: Object,
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const getMedalVariant = (medal) => {
     if (!medal) return 'neutral';
@@ -25,10 +25,10 @@ const getMedalVariant = (medal) => {
 const getMedalImage = (medal) => {
     if (!medal) return null;
     const name = (typeof medal === 'string' ? medal : (medal.name || '')).toLowerCase();
-    
-    if (name.includes('ouro') || name.includes('gold')) return '/images/badges-gold.png';
-    if (name.includes('prata') || name.includes('silver')) return '/images/badges-silver.png';
-    if (name.includes('bronze')) return '/images/badges-bronze.png';
+    const loc = locale.value;
+    if (name.includes('ouro') || name.includes('gold')) return `/images/badges-gold_${loc}.png`;
+    if (name.includes('prata') || name.includes('silver')) return `/images/badges-silver_${loc}.png`;
+    if (name.includes('bronze')) return `/images/badges-bronze_${loc}.png`;
     
     return null;
 };

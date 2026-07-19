@@ -20,7 +20,7 @@ const props = defineProps({
     }
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const user = usePage().props.auth.user;
 
@@ -66,10 +66,11 @@ const toRoman = (num) => {
 const toAlpha = (index) => String.fromCharCode(65 + index);
 
 const getMedalImage = (medalName) => {
+    const loc = locale.value;
     const images = {
-        'gold': '/images/badges-gold.png',
-        'silver': '/images/badges-silver.png',
-        'bronze': '/images/badges-bronze.png',
+        'gold': `/images/badges-gold_${loc}.png`,
+        'silver': `/images/badges-silver_${loc}.png`,
+        'bronze': `/images/badges-bronze_${loc}.png`,
     };
     return images[medalName] || null;
 };

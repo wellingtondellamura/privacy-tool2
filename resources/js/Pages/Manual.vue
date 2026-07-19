@@ -208,7 +208,13 @@ const sections = [
                             <p class="text-lg text-surface-600 leading-relaxed mb-4">
                                 {{ $t('manual.hero_desc') }}
                             </p>
-                            <p class="text-sm text-surface-400">{{ $t('manual.hero_stats') }}</p>
+                            <div class="flex items-center gap-4 mb-4">
+                                <p class="text-sm text-surface-400">{{ $t('manual.hero_stats') }}</p>
+                                <a :href="`/docs/Manual_Mitra_${$i18n.locale}.pdf`" download target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Download PDF
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
