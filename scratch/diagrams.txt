@@ -1,0 +1,85 @@
+--- DIAGRAM 0 ---
+flowchart LR
+    A["Criar Projeto"] --> B["Criar Rodada de Avaliação"]
+    B --> C["Criar Inspeções"]
+    C --> D["Preencher Questionário"]
+    D --> E["Fechar Inspeção"]
+    E --> F["Fechar Rodada"]
+    F --> G["Visualizar Resultados"]
+    G --> H["Publicar no Diretório"]
+    H --> I["Gerar Selo"]
+
+--- DIAGRAM 1 ---
+stateDiagram-v2
+    [*] --> Rascunho
+    Rascunho --> Fechada: Fechar Rodada
+    Fechada --> [*]
+    note right of Rascunho: Inspeções podem ser criadas
+    note right of Fechada: Snapshot consolidado gerado
+
+--- DIAGRAM 2 ---
+stateDiagram-v2
+    [*] --> Rascunho
+    Rascunho --> Ativa: Ativar
+    Ativa --> Fechada: Fechar
+    Fechada --> [*]
+    note right of Rascunho: Preparação
+    note right of Ativa: Preenchendo respostas
+    note right of Fechada: Snapshots de resultado gerados
+
+--- DIAGRAM 3 ---
+mindmap
+  root((Transparência))
+    Pessoas/Atores
+      Identificação dos atores
+      Agências reguladoras
+      Papéis no uso dos dados
+    Propósito de Uso
+      Objetivo do uso
+      Base legal
+      Período de manipulação
+    Dados Pessoais
+      Quais dados são coletados
+      Origem e composição
+      Permissão do indivíduo
+    Compartilhamento
+      Destinatários
+      Base legal
+      Eventos de transferência
+    Agenciamento
+      Direitos do indivíduo
+      Meios de contato
+      Recursos no software
+
+--- DIAGRAM 4 ---
+flowchart TD
+    START([Início]) --> REG[Cadastrar-se / Login]
+    REG --> PROJ[Criar Projeto]
+    PROJ --> CONV{Convidar Membros?}
+    CONV -->|Sim| INVITE[Enviar Convites por E-mail]
+    INVITE --> ROUND
+    CONV -->|Não| ROUND[Criar Rodada de Avaliação]
+    ROUND --> INSP[Criar Inspeção na Rodada]
+    INSP --> ATIVAR[Ativar Inspeção]
+    ATIVAR --> QUEST[Preencher Questionário - 46 perguntas]
+    QUEST --> FECHAR[Fechar Inspeção]
+    FECHAR --> SNAP[Snapshots Gerados Automaticamente]
+    SNAP --> MAIS{Mais inspeções na rodada?}
+    MAIS -->|Sim| INSP
+    MAIS -->|Não| REVIEW[Revisar Rodada]
+    REVIEW --> CLOSE_ROUND[Fechar Rodada]
+    CLOSE_ROUND --> RESULT[Visualizar Resultados]
+    RESULT --> COMP{Comparar com outra rodada?}
+    COMP -->|Sim| COMPARE[Comparação Evolutiva]
+    COMP -->|Não| PUB{Publicar?}
+    PUB -->|Sim| PUBLIC[Publicar no Diretório Público]
+    PUBLIC --> BADGE{Gerar Selo?}
+    BADGE -->|Sim| SEAL[Gerar Selo Verificável]
+    BADGE -->|Não| EXPORT
+    PUB -->|Não| EXPORT{Exportar Dados?}
+    EXPORT -->|Sim| JSON[Exportar JSON/ZIP]
+    EXPORT -->|Não| FIM([Fim])
+    SEAL --> FIM
+    JSON --> FIM
+    COMPARE --> PUB
+

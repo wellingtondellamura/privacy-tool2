@@ -343,15 +343,8 @@ const sections = [
                                     <div v-for="(c, ci) in s.content" :key="ci" class="mb-5">
                                         <!-- Image Placeholder -->
                                         <template v-if="c.image">
-                                            <div class="w-full my-4 border rounded-xl overflow-hidden bg-surface-50 flex justify-center items-center p-8 border-dashed border-surface-300">
-                                                <div class="text-center">
-                                                    <svg class="mx-auto h-12 w-12 text-surface-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                    </svg>
-                                                    <p class="text-surface-500 font-medium">{{ $t(c.altKey) }}</p>
-                                                    <p class="text-xs text-surface-400 mt-1">Image placeholder ({{ c.image }})</p>
-                                                </div>
-                                                <!-- <img :src="c.image" :alt="$t(c.altKey)" class="max-w-full h-auto shadow-sm rounded-lg" /> -->
+                                            <div class="w-full my-4 border rounded-xl overflow-hidden bg-white flex justify-center items-center p-2 border-surface-200">
+                                                <img :src="c.image.replace('.png', '_' + $i18n.locale + '.png')" :alt="$t(c.altKey)" class="max-w-full h-auto shadow-sm rounded-lg" />
                                             </div>
                                         </template>
                                         <!-- Text Content -->
