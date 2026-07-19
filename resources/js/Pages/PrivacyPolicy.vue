@@ -19,7 +19,7 @@ const { t } = useI18n();
                     <span class="text-sm font-medium">{{ $t('common.back') }}</span>
                 </Link>
                 <div class="h-4 w-px bg-surface-200"></div>
-                <span class="text-sm text-surface-500">Privacy Tool</span>
+                <span class="text-sm text-surface-500">Mitra Privacy Tool</span>
             </div>
         </header>
 
@@ -86,7 +86,7 @@ const { t } = useI18n();
 
             <!-- Footer -->
             <div class="mt-16 pt-8 border-t border-surface-100 text-center">
-                <p class="text-sm text-surface-400">Privacy Tool &copy; {{ new Date().getFullYear() }}</p>
+                <p class="text-sm text-surface-400">Mitra Privacy Tool &copy; {{ new Date().getFullYear() }}</p>
             </div>
         </main>
     </div>

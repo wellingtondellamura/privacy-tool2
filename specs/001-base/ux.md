@@ -1,4 +1,4 @@
-# Privacy Tool — UX/UI Specification (raw-ux)
+# Mitra Privacy Tool — UX/UI Specification (raw-ux)
 
 ## 1) Premissa de Design
 

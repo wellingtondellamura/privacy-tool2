@@ -23,7 +23,7 @@ class RoundReviewStarted extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Processo de Consolidação Iniciado - ' . $this->round->project->name,
+            subject: __('email.round_review_subject', ['project' => $this->round->project->name]),
         );
     }
 

@@ -174,7 +174,7 @@ class RoundBadgeController extends Controller
             badgeDiv.innerHTML = html;
             container.parentNode.insertBefore(badgeDiv, container);
         })
-        .catch(err => console.error('Privacy Tool Badge Error:', err));
+        .catch(err => console.error('Mitra Privacy Tool Badge Error:', err));
 })();
 JS;
 

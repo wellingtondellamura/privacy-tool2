@@ -31,6 +31,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="APP_NAME" value="Mitra Tool"/>
+        <env name="APP_KEY" value="base64:zT+2WBfRunOXwALyExK1Z08P+iHvGkHsx8bR+PwV5kA="/>
         <env name="APP_LOCALE" value="pt_BR"/>
         <env name="APP_FALLBACK_LOCALE" value="en"/>
     </php>

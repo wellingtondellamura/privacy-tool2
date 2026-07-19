@@ -61,7 +61,7 @@ Route::get('/badge/{token}', [RoundBadgeController::class, 'publicShow'])
     ->name('badge.show');
 
 Route::post('/locale', function (Illuminate\Http\Request $request) {
-    $validated = $request->validate(['locale' => 'required|in:pt_BR,en']);
+    $validated = $request->validate(['locale' => 'required|in:pt_BR,en,es']);
     session(['locale' => $validated['locale']]);
     return back();
 })->name('locale.update');

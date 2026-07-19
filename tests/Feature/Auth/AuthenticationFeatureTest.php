@@ -21,6 +21,7 @@ test('successful user registration creates user with unverified email', function
         'email' => 'newuser@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'terms' => true,
     ]);
 
     // Then a new user record should be created
@@ -43,6 +44,7 @@ test('registration fires Registered event which triggers verification email', fu
         'email' => 'verify@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'terms' => true,
     ]);
 
     $user = User::where('email', 'verify@example.com')->first();

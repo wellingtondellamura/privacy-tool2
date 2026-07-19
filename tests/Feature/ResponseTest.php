@@ -32,10 +32,11 @@ beforeEach(function () {
     ]);
 
     $this->inspection = Inspection::create([
-        'project_id' => $this->project->id,
-        'questionnaire_version_id' => QuestionnaireVersion::getActive()->id,
-        'status' => 'active',
-        'started_at' => now(),
+        'project_id'                 => $this->project->id,
+        'questionnaire_version_id'   => QuestionnaireVersion::getActive()->id,
+        'user_id'                    => $this->evaluator->id,
+        'status'                     => 'active',
+        'started_at'                 => now(),
     ]);
 
     $this->question = Question::first();

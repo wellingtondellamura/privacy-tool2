@@ -1,9 +1,9 @@
-# 📘 Manual de Uso — Privacy Tool v2
+# 📘 Manual de Uso — Mitra Privacy Tool
 
 **Ferramenta de Inspeção de Transparência de Dados Pessoais**
 
 > [!NOTE]
-> O Privacy Tool v2 é uma ferramenta para avaliar a transparência no uso de dados pessoais em aplicações de software, baseada na **LGPD** e no modelo acadêmico **TR-Model** (Método Mitra). A avaliação é feita através de 46 critérios distribuídos em 5 dimensões de transparência.
+> O Mitra Privacy Tool é uma ferramenta para avaliar a transparência no uso de dados pessoais em aplicações de software, baseada na **LGPD** e no modelo acadêmico **TR-Model** (Método Mitra). A avaliação é feita através de 46 critérios distribuídos em 5 dimensões de transparência.
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 1. Visão Geral do Sistema
 
-O Privacy Tool v2 permite que equipes avaliem o nível de transparência de um software quanto ao tratamento de dados pessoais. O fluxo geral é:
+O Mitra Privacy Tool permite que equipes avaliem o nível de transparência de um software quanto ao tratamento de dados pessoais. O fluxo geral é:
 
 ```mermaid
 flowchart LR
@@ -57,10 +57,19 @@ Os resultados são classificados por um sistema gamificado de medalhas:
 
 | Medalha | Faixa de Score |
 |---------|---------------|
-| 🥇 **Ouro** | Score mais alto — excelente transparência |
-| 🥈 **Prata** | Boa conformidade |
-| 🥉 **Bronze** | Conformidade parcial |
-| ⚠️ **Incipiente** | Score mais baixo — necessita melhorias significativas |
+| 🥇 **Ouro** | Score mais alto — excelente transparência (91 a 100 pontos) |
+| 🥈 **Prata** | Boa conformidade (61 a 90 pontos) |
+| 🥉 **Bronze** | Conformidade parcial (41 a 60 pontos) |
+| ⚠️ **Incipiente** | Score mais baixo — necessita melhorias significativas (0 a 40 pontos) |
+
+### Internacionalização (i18n)
+
+O Mitra Privacy Tool foi desenhado com arquitetura global. Toda a interface de usuário, as mensagens do sistema e os e-mails transacionais (como convites e notificações) operam dinamicamente em três idiomas:
+- 🇧🇷 **Português** (pt_BR)
+- 🇺🇸 **Inglês** (en)
+- 🇪🇸 **Espanhol** (es)
+
+O idioma padrão é detectado automaticamente através do cabeçalho `Accept-Language` do navegador (visitantes e usuários não logados), e pode ser alterado através do menu superior e salvo permanentemente no perfil do usuário.
 
 ---
 
@@ -126,7 +135,7 @@ O **dono** do projeto pode acessar a aba **"Configurações"** na tela de detalh
 2. **Modelo de Consenso**: Define a estratégia matemática ou workflow de resolução para consolidar as respostas quando houver divergências de pontuação entre múltiplos avaliadores em uma rodada:
    - **Dono Decide**: Caso haja discordâncias, o dono do projeto revisará as notas divergentes e escolherá manualmente a resposta final consolidada na tela de revisão da rodada.
    - **Convergência dos Avaliadores**: Os avaliadores deverão discutir em um chat integrado para cada questão em conflito e reavaliar/ajustar suas próprias notas individuais até que haja convergência.
-   - **Voto Majoritário**: O sistema calcula automaticamente a nota mais votada. Empates são resolvidos a favor da nota mais conservadora (menor valor).
+   - **Voto Majoritário**: O sistema calcula automaticamente a nota mais votada. Em nome da integridade da auditoria, empates sempre são resolvidos em favor da resposta mais conservadora (pior cenário para a aplicação avaliada) seguindo estritamente a hierarquia: `Inexistente (0 pontos) > Insuficiente (50 pontos) > Suficiente (100 pontos)`.
 3. **Tipo de Auditoria**:
    - **Autoavaliação (Interna)**: A própria equipe interna do software realiza a inspeção.
    - **Auditoria Externa (Independente)**: Avaliação conduzida por um auditor ou consultoria externa e independente. Essa informação gera um selo diferenciado de proveniência.
@@ -188,10 +197,10 @@ stateDiagram-v2
 Durante a criação ou edição da rodada, é possível registrar a **Versão do Software Avaliado** (ex: `1.0.0` ou `v2.1.3`). Isso garante que os resultados daquela rodada fiquem atrelados a um release específico do produto.
 
 ### Painel de Divergências e Resolução de Conflitos
-Quando uma rodada possui mais de uma inspeção fechada por avaliadores diferentes, é comum que existam divergências de notas em certas perguntas. O sistema detecta e classifica a dispersão das notas em três níveis baseados na variância estatística das respostas:
-- **Divergência Baixa**
-- **Divergência Média**
-- **Divergência Alta**
+Quando uma rodada possui mais de uma inspeção fechada por avaliadores diferentes, é comum que existam divergências de notas em certas perguntas. O sistema detecta e classifica a dispersão das notas aplicando o cálculo estatístico de **Variância Populacional** `(1/N) * Σ(xi - média)²` sobre os scores assinalados. O resultado da variância define a severidade do conflito:
+- **Divergência Baixa**: Variância entre `0` e `10`
+- **Divergência Média**: Variância entre `11` e `30`
+- **Divergência Alta**: Variância `> 30`
 
 Durante a fase de **Revisão e Fechamento** da rodada, o **Painel de Divergências** ajuda os membros a tratarem esses conflitos dependendo do **Modelo de Consenso** ativo no projeto:
 - **Sob o modelo de Dono Decide**: O dono do projeto visualizará um painel de resolução na tela de revisão, podendo clicar em cada questão em conflito e definir de forma definitiva a resposta oficial consolidada.
@@ -301,6 +310,14 @@ Após **fechar uma inspeção**, o sistema gera automaticamente os snapshots de 
 - **Medalha** (Ouro, Prata, Bronze, Incipiente) com badge visual.
 - **Gráficos** visuais por dimensão.
 - Informações do projeto, versão do questionário e data.
+
+### 9.4 Transparência Matemática (Algoritmo de Agregação)
+
+Para garantir a total lisura e previsibilidade dos resultados, o cálculo de desempenho segue fórmulas matemáticas determinísticas *bottom-up*:
+1. **Conversão Base**: As respostas textuais são mapeadas para inteiros (Suficiente = 100, Insuficiente = 50, Inexistente = 0, Não se aplica = nulo).
+2. **Score da Categoria (Dimensão)**: `arredonda((soma(pontos_questoes) / (total_questoes_respondidas * 100)) * 100)`
+3. **Score da Seção**: Média aritmética simples dos scores das categorias filhas.
+4. **Score Global**: Média aritmética simples dos scores de todas as seções (atualmente 2 seções), seguido do arredondamento comercial inteiro, que define com precisão a medalha daquela rodada.
 
 ---
 

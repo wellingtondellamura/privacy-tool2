@@ -46,7 +46,7 @@ class ProfileController extends Controller
     public function updateLocale(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'locale' => 'required|in:pt_BR,en',
+            'locale' => 'required|in:pt_BR,en,es',
         ]);
 
         $request->user()->update(['locale' => $validated['locale']]);

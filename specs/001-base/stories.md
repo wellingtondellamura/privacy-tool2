@@ -1,4 +1,4 @@
-# 📘 Privacy Tool — Specification by Example (BDD)
+# 📘 Mitra Privacy Tool — Specification by Example (BDD)
 
 Versão: 2.0
 Escopo: Backend-first

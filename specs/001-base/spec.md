@@ -1,4 +1,4 @@
-# 📘 Privacy Tool — Especificação Formal (Spec-Driven Development)
+# 📘 Mitra Privacy Tool — Especificação Formal (Spec-Driven Development)
 
 **Versão:** 2.0.0
 **Status:** Especificação Técnica Base

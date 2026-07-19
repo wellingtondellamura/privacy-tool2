@@ -21,7 +21,7 @@ class SetLocale
         }
 
         if (!$locale) {
-            $locale = $request->getPreferredLanguage(['pt_BR', 'en']);
+            $locale = $request->getPreferredLanguage(['pt_BR', 'en', 'es']);
         }
 
         app()->setLocale($locale ?? config('app.fallback_locale', 'en'));

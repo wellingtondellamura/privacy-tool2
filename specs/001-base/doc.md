@@ -1,8 +1,8 @@
-# Privacy Tool — Raw Documentation (As-Is)
+# Mitra Privacy Tool — Raw Documentation (As-Is)
 
 ## 1) Visão Geral
 
-O Privacy Tool é uma aplicação web para inspeção de transparência no uso de dados pessoais em softwares/sites, com base na LGPD e no TR-Model.  
+O Mitra Privacy Tool é uma aplicação web para inspeção de transparência no uso de dados pessoais em softwares/sites, com base na LGPD e no TR-Model.  
 Fluxo principal: Início → Formulário → Resultados → Exportação estruturada.
 
 ---

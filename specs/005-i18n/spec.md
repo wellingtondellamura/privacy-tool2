@@ -584,7 +584,7 @@ Convenção de chaves: **namespace por feature** com dot notation.
   "results.footer.trmodel_link": "Metodologia TRModel (USP)",
   "results.footer.lgpd_link": "Portal Oficial: LGPD (Governo Federal)",
   "results.footer.description": "Uma iniciativa para ampliar a aderência a boas práticas técnicas de dados pessoais e empoderar a transparência.",
-  "results.footer.copyright": "Privacy Tool.",
+  "results.footer.copyright": "Mitra Privacy Tool.",
   "results.footer.developed_with": "Desenvolvido com o rigor técnico TR-Model v1.0",
 
   "comparison.breadcrumb_evolution": "Evolução e Comparação",
@@ -662,7 +662,7 @@ Convenção de chaves: **namespace por feature** com dot notation.
   "footer.references": "Referências Oficiais",
   "footer.trmodel_link": "Metodologia TRModel (USP)",
   "footer.lgpd_link": "Portal Oficial: LGPD (Governo Federal)",
-  "footer.copyright": "Privacy Tool. Todos os direitos reservados."
+  "footer.copyright": "Mitra Privacy Tool. Todos os direitos reservados."
 }
 ```
 

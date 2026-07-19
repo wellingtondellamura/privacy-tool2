@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="public/images/privacy-tool.png" width="200" alt="Privacy Tool Logo">
+  <img src="public/images/privacy-tool.png" width="200" alt="Mitra Privacy Tool Logo">
 </p>
 
-# Privacy Tool
+# Mitra Privacy Tool
 
-The **Privacy Tool** is a robust platform designed to support organizations in privacy management, compliance, and data protection. The tool centralizes the management of inspections, projects, and team collaboration within a single intuitive environment.
+The **Mitra Privacy Tool** is a robust platform designed to support organizations in privacy management, compliance, and data protection. The tool centralizes the management of inspections, projects, and team collaboration within a single intuitive environment.
 
 ## 🚀 Key Features
 
