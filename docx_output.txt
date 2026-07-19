@@ -1,0 +1,98 @@
+Checklist TR-Model (TR-List)
+Criado por: Dr. Thiago Adriano Coleti (CCT-UENP) e Prof. Dr. Marcelo Morandini (EACH-USP)
+
+O TR-List é um checklist composto por questões baseadas nas especificações de Transparência de Dados Pessoais propostas no TR-Model. O TR-List pode ser utilizado para dar suporte à avaliação por profissionais de IHC e de Proteção de Dados ou por avaliação com indivíduos a fim de verificar a transparência para os usuários finais. 
+O TR-List foi criado com base no TR-Model, um Perfil de Aplicação de Metadados que apresenta um conjunto mínimo de informações sobre manipulação de dados pessoais que devem ser disponibilizadas para garantir o mínimo de transparência no uso de dados pessoais. O artigo base do TR-model pode ser encontrado na página da IEEE Access (https://ieeexplore.ieee.org/document/9069871) e a Tese de Doutorado que deu origem ao modelo pode ser acessada na página de Teses da Universidade de São Paulo (https://www.teses.usp.br/teses/disponiveis/3/3141/tde-18102023-111015/pt-br.php).
+Uma possível aplicação do TR-List é a utilização do mesmo para apoiar o Privacy by Design (PbD), modelo este que estabelece 7 princípios de privacidade que devem ser abordados desde os estágios iniciais de projeto de produtos e serviços. Um dos princípios do PbD é a transparência dos processos conduzidos nos dados pessoais de forma a permitir a compreensão e intervenção dos titulares dos dados, caso necessário.
+O TR-List foi dividido nos seguintes grupos de questões:
+Pessoas/Atores: Pessoas (atores) envolvidos no uso dos dados pessoais. Visa verificar se as informações sobre quem realiza as tarefas são apresentadas assim como informações sobre como entrar em contato com o ator;
+Propósito de uso: apresenta questões que buscam verificar informações sobre como os dados pessoais são utilizados, ou seja, os objetivos de uso dos dados pessoais.
+Dados pessoais utilizados: verifica informações sobre quais dados são utilizados e como eles são adquiridos;
+Compartilhamento e Transparência: Auxiliar na verificação das informações sobre o compartilhamento de dados pessoais com outros controladores;
+Direitos do indivíduo: auxilia na verificação de informações sobre como o indivíduo pode/deve agir quando se sentir enganado ou lesado.
+As questões dentro dos grupos foram subdivididas em dois Tópicos
+Tópico 01: Existência da Informação: São questões voltadas para a existência da informação sobre o uso dos dados pessoais de acordo com o grupo específico. As opções de resposta são:
+Suficiente: Há informações suficientes sobre o uso de dados pessoais.
+Insuficiente: Não há informações suficientes, ou seja, não são disponibilizadas todas as informações necessárias para analisar o uso de dados pessoais.
+Inexistente: Não foram identificadas as informações requeridas sobre o uso dos dados pessoais.
+Tópico 02: Formato de apresentação: Esse tópico traz questões relacionadas ao formato de apresentação e a forma de disponibilizar. O formato de apresentação são as técnicas de uso de textos, imagens, vídeos etc. Já a forma de disponibilizar está relacionada à dificuldade do usuário encontrar informações no meio de textos complexos, caminhos difíceis de percorrer no software ou acesso dificultado à informação.
+As Opções de resposta são:
+Apropriado: as informações são apresentadas em formato adequado ao indivíduo e é de fácil localização
+Inapropriado: O formato de apresentação não é bom, não permite o entendimento da informação ou a forma de acesso é ruim/complexo.
+Necessita melhorias: um dos parâmetros (formato de exibição ou forma de disponibilizar) está adequado, mas o outro não. 
+A escolha da opção de resposta pode ser feita de acordo com o contexto de avaliação utilizado no momento, por exemplo: (1) Regulamentação: pode ser suficiente, insuficiente e inexistente em relação ao que é solicitado na GDPR ou LGPD ou outra regulamentação – avaliação feita por um desenvolver ou advogado, por exemplo; ou (2) Pessoal: Em uma avaliação com o usuário, o mesmo pode indicar que a informação é suficiente, insuficiente ou inexistente do ponto de vista de avaliação de um indivíduo procurando informações sobre o uso de seus dados pessoais.
+Grupo -  Pessoas e Atores
+Tópico 1: No que tange ao volume e qualidade das informações apresentadas, classifique como Suficiente, Insuficiente ou Inexistente.
+Informações sobre os atores tais como: Nome, endereço, telefone, e-mail e responsável pela empresa?
+Informações que indicam quais são as agências de proteção de dados regulamentam o uso dos dados pessoais pelos autores?
+Informações sobre o papel (função) de cada autor no uso dos dados pessoais?
+Tópico 2: No que tange o formato de apresentação das informações, classifique como Adequado, Inadequado ou Necessita melhorias
+Elementos de design (textos, figuras, fotos etc) utilizados para apresentar as informações dos autores.
+Simplicidade, objetividade e relevância das informações de forma a auxiliar efetivamente na análise dos atores envolvidos no uso dos dados pessoais.
+A facilidade de acesso das informações de forma a não exigir que o indivíduo realize buscas complexas ou análise/leia grandes volumes de textos.
+As informações evitam que o indivíduo precise buscar informações em outras fontes.
+
+Questões do Grupo: Propósitos/Objetivos de uso
+Tópico 1: No que tange ao volume e qualidade das informações apresentadas, classifique como Suficiente, Insuficiente ou Inexistente.
+Descrição do objetivo de uso dos dados pessoais.
+Informação sobre a lei/regulamentação que torna o uso dos dados pessoais legalizado.
+Informações sobre quais dados pessoais serão utilizados para atingir os objetivos apontados.
+Informação do ator responsável legal pelo uso dos dados pessoais.
+Informações sobre a existência, ou não, da utilização ou processamento de dados pessoais feitas exclusivamente por computador, sem a supervisão humana.
+Informações sobre o período de uso dos dados pessoais para o propósito indicado.
+
+Tópico 2: No que tange o formato de apresentação das informações, classifique como Adequado, Inadequado ou Necessita melhorias
+Elementos de design (textos, figuras, fotos etc) utilizados para apresentar as informações do propósito de uso dos dados.
+Simplicidade, objetividade e relevância das informações de forma a auxiliar efetivamente na análise do propósito de uso dos dados pessoais. 
+A facilidade de acesso das informações de forma a não exigir que o indivíduo realize buscas complexas ou análise/leia grandes volumes de textos.
+As informações apresentadas evitam que o indivíduo precise buscar informações em outras fontes.
+
+Questões do Grupo: Dados Pessoais
+Tópico 1: No que tange ao volume e qualidade das informações apresentadas, classifique como Suficiente, Insuficiente ou Inexistente.
+Informações de quais dados pessoais são utilizados.
+Descrição de como os dados pessoais são compostos (detalhes que são registrados).
+Informações sobre a origem dos dados (dispositivos, compra de terceiros, compartilhamento etc).
+Em caso de obrigatoriedade da disponibilização dos dados pelos indivíduos, informações sobre o que pode ocorrer no caso da não coleta dos dados.
+Informações sobre o objetivo do uso do dado pessoal e como (qual processo) é feito com o dado pessoal.
+Informações sobre a permissão concedida pelo indivíduo para o uso dos dados pessoais.
+
+Tópico 2: No que tange o formato de apresentação das informações, classifique como Adequado, Inadequado ou Necessita melhorias
+Elementos de design (textos, figuras, fotos etc) utilizados para apresentar as informações dos dados pessoais.
+Simplicidade, objetividade e relevância das informações de forma a auxiliar efetivamente na análise dos dados pessoais utilizados.
+A facilidade de acesso das informações de forma a não exigir que o indivíduo realize buscas complexas ou análise/leia grandes volumes de textos.
+As informações evitam que o indivíduo precise buscar informações em outras fontes.
+
+
+
+Questões do Grupo: Transferência e Compartilhamento
+Tópico 1: No que tange ao volume e qualidade das informações apresentadas, classifique como Suficiente, Insuficiente ou Inexistente.
+Informações de quais dados pessoais são transferidos ou compartilhados com terceiros.
+Informações sobre o motivo da transferência e/ou compartilhamento dos dados pessoais.
+Informações sobre a base legal (lei/regulamentação) que garante a legalidade do compartilhamento dos dados.
+Dados completos do destinatário dos dados pessoais, de forma que permita a identificação e o contato com o destinatário. 
+Dados da organização que monitora o uso dos dados pessoais no país ou região do destinatário, de forma que permita a identificação e o contato com o órgão.
+Relação de quais dados foram transferidos ou compartilhados e como foram obtidos.
+Informações para relembrar como você permitiu e/ou autorizou o compartilhamento dos dados pessoais.
+Informações sobre os eventos que causam a transferência/compartilhamento dos dados pessoais.
+
+Tópico 2: No que tange o formato de apresentação das informações, classifique como Adequado, Inadequado ou Necessita melhorias
+Elementos de design (textos, figuras, fotos etc) utilizados para apresentar as informações sobre a transferência ou compartilhamento dos dados.
+Simplicidade, objetividade e relevância das informações de forma a auxiliar efetivamente na análise das ações de transferência e compartilhamento.
+A facilidade de acesso das informações de forma a não exigir que o indivíduo realize buscas complexas ou análise/leia grandes volumes de textos.
+As informações evitam que o indivíduo precise buscar informações em outras fontes.
+
+
+
+
+Questões do Grupo: Ação, Questionamento e Negociação
+Tópico 1: No que tange ao volume e qualidade das informações apresentadas, classifique como Suficiente, Insuficiente ou Inexistente.
+Informações de como o indivíduo pode solicitar cópia de seus dados, alteração de permissão de uso dos dados, realizar uma reclamação ou exercer qualquer direito sobre os seus dados.
+Informações sobre meios de contato, telefones, e-mails sobre os atores envolvidos no uso dos dados pessoais.
+Informações e/ou recursos para o indivíduo solicitar cópia de seus dados, alteração de permissão de uso dos dados, realizar uma reclamação ou exercer qualquer direito sobre os seus dados diretamente no software, sem a necessidade de entrar em contato.
+
+Tópico 2: No que tange o formato de apresentação das informações, classifique como Adequado, Inadequado ou Necessita melhorias
+Elementos de design (textos, figuras, fotos etc) utilizados para apresentar as informações sobre meios para o indivíduo solicitar cópia de seus dados, alteração de permissão de uso dos dados, realizar uma reclamação ou exercer qualquer direito sobre os seus dados.
+Simplicidade, objetividade e relevância das informações de forma a orientar o indivíduo no exercício de seus direitos sobre seus dados pessoais.
+A facilidade de acesso das informações de forma a não exigir que o indivíduo realize buscas complexas ou análise/leia grandes volumes de textos.
+As informações evitam que o indivíduo precise buscar informações em outras fontes.
+

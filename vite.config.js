@@ -17,4 +17,22 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        chunkSizeWarningLimit: 1600,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('vue') || id.includes('@vue') || id.includes('vue-i18n')) {
+                            return 'vendor-vue';
+                        }
+                        if (id.includes('@inertiajs')) {
+                            return 'vendor-inertia';
+                        }
+                        return 'vendor-core';
+                    }
+                }
+            }
+        }
+    }
 });
