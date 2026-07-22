@@ -6,7 +6,7 @@ import Button from '@/Components/Button.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const activeSection = ref(null);
 const toggle = (id) => { activeSection.value = activeSection.value === id ? null : id; };
@@ -17,11 +17,19 @@ const roles = [
     { nameKey: 'manual.role_observer_name', descKey: 'manual.role_observer_desc' },
 ];
 
+const getMedalImage = (key) => {
+    const loc = locale.value;
+    if (key === 'gold') return `/images/badges-gold_${loc}.png`;
+    if (key === 'silver') return `/images/badges-silver_${loc}.png`;
+    if (key === 'bronze') return `/images/badges-bronze_${loc}.png`;
+    return null;
+};
+
 const medals = [
-    { icon: '🥇', nameKey: 'manual.medal_gold_name', descKey: 'manual.medal_gold_desc', bg: 'bg-yellow-400', text: 'text-yellow-900', shadow: 'shadow-yellow-400/30' },
-    { icon: '🥈', nameKey: 'manual.medal_silver_name', descKey: 'manual.medal_silver_desc', bg: 'bg-gray-300', text: 'text-gray-700', shadow: 'shadow-gray-300/30' },
-    { icon: '🥉', nameKey: 'manual.medal_bronze_name', descKey: 'manual.medal_bronze_desc', bg: 'bg-amber-600', text: 'text-amber-100', shadow: 'shadow-amber-600/30' },
-    { icon: '⚠️', nameKey: 'manual.medal_incipient_name', descKey: 'manual.medal_incipient_desc', bg: 'bg-red-400', text: 'text-red-900', shadow: 'shadow-red-400/30' },
+    { key: 'gold', nameKey: 'manual.medal_gold_name', descKey: 'manual.medal_gold_desc' },
+    { key: 'silver', nameKey: 'manual.medal_silver_name', descKey: 'manual.medal_silver_desc' },
+    { key: 'bronze', nameKey: 'manual.medal_bronze_name', descKey: 'manual.medal_bronze_desc' },
+    { key: 'incipient', nameKey: 'manual.medal_incipient_name', descKey: 'manual.medal_incipient_desc' },
 ];
 
 const answerLevels = [
@@ -260,16 +268,26 @@ const sections = [
                 </div>
 
                 <!-- Medal System -->
-                <div class="bg-surface-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden mb-16">
-                    <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,#16a34a_0%,transparent_50%)] opacity-20"></div>
-                    <div class="relative z-10 text-center max-w-2xl mx-auto">
-                        <h2 class="text-3xl font-bold mb-4">{{ $t('manual.medals_title') }}</h2>
-                        <p class="text-surface-300 mb-10">{{ $t('manual.medals_desc') }}</p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div v-for="m in medals" :key="m.nameKey" class="flex flex-col items-center">
-                                <div :class="[m.bg, m.text, m.shadow]" class="w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-3 shadow-lg">{{ m.icon }}</div>
-                                <span class="font-bold text-lg">{{ $t(m.nameKey) }}</span>
-                                <span class="text-xs text-surface-400 mt-1">{{ $t(m.descKey) }}</span>
+                <div class="bg-surface-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden mb-16 shadow-2xl border border-surface-800">
+                    <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_20%,#16a34a_0%,transparent_60%)] opacity-20 pointer-events-none"></div>
+                    <div class="relative z-10 text-center max-w-4xl mx-auto">
+                        <h2 class="text-3xl font-extrabold mb-3 tracking-tight">{{ $t('manual.medals_title') }}</h2>
+                        <p class="text-surface-300 mb-10 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">{{ $t('manual.medals_desc') }}</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 items-start">
+                            <div v-for="m in medals" :key="m.key" class="flex flex-col items-center text-center group">
+                                <div class="h-28 md:h-32 flex items-center justify-center mb-4 transform group-hover:scale-105 transition-transform duration-300">
+                                    <img v-if="getMedalImage(m.key)" 
+                                         :src="getMedalImage(m.key)" 
+                                         class="max-h-full max-w-full object-contain drop-shadow-2xl" 
+                                         :alt="$t(m.nameKey)" />
+                                    <div v-else class="w-20 h-20 rounded-full bg-red-500/20 border-2 border-red-500/40 text-red-400 flex items-center justify-center shadow-lg shadow-red-900/30">
+                                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-lg text-white mb-1.5">{{ $t(m.nameKey) }}</span>
+                                <span class="text-xs text-surface-400 leading-relaxed max-w-[180px]">{{ $t(m.descKey) }}</span>
                             </div>
                         </div>
                     </div>

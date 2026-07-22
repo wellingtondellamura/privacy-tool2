@@ -36,7 +36,7 @@ class RoundPublicationService
                 'published_at' => now(),
                 'published_by' => $user->id,
                 'score' => $payload['global_score'] ?? 0,
-                'medal' => $payload['medal']['name'] ?? null,
+                'medal' => is_array($payload['medal'] ?? null) ? ($payload['medal']['name'] ?? null) : ($payload['medal'] ?? null),
                 'year' => $round->closed_at?->year ?? now()->year,
                 'questionnaire_version_id' => $round->inspections()->first()?->questionnaire_version_id,
             ];

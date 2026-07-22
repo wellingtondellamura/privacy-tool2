@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\EvaluationRound;
 use App\Models\Project;
 use App\Actions\CloseRoundAction;
+use App\Enums\Visibility;
+use App\Services\RoundPublicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -158,11 +160,8 @@ class EvaluationRoundController extends Controller
             
             // Handle immediate publication if requested
             if ($validated['publish_immediately'] ?? false) {
-                $round->publicDirectory()->create([
-                    'visibility' => $validated['visibility'] ?? 'score_public',
-                    'published_at' => now(),
-                    'payload_json' => $round->snapshots()->latest()->first()->payload_json,
-                ]);
+                $visibility = Visibility::tryFrom($validated['visibility'] ?? '') ?? Visibility::SCORE_PUBLIC;
+                app(RoundPublicationService::class)->publish($round, $visibility, $request->user());
             }
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['status' => $e->getMessage()]);

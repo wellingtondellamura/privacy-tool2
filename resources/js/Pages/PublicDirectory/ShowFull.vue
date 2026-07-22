@@ -94,13 +94,13 @@ const getMedalImage = (medal) => {
                         <div v-if="tool.report.medal" class="flex flex-col items-center gap-2 font-medium">
                             <img v-if="getMedalImage(tool.report.medal)" 
                                  :src="getMedalImage(tool.report.medal)" 
-                                 class="w-32 h-32 object-contain drop-shadow-md mb-2" 
+                                 class="w-32 h-32 object-contain drop-shadow-md mb-1" 
                                  :alt="tool.report.medal.name || tool.report.medal" />
                             
-                             <Badge :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
+                            <Badge v-else :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
                                 {{ tool.report.medal.name || tool.report.medal }}
                             </Badge>
-                            <p class="text-xs text-surface-400 font-medium mt-2 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count || tool.inspection_count }) }}</p>
+                            <p class="text-xs text-surface-400 font-medium mt-1 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count || tool.inspection_count }) }}</p>
                         </div>
                         <div v-else class="text-surface-400 italic text-sm">{{ $t('directory.full_no_medal') }}</div>
                     </Card>

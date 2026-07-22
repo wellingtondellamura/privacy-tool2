@@ -34,12 +34,8 @@ const getMedalImage = (medal) => {
 };
 
 const getConsensusModelLabel = (model) => {
-    switch(model) {
-        case 'owner_decides': return t('models.owner_decides', 'Decisão do Coordenador');
-        case 'evaluator_convergence': return t('models.evaluator_convergence', 'Convergência de Avaliadores');
-        case 'majority_vote': return t('models.majority_vote', 'Voto da Maioria');
-        default: return model;
-    }
+    if (!model) return '';
+    return t(`labels.consensus_model.${model}`, model);
 };
 </script>
 
@@ -49,43 +45,43 @@ const getConsensusModelLabel = (model) => {
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
                 
                 <!-- Hero Section -->
-                <div class="relative py-16 px-8 rounded-[40px] bg-surface-900 border border-surface-700 shadow-2xl overflow-hidden text-center">
-                    <div class="absolute inset-0 bg-gradient-to-br from-brand-900/40 to-transparent"></div>
+                <div class="relative py-14 px-6 sm:px-10 rounded-[40px] bg-surface-900 border border-surface-700/80 shadow-2xl overflow-hidden text-center">
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand-900/40 via-surface-900 to-surface-950"></div>
                     <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500 rounded-full blur-[120px] opacity-20 -mr-32 -mt-32"></div>
                     
                     <div class="relative z-10 space-y-8">
                         <div class="flex flex-col items-center">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-[10px] font-bold uppercase tracking-widest mb-6">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-[10px] font-bold uppercase tracking-widest mb-4">
                                 {{ $t('directory.summary_badge') }}
                             </div>
                             <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-tight">{{ tool.name }}</h1>
                         </div>
 
-                        <div class="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-20">
+                        <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
                             <div class="text-center group">
-                                <div class="text-7xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-500">{{ tool.score }}%</div>
+                                <div class="text-6xl md:text-7xl font-black text-white mb-1 group-hover:scale-105 transition-transform duration-500">{{ tool.score }}%</div>
                                 <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_score') }}</div>
                             </div>
                             
-                            <div class="h-16 w-px bg-surface-700 hidden md:block"></div>
+                            <div class="h-16 w-px bg-surface-700/80 hidden md:block"></div>
                             
-                            <div class="text-center" v-if="tool.medal">
-                                <div class="mb-4 flex flex-col items-center">
+                            <div class="text-center flex flex-col items-center" v-if="tool.medal">
+                                <div class="flex flex-col items-center">
                                     <img v-if="getMedalImage(tool.medal)" 
                                          :src="getMedalImage(tool.medal)" 
-                                         class="w-32 h-32 object-contain drop-shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-500" 
+                                         class="w-28 h-28 md:w-32 md:h-32 object-contain drop-shadow-2xl mb-2 transform hover:scale-105 transition-transform duration-500" 
                                          :alt="tool.medal.name || tool.medal" />
                                          
-                                    <Badge :variant="getMedalVariant(tool.medal)" size="lg" class="px-8 py-2 text-sm uppercase tracking-widest shadow-lg">
+                                    <Badge v-else :variant="getMedalVariant(tool.medal)" size="lg" class="px-8 py-2 text-sm uppercase tracking-widest shadow-lg mb-2">
                                         {{ tool.medal.name || tool.medal }}
                                     </Badge>
                                 </div>
-                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_classification') }}</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold mt-1">{{ $t('directory.summary_classification') }}</div>
                             </div>
                         </div>
 
                         <!-- Summary Info Pills -->
-                        <div class="pt-6 border-t border-surface-700/50 flex flex-wrap justify-center items-center gap-4 text-xs font-medium text-surface-300">
+                        <div class="pt-6 border-t border-surface-700/50 flex flex-wrap justify-center items-center gap-3 text-xs font-medium text-surface-300">
                             <!-- Evaluators -->
                             <div class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
                                 <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,15 +102,12 @@ const getConsensusModelLabel = (model) => {
                             </div>
                             
                             <!-- Consensus Model -->
-                            <a href="https://mitra.ufca.edu.br" target="_blank" class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner hover:bg-surface-700 hover:text-white transition-colors group">
-                                <svg class="w-4 h-4 text-brand-400 group-hover:text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div v-if="tool.consensus_model" class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
+                                <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                                 </svg>
                                 {{ getConsensusModelLabel(tool.consensus_model) }}
-                                <svg class="w-3 h-3 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                            </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,21 +115,23 @@ const getConsensusModelLabel = (model) => {
                 <!-- Main Content -->
                 <div class="space-y-10">
                     <!-- Diagnosis & Provenance Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div v-if="tool.diagnosis" class="md:col-span-2 space-y-4 flex flex-col">
-                            <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                        <div v-if="tool.diagnosis" class="md:col-span-2 space-y-3 flex flex-col">
+                            <h2 class="text-lg font-extrabold text-surface-900 flex items-center gap-2">
                                  <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                  {{ $t('directory.summary_diagnosis') }}
                             </h2>
-                            <Card class="p-8 bg-white border-surface-200 flex-1 flex items-center">
-                                <div class="text-xl text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium">
-                                    "{{ tool.diagnosis }}"
+                            <Card class="p-6 md:p-8 bg-white border-surface-200 flex-1 flex items-center justify-center relative overflow-hidden shadow-sm">
+                                <div class="absolute top-3 left-4 text-surface-200 text-6xl font-serif select-none pointer-events-none">“</div>
+                                <div class="text-base md:text-lg text-surface-700 leading-relaxed italic whitespace-pre-wrap font-medium text-center relative z-10 px-4">
+                                    {{ tool.diagnosis }}
                                 </div>
+                                <div class="absolute bottom-1 right-4 text-surface-200 text-6xl font-serif select-none pointer-events-none">”</div>
                             </Card>
                         </div>
                         
-                        <div :class="tool.diagnosis ? 'md:col-span-1' : 'md:col-span-3'" class="space-y-4">
-                            <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+                        <div :class="tool.diagnosis ? 'md:col-span-1' : 'md:col-span-3'" class="space-y-3 flex flex-col">
+                            <h2 class="text-lg font-extrabold text-surface-900 flex items-center gap-2">
                                  <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                                  {{ $t('directory.provenance_title') }}
                             </h2>
@@ -146,7 +141,9 @@ const getConsensusModelLabel = (model) => {
                                 :user-count="tool.user_count_total"
                                 :inspection-count="tool.inspection_count"
                                 :inspection-date="tool.inspection_date"
-                                class="h-full"
+                                :consensus-model="tool.consensus_model"
+                                :show-title="false"
+                                class="flex-1"
                             />
                         </div>
                     </div>

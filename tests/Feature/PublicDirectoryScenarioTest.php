@@ -135,3 +135,26 @@ test('scenario: access private inspection', function () {
     // Then the system must return 404
     $response->assertStatus(404);
 });
+
+test('scenario: publication with score 0 falls back to snapshot score in public directory list', function () {
+    $p = Project::factory()->create(['name' => 'Tool Fallback']);
+    $r = EvaluationRound::factory()->closed()->create(['project_id' => $p->id]);
+    RoundSnapshot::factory()->create(['evaluation_round_id' => $r->id, 'payload_json' => ['global_score' => 85, 'medal' => ['name' => 'Prata']]]);
+
+    // Create publication directly without score (simulating legacy/unpopulated score)
+    $pub = RoundPublication::create([
+        'evaluation_round_id' => $r->id,
+        'visibility' => Visibility::SCORE_PUBLIC,
+        'score' => 0,
+        'published_at' => now(),
+    ]);
+
+    $response = $this->getJson('/tools', ['X-Inertia' => 'true']);
+    $response->assertStatus(200);
+
+    $data = $response->json('props.tools.data');
+    $item = collect($data)->firstWhere('project_name', 'Tool Fallback');
+    
+    expect($item)->not->toBeNull();
+    expect($item['score'])->toBe(85);
+});

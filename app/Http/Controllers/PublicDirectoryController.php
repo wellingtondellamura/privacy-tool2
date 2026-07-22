@@ -42,17 +42,25 @@ class PublicDirectoryController extends Controller
             default => $query->orderBy('score', 'desc'),
         };
 
-        $publications = $query->paginate(15)->withQueryString()->through(fn ($pub) => [
-            'slug' => $pub->slug,
-            'project_name' => $pub->evaluationRound->project->name,
-            'round_name' => $pub->evaluationRound->name,
-            'project_url' => $pub->evaluationRound->project->url,
-            'score' => $pub->score,
-            'medal' => $pub->medal,
-            'year' => $pub->year,
-            'published_at' => $pub->published_at?->format('d/m/Y'),
-            'visibility' => $pub->visibility->value,
-        ]);
+        $publications = $query->paginate(15)->withQueryString()->through(function ($pub) {
+            $latestSnapshot = $pub->evaluationRound->snapshots()->latest()->first();
+            $payload = $latestSnapshot ? $latestSnapshot->payload_json : [];
+            
+            $score = ($pub->score && $pub->score > 0) ? $pub->score : ($payload['global_score'] ?? 0);
+            $medal = $pub->medal ?: (is_array($payload['medal'] ?? null) ? ($payload['medal']['name'] ?? null) : ($payload['medal'] ?? null));
+
+            return [
+                'slug' => $pub->slug,
+                'project_name' => $pub->evaluationRound->project->name,
+                'round_name' => $pub->evaluationRound->name,
+                'project_url' => $pub->evaluationRound->project->url,
+                'score' => $score,
+                'medal' => $medal,
+                'year' => $pub->year ?? ($pub->evaluationRound->closed_at?->year ?? now()->year),
+                'published_at' => $pub->published_at?->format('d/m/Y'),
+                'visibility' => $pub->visibility->value,
+            ];
+        });
 
         return Inertia::render('PublicDirectory/Index', [
             'tools' => $publications,
