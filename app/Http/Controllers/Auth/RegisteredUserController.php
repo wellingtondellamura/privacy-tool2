@@ -37,7 +37,10 @@ class RegisteredUserController extends Controller
             'terms' => ['required', 'accepted'],
             'profile' => ['nullable', 'string', 'in:student,professional,researcher'],
             'affiliation' => ['nullable', 'string', 'max:255'],
+            'locale' => ['nullable', 'string', 'in:pt_BR,en,es'],
         ]);
+
+        $locale = $request->input('locale') ?? app()->getLocale();
 
         $user = User::create([
             'name' => $request->name,
@@ -46,7 +49,10 @@ class RegisteredUserController extends Controller
             'terms_accepted_at' => now(),
             'profile' => $request->profile ?: null,
             'affiliation' => $request->affiliation ?: null,
+            'locale' => $locale,
         ]);
+
+        session(['locale' => $locale]);
 
         event(new Registered($user));
 

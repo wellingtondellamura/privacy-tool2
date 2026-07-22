@@ -7,7 +7,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ref, computed } from 'vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const currentStep = ref(1);
 
@@ -19,6 +19,7 @@ const form = useForm({
     terms: false,
     profile: '',
     affiliation: '',
+    locale: locale.value,
 });
 
 // Front-end step validation

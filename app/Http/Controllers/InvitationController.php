@@ -76,11 +76,16 @@ class InvitationController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
+            $locale = $request->input('locale') ?? app()->getLocale();
+
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $invitation->email,
                 'password' => Hash::make($validated['password']),
+                'locale' => $locale,
             ]);
+
+            session(['locale' => $locale]);
             
             Auth::login($user);
         } else {
