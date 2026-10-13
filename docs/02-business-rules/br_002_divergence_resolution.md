@@ -19,19 +19,22 @@ The system computes the population variance of the numeric scores assigned to th
   - If `N == 0` (no answers), variance is `0`.
 
 ### 3.2 Divergence Classification (`classify`)
-The calculated variance is mapped to a discrete classification to provide visual feedback to the user.
+The classification uses the **standard deviation** (σ = √variance), which is on the same 0–100 scale as the scores. Null scores ("Não se aplica") are ignored.
 - **Rules (Decision Table):**
-  | Variance Condition | Output Classification |
-  |--------------------|-----------------------|
-  | `<= 10`            | Low (baixa)           |
-  | `11` to `30`       | Medium (média)        |
-  | `> 30`             | High (alta)           |
+  | Standard deviation | Output Classification | Example |
+  |--------------------|-----------------------|---------|
+  | `<= 10`            | Low (baixa)           | 100 × 90 (σ = 5) |
+  | `> 10` to `30`     | Medium (média)        | 100 × 50 (σ = 25) |
+  | `> 30`             | High (alta)           | 100 × 0 (σ = 50) |
+
+> Before 2026-10, the same thresholds were applied to the variance, so any disagreement between two evaluators was classified as "high".
 
 ## 4. Output
 For any given question with multiple answers, the system outputs an array:
 ```json
 {
-  "variance": 15.5,
+  "variance": 625.0,
+  "std_dev": 25.0,
   "classification": "medium"
 }
 ```

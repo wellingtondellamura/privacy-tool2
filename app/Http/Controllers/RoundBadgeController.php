@@ -80,7 +80,7 @@ class RoundBadgeController extends Controller
         }
 
         $lang = request()->query('lang', 'en');
-        if (!in_array($lang, ['pt_BR', 'en'])) {
+        if (!in_array($lang, ['pt_BR', 'en', 'es'])) {
             $lang = 'en';
         }
         app()->setLocale($lang);
@@ -126,55 +126,61 @@ class RoundBadgeController extends Controller
         }
 
         $lang = request()->query('lang', 'en');
-        if (!in_array($lang, ['pt_BR', 'en'])) {
+        if (!in_array($lang, ['pt_BR', 'en', 'es'])) {
             $lang = 'en';
         }
 
         $apiUrl = route('badge.show', $token) . '?lang=' . $lang;
         
+        // The badge runs on third-party sites: every value is inserted with
+        // textContent / setAttribute, never as HTML.
         $js = <<<JS
 (function() {
-    const container = document.currentScript;
+    var container = document.currentScript;
+    var colors = { gold: '#fbbf24', silver: '#94a3b8', bronze: '#b45309', incipient: '#ef4444' };
+
+    function el(tag, style, text) {
+        var node = document.createElement(tag);
+        if (style) node.setAttribute('style', style);
+        if (text !== undefined && text !== null) node.textContent = String(text);
+        return node;
+    }
+
     fetch('{$apiUrl}')
-        .then(response => response.json())
-        .then(data => {
-            const badgeDiv = document.createElement('div');
-            badgeDiv.className = 'privacy-tool-badge privacy-tool-badge-' + data.style;
-            
-            let html = `
-                <a href="\${data.public_url}" target="_blank" style="text-decoration:none; color:inherit; font-family:sans-serif; display:inline-block;">
-                    <div style="border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:inline-block; background:#fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border-top: 4px solid \${data.medal_key === 'gold' ? '#fbbf24' : (data.medal_key === 'silver' ? '#94a3b8' : '#b45309')}; min-width: 200px;">
-                        <div style="font-size:12px; font-weight:600; color:#475569;">\${data.project_name}</div>
-                        <div style="font-weight:bold; font-size:18px; margin:6px 0; color:#0f172a;">\${data.medal} (\${data.global_score}%)</div>
-                        <div style="font-size:10px; color:#64748b; margin-bottom:4px;">\${data.audited_label} \${data.date}</div>
-                        <div style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px; \${data.is_self_assessment ? 'background:#fef3c7; color:#d97706;' : 'background:#dcfce7; color:#15803d;' }">
-                            \${data.audit_type_label}
-                        </div>
-                        \${data.software_version ? `<div style="font-size:10px; color:#94a3b8; margin-top:6px;">v\${data.software_version}</div>` : ''}
-                    </div>
-                </a>
-            `;
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            var badgeDiv = el('div');
+            badgeDiv.className = 'privacy-tool-badge privacy-tool-badge-' + String(data.style).replace(/[^a-z]/g, '');
+
+            var link = el('a', 'text-decoration:none; color:inherit; font-family:sans-serif; display:inline-block;');
+            if (/^https?:\/\//.test(data.public_url)) link.href = data.public_url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+
+            var scoreText = data.medal + ' (' + Number(data.global_score) + '%)';
 
             if (data.style === 'compact') {
-                html = `
-                    <a href="\${data.public_url}" target="_blank" style="text-decoration:none; color:inherit; font-family:sans-serif;">
-                        <div style="border:1px solid #ccc; border-radius:4px; padding:6px; display:inline-block; background:#fff;">
-                             <strong>\${data.medal}</strong> (\${data.global_score}%)
-                        </div>
-                    </a>
-                `;
+                var compact = el('div', 'border:1px solid #ccc; border-radius:4px; padding:6px; display:inline-block; background:#fff;');
+                compact.appendChild(el('strong', '', scoreText));
+                link.appendChild(compact);
             } else if (data.style === 'minimal') {
-                html = `
-                    <a href="\${data.public_url}" target="_blank" style="text-decoration:none; color:inherit; font-family:sans-serif;">
-                         <div style="display:inline-block; font-weight:bold;">\${data.medal} (\${data.global_score}%)</div>
-                    </a>
-                `;
+                link.appendChild(el('div', 'display:inline-block; font-weight:bold;', scoreText));
+            } else {
+                var card = el('div', 'border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:inline-block; background:#fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); min-width: 200px; border-top: 4px solid ' + (colors[data.medal_key] || '#94a3b8') + ';');
+                card.appendChild(el('div', 'font-size:12px; font-weight:600; color:#475569;', data.project_name));
+                card.appendChild(el('div', 'font-weight:bold; font-size:18px; margin:6px 0; color:#0f172a;', scoreText));
+                card.appendChild(el('div', 'font-size:10px; color:#64748b; margin-bottom:4px;', data.audited_label + ' ' + (data.date || '')));
+                card.appendChild(el('div', 'font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px; ' + (data.is_self_assessment ? 'background:#fef3c7; color:#d97706;' : 'background:#dcfce7; color:#15803d;'), data.audit_type_label));
+                if (data.software_version) {
+                    card.appendChild(el('div', 'font-size:10px; color:#94a3b8; margin-top:6px;', 'v' + data.software_version));
+                }
+                link.appendChild(card);
             }
 
-            badgeDiv.innerHTML = html;
+            badgeDiv.appendChild(link);
             container.parentNode.insertBefore(badgeDiv, container);
         })
-        .catch(err => console.error('Mitra Privacy Tool Badge Error:', err));
+        .catch(function(err) { console.error('Mitra Privacy Tool Badge Error:', err); });
 })();
 JS;
 

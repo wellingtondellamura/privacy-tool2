@@ -6,6 +6,7 @@ return [
         'silver' => 'Prata',
         'bronze' => 'Bronze',
         'incipient' => 'Incipiente',
+        'no_data' => 'Sem dados',
     ],
 
     'response' => [
@@ -13,13 +14,13 @@ return [
             'high' => 'Suficiente',
             'medium' => 'Insuficiente',
             'low' => 'Inexistente',
-            'other' => 'Outro',
+            'other' => 'Não se aplica',
         ],
         'presentation_format' => [
             'high' => 'Apropriado',
             'medium' => 'Inapropriado',
             'low' => 'Necessita melhorias',
-            'other' => 'Outro',
+            'other' => 'Não se aplica',
         ],
     ],
 

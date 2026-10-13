@@ -19,7 +19,7 @@ class ResponseController extends Controller
 
         // Only active inspections accept responses
         if (!$inspection->isActive()) {
-            return response()->json(['message' => 'Inspection is not active. Cannot submit responses.'], 422);
+            return response()->json(['message' => __('messages.inspection_not_active')], 422);
         }
 
         // Golden rule: only the inspection's responsible member can submit responses
@@ -32,7 +32,7 @@ class ResponseController extends Controller
         $role = $inspection->project->getMemberRole($user);
 
         if (!in_array($role, ['owner', 'evaluator'])) {
-            return response()->json(['message' => 'Only evaluators can submit responses.'], 403);
+            return response()->json(['message' => __('messages.only_evaluators_respond')], 403);
         }
 
         $requireEvidence = $inspection->project->require_evidence_for_high && $request->input('answer') === 'high';

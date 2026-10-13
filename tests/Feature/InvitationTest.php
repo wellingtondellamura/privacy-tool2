@@ -91,12 +91,50 @@ test('accept invitation with existing user adds to project', function () {
         'expires_at' => now()->addDays(7),
     ]);
 
-    $response = $this->post("/invitations/{$invitation->token}/accept");
+    $response = $this->actingAs($existingUser)->post("/invitations/{$invitation->token}/accept");
 
     $response->assertRedirect(route('projects.show', $this->project->id));
     $response->assertSessionHas('success');
     expect($this->project->hasMember($existingUser))->toBeTrue();
     expect($this->project->getMemberRole($existingUser))->toBe('observer');
+});
+
+test('invitation token does not sign in an existing account', function () {
+    $existingUser = User::factory()->create(['email' => 'existing@example.com']);
+
+    $invitation = Invitation::create([
+        'project_id' => $this->project->id,
+        'email' => 'existing@example.com',
+        'token' => str_repeat('a', 64),
+        'role' => 'evaluator',
+        'expires_at' => now()->addDays(7),
+    ]);
+
+    $response = $this->post("/invitations/{$invitation->token}/accept");
+
+    $response->assertRedirect(route('login'));
+    $this->assertGuest();
+    expect($this->project->hasMember($existingUser))->toBeFalse();
+    expect($invitation->fresh()->accepted_at)->toBeNull();
+});
+
+test('another signed-in user cannot accept an invitation sent to someone else', function () {
+    $invited = User::factory()->create(['email' => 'invited@example.com']);
+    $intruder = User::factory()->create();
+
+    $invitation = Invitation::create([
+        'project_id' => $this->project->id,
+        'email' => 'invited@example.com',
+        'token' => str_repeat('b', 64),
+        'role' => 'evaluator',
+        'expires_at' => now()->addDays(7),
+    ]);
+
+    $this->actingAs($intruder)->post("/invitations/{$invitation->token}/accept")
+        ->assertSessionHasErrors('token');
+
+    expect($this->project->hasMember($invited))->toBeFalse();
+    expect($this->project->hasMember($intruder))->toBeFalse();
 });
 
 test('expired invitation returns error', function () {

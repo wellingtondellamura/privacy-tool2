@@ -87,25 +87,38 @@ class CloseRoundAction
         }
         $resolvedAnswers = $consensusModel->strategy()->resolve($round);
 
-        foreach ($template['sections'] as $sIndex => $templateSection) {
+        // Index every inspection payload by question_id, so questions are matched by
+        // identity instead of position. Null = unanswered or "Não se aplica".
+        $scoresByQuestion = [];
+        foreach ($payloads as $payload) {
+            foreach ($payload['sections'] ?? [] as $section) {
+                foreach ($section['categories'] ?? [] as $category) {
+                    foreach ($category['questions'] ?? [] as $question) {
+                        $scoresByQuestion[$question['question_id']][] = $question['score'] ?? null;
+                    }
+                }
+            }
+        }
+
+        foreach ($template['sections'] as $templateSection) {
             $categories = [];
-            foreach ($templateSection['categories'] as $cIndex => $templateCategory) {
-                
+            foreach ($templateSection['categories'] as $templateCategory) {
+
                 // Average question scores or use resolved consensus scores
                 $questions = [];
-                foreach ($templateCategory['questions'] as $qIndex => $templateQuestion) {
+                foreach ($templateCategory['questions'] as $templateQuestion) {
                     $qId = $templateQuestion['question_id'];
-                    $qScores = $payloads->map(fn($p) => $p['sections'][$sIndex]['categories'][$cIndex]['questions'][$qIndex]['score'] ?? 0);
-                    $divergence = DivergenceService::forQuestion($qScores->toArray());
+                    $qScores = $scoresByQuestion[$qId] ?? [];
+                    $divergence = DivergenceService::forQuestion($qScores);
 
                     if (isset($resolvedAnswers[$qId])) {
-                        $ansVal = $resolvedAnswers[$qId];
-                        $answerLevel = \App\Enums\AnswerLevel::tryFrom($ansVal) ?? \App\Enums\AnswerLevel::OTHER;
-                        $qScore = $answerLevel->score() ?? 0;
+                        $answerLevel = \App\Enums\AnswerLevel::tryFrom($resolvedAnswers[$qId]) ?? \App\Enums\AnswerLevel::OTHER;
+                        $qScore = $answerLevel->score();
                         $levelValue = $answerLevel->value;
                     } else {
-                        $qScore = (int) round($qScores->sum() / $count);
+                        $qScore = AggregationService::averageScore($qScores);
                         $levelValue = match (true) {
+                            $qScore === null => 'other',
                             $qScore >= 91 => 'high',
                             $qScore >= 41 => 'medium',
                             default => 'low',
@@ -118,18 +131,16 @@ class CloseRoundAction
                         'level'         => $levelValue,
                         'score'         => $qScore,
                         'variance'      => $divergence['variance'],
+                        'std_dev'       => $divergence['std_dev'],
                         'classification' => $divergence['classification'],
                     ];
                 }
 
-                // Recalculate category score dynamically based on the finalized question scores
-                $catQuestionScores = array_filter(array_column($questions, 'score'), fn($s) => $s !== null);
-                $avgCatScore = AggregationService::categoryScore($catQuestionScores, count($questions));
-
                 $categories[] = [
                     'id' => $templateCategory['id'],
                     'name' => $templateCategory['name'],
-                    'score' => $avgCatScore,
+                    // Recalculate category score from the finalized question scores
+                    'score' => AggregationService::categoryScore(array_column($questions, 'score')),
                     'questions' => $questions,
                 ];
             }
@@ -149,9 +160,7 @@ class CloseRoundAction
 
         // Bug 1 fix: calculate global_score as average of section scores (same formula as CloseInspectionAction),
         // not as average of individual inspection global_scores (which would be averaging already-rounded averages).
-        $globalScore = count($sections) > 0
-            ? (int) round(array_sum(array_column($sections, 'score')) / count($sections))
-            : 0;
+        $globalScore = AggregationService::globalScore(array_column($sections, 'score'));
 
         return [
             'global_score' => $globalScore,

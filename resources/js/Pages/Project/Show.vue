@@ -11,6 +11,7 @@ import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ProjectIcon from '@/Components/ProjectIcon.vue';
 import ProjectIconPicker from '@/Components/ProjectIconPicker.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import StatusBadge from '@/Components/StatusBadge.vue';
 
 const props = defineProps({
     project: {
@@ -99,6 +100,7 @@ const submitInvite = () => {
 };
 
 const canManageMembers = props.project.owner_id === user.id;
+const currentRole = props.project.members.find(m => m.user_id === user.id)?.role;
 
 // We format dates
 const selectedRounds = ref([]);
@@ -169,43 +171,9 @@ const latestClosedInspection = computed(() => {
     return props.project.inspections.find(i => i.status === 'closed');
 });
 
-// Publication Logic
-const isPublishingModalOpen = ref(false);
-const currentInspectionToPublish = ref(null);
+const visibilityLabel = (visibility) => t(`labels.visibility.${visibility}`);
 
-const publishForm = useForm({
-    visibility: 'private',
-});
-
-const openPublishModal = (inspection) => {
-    currentInspectionToPublish.value = inspection;
-    publishForm.visibility = inspection.publication?.visibility || 'private';
-    isPublishingModalOpen.value = true;
-};
-
-const closePublishModal = () => {
-    isPublishingModalOpen.value = false;
-    currentInspectionToPublish.value = null;
-    publishForm.reset();
-};
-
-const submitPublication = () => {
-    if (currentInspectionToPublish.value.publication) {
-        publishForm.put(route('inspections.publications.update', currentInspectionToPublish.value.id), {
-            onSuccess: () => closePublishModal(),
-        });
-    } else {
-        publishForm.post(route('inspections.publish', currentInspectionToPublish.value.id), {
-            onSuccess: () => closePublishModal(),
-        });
-    }
-};
-
-const revokePublication = () => {
-    publishForm.delete(route('inspections.publications.destroy', currentInspectionToPublish.value.id), {
-        onSuccess: () => closePublishModal(),
-    });
-};
+const latestClosedRound = computed(() => props.project.evaluation_rounds.find(r => r.status === 'closed'));
 </script>
 
 <template>
@@ -213,20 +181,20 @@ const revokePublication = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-start gap-4">
-                <div class="flex-grow">
+            <div class="flex flex-col lg:flex-row lg:items-start gap-4">
+                <div class="flex-grow min-w-0">
                     <Breadcrumbs :items="[
                         { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: project.name }
                     ]" />
-                    
+
                     <div v-if="!isProjectEditing">
-                        <div class="flex items-center gap-3">
-                            <ProjectIcon :icon="project.icon" :color="project.color" size="md" />
-                            <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <ProjectIcon :icon="project.icon" :color="project.color" size="md" class="shrink-0" />
+                            <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight break-words min-w-0">
                                 {{ project.name }}
                             </h2>
-                            <button v-if="canManageMembers" @click="toggleProjectEdit" class="text-surface-400 hover:text-brand-600 transition-colors">
+                            <button v-if="canManageMembers" @click="toggleProjectEdit" class="shrink-0 p-1 text-surface-400 hover:text-brand-600 transition-colors" :title="$t('project.edit_name')" :aria-label="$t('project.edit_name')">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
@@ -235,7 +203,7 @@ const revokePublication = () => {
                         <p class="text-sm text-surface-500 max-w-2xl mt-1">{{ project.description || $t('project.no_description') }}</p>
                     </div>
 
-                    <div v-else class="mt-4 space-y-4 max-w-2xl bg-surface-50 p-6 rounded-xl border border-surface-200 shadow-inner">
+                    <div v-else class="mt-4 space-y-4 max-w-2xl bg-surface-50 p-4 sm:p-6 rounded-xl border border-surface-200 shadow-inner">
                         <div class="space-y-4">
                             <Input
                                 :label="$t('project.edit_name')"
@@ -277,32 +245,32 @@ const revokePublication = () => {
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 mt-2">
-                    <a :href="route('projects.export', project.id)" target="_blank">
-                        <Button variant="ghost">
-                            {{ $t('project.export_json') }}
-                        </Button>
-                    </a>
-                    <Button v-if="project.evaluation_rounds.find(r => r.status === 'closed')" variant="info" @click="$inertia.get(route('rounds.results', project.evaluation_rounds.find(r => r.status === 'closed').id))">
+                <div class="flex flex-wrap items-center gap-2 lg:mt-2 lg:justify-end lg:shrink-0">
+                    <Button v-if="canManageMembers" variant="primary" @click="openRoundCreateModal">
+                        {{ $t('project.new_round') }}
+                    </Button>
+                    <Button v-if="latestClosedRound" variant="info" @click="$inertia.get(route('rounds.results', latestClosedRound.id))">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         {{ $t('project.consolidated_result') }}
                     </Button>
                     <Button v-if="canCompare" variant="info" @click="compareSelectedRounds">
                         {{ $t('project.compare_rounds', { count: selectedRounds.length }) }}
                     </Button>
-                    <Button v-if="canManageMembers" variant="primary" @click="openRoundCreateModal">
-                        {{ $t('project.new_round') }}
-                    </Button>
+                    <a v-if="canManageMembers" :href="route('projects.export', project.id)" target="_blank" :title="$t('project.export_hint')">
+                        <Button variant="ghost">
+                            {{ $t('project.export_json') }}
+                        </Button>
+                    </a>
                 </div>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-                
+        <div class="py-6 sm:py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+
                 <!-- Navigation Tabs (Only for owner/members, settings only for owner) -->
                 <div class="border-b border-surface-200" v-if="canManageMembers">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <nav class="-mb-px flex gap-6 sm:gap-8 overflow-x-auto" aria-label="Tabs">
                         <button
                             @click="activeTab = 'overview'"
                             class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
@@ -324,9 +292,9 @@ const revokePublication = () => {
                     </nav>
                 </div>
 
-                <div v-show="activeTab === 'overview'" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div v-show="activeTab === 'overview'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                     <!-- Esquerda: Inspeções e Detalhes da Avaliação -->
-                    <div class="md:col-span-2 space-y-6">
+                    <div class="lg:col-span-2 space-y-6 min-w-0">
                         <Card :title="$t('project.rounds_title')">
                             <div v-if="project.evaluation_rounds.length === 0" class="py-12 text-center text-surface-500">
                                 {{ $t('project.no_rounds') }}
@@ -335,46 +303,49 @@ const revokePublication = () => {
                                     {{ $t('project.create_first_round') }}
                                 </Button>
                             </div>
-                            
-                            <ul v-else class="divide-y divide-surface-100">
-                                <li v-for="round in project.evaluation_rounds" :key="round.id" 
-                                    class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
+
+                            <p v-if="project.evaluation_rounds.filter(r => r.status === 'closed').length >= 2" class="text-xs text-surface-500 mb-2">
+                                {{ $t('project.compare_hint') }}
+                            </p>
+                            <ul v-if="project.evaluation_rounds.length > 0" class="divide-y divide-surface-100">
+                                <li v-for="round in project.evaluation_rounds" :key="round.id"
+                                    class="py-4 flex justify-between items-center gap-3 hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
                                     :class="{'bg-brand-50/50': selectedRounds.includes(round.id)}"
                                 >
-                                    <div class="flex items-center gap-4 flex-grow">
+                                    <div class="flex items-center gap-3 sm:gap-4 flex-grow min-w-0">
                                         <div v-if="round.status === 'closed'" class="shrink-0">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 :checked="selectedRounds.includes(round.id)"
                                                 @click.stop="toggleRoundSelection(round.id)"
-                                                class="rounded border-surface-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                                                :aria-label="$t('project.select_to_compare', { name: round.name })"
+                                                :title="$t('project.select_to_compare', { name: round.name })"
+                                                class="h-5 w-5 rounded border-surface-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
                                             />
                                         </div>
-                                        <div class="cursor-pointer flex-grow" @click="$inertia.get(route('rounds.show', round.id))">
-                                            <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium" :class="selectedRounds.includes(round.id) ? 'text-brand-900' : 'text-surface-900'">
+                                        <div class="cursor-pointer flex-grow min-w-0" @click="$inertia.get(route('rounds.show', round.id))">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <p class="text-sm font-medium break-words" :class="selectedRounds.includes(round.id) ? 'text-brand-900' : 'text-surface-900'">
                                                     {{ round.name }}
                                                 </p>
-                                                <Badge :variant="round.status === 'closed' ? 'success' : (round.status === 'active' ? 'brand' : 'surface')">
-                                                    {{ round.status === 'closed' ? $t('round.status_closed') : (round.status === 'active' ? $t('round.status_active') : $t('round.status_draft')) }}
-                                                </Badge>
-                                                <Badge v-if="round.public_directory" variant="primary" class="text-[10px]">
-                                                    {{ $t('round.published_badge', { visibility: round.public_directory.visibility }) }}
+                                                <StatusBadge :status="round.status" />
+                                                <Badge v-if="round.public_directory && round.public_directory.visibility !== 'private'" variant="primary">
+                                                    {{ $t('round.published_badge', { visibility: visibilityLabel(round.public_directory.visibility) }) }}
                                                 </Badge>
                                             </div>
                                             <p class="text-xs text-surface-500">
                                                 {{ $t('project.created_at', { date: formatDate(round.created_at) }) }}
                                                 <span v-if="round.closed_at"> • {{ $t('project.closed_at', { date: formatDate(round.closed_at) }) }}</span>
-                                                <span v-if="round.snapshots?.[0]" class="ml-2 font-medium text-brand-600">
+                                                <span v-if="round.snapshots?.[0]" class="font-medium text-brand-600">
                                                     • Score: {{ round.snapshots[0].payload_json.global_score }}%
                                                 </span>
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <Button 
-                                            size="sm" 
-                                            variant="outline" 
+                                    <div class="hidden sm:flex items-center gap-3">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
                                             @click.stop="$inertia.get(route('rounds.show', round.id))"
                                         >
                                             {{ $t('common.open') }}
@@ -390,12 +361,12 @@ const revokePublication = () => {
                                 <br><br>
                                 <p class="text-xs">{{ $t('project.no_inspections_description') }}</p>
                             </div>
-                            
+
                             <ul v-else class="divide-y divide-surface-100">
-                                <li v-for="inspection in project.inspections" :key="inspection.id" 
-                                    class="py-4 flex justify-between items-center hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
+                                <li v-for="inspection in project.inspections" :key="inspection.id"
+                                    class="py-4 flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 hover:bg-surface-50 transition-colors px-4 -mx-4 rounded-lg group"
                                 >
-                                    <div class="cursor-pointer flex-grow" @click="$inertia.get(route('inspections.show', inspection.id))">
+                                    <div class="cursor-pointer flex-grow min-w-0" @click="$inertia.get(route('inspections.show', inspection.id))">
                                         <p class="text-sm font-medium text-surface-900">
                                             {{ $t('project.inspection_label', { id: inspection.sequential_id }) }}
                                         </p>
@@ -404,34 +375,26 @@ const revokePublication = () => {
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <!-- Status Badge with semantic color + dot -->
-                                        <Badge :variant="inspection.status">
-                                            <span class="flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full"
-                                                    :class="{
-                                                        'bg-slate-400': inspection.status === 'draft',
-                                                        'bg-blue-500': inspection.status === 'active',
-                                                        'bg-emerald-500': inspection.status === 'closed',
-                                                    }"
-                                                ></span>
-                                                {{ inspection.status === 'closed' ? $t('round.status_closed') : (inspection.status === 'active' ? $t('round.status_active') : $t('round.status_draft')) }}
-                                            </span>
-                                        </Badge>
-                                        <!-- Result buttons (only on closed, appear on hover) -->
-                                        <div v-if="inspection.status === 'closed'" class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button 
-                                                size="xs" 
-                                                variant="info" 
+                                        <StatusBadge :status="inspection.status" />
+                                        <!-- Result buttons (only on closed; always visible on touch screens, on hover from sm up) -->
+                                        <div v-if="inspection.status === 'closed'" class="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
+                                            <Button
+                                                v-if="inspection.user_id === user.id"
+                                                size="sm"
+                                                variant="info"
                                                 @click.stop="$inertia.get(route('results.individual', inspection.id))"
                                                 :title="$t('project.my_result')"
+                                                :aria-label="$t('project.my_result')"
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                             </Button>
-                                            <Button 
-                                                size="xs" 
-                                                variant="info" 
+                                            <Button
+                                                v-if="inspection.user_id === user.id || currentRole !== 'evaluator'"
+                                                size="sm"
+                                                variant="info"
                                                 @click.stop="$inertia.get(route('results.team', inspection.id))"
-                                                :title="$t('project.consolidated_result')"
+                                                :title="$t('project.inspection_result')"
+                                                :aria-label="$t('project.inspection_result')"
                                             >
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                                             </Button>
@@ -446,7 +409,7 @@ const revokePublication = () => {
                     <div class="space-y-6">
                         <Card :title="$t('project.members_title')">
                             <template #header v-if="canManageMembers">
-                                <div class="flex justify-between items-center px-6 border-surface-100 bg-surface-50/50">
+                                <div class="flex justify-between items-center gap-2">
                                     <h3 class="text-lg font-medium text-surface-900">{{ $t('project.members_title') }}</h3>
                                     <Button size="sm" variant="outline" @click="isInviting = !isInviting">
                                         {{ $t('project.invite') }}
@@ -495,21 +458,21 @@ const revokePublication = () => {
                             </transition>
 
                             <ul class="divide-y divide-surface-100">
-                                <li v-for="member in project.members" :key="member.id" class="py-3 flex items-center justify-between px-6">
-                                    <div class="flex items-center">
-                                        <div class="h-8 w-8 rounded-full bg-surface-200 flex items-center justify-center text-surface-600 font-bold text-xs ring-2 ring-white">
+                                <li v-for="member in project.members" :key="member.id" class="py-3 flex items-center justify-between gap-3">
+                                    <div class="flex items-center min-w-0">
+                                        <div class="h-8 w-8 shrink-0 rounded-full bg-surface-200 flex items-center justify-center text-surface-600 font-bold text-xs ring-2 ring-white">
                                             {{ member.user.name.charAt(0) }}
                                         </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-surface-900">{{ member.user.name }}</p>
-                                            <p class="text-xs text-surface-500">{{ member.user.email }}</p>
+                                        <div class="ml-3 min-w-0">
+                                            <p class="text-sm font-medium text-surface-900 truncate">{{ member.user.name }}</p>
+                                            <p class="text-xs text-surface-500 truncate" :title="member.user.email">{{ member.user.email }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <select v-if="canManageMembers && member.role !== 'owner'" 
-                                                :value="member.role" 
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <select v-if="canManageMembers && member.role !== 'owner'"
+                                                :value="member.role"
                                                 @change="updateRole(member.user.id, $event.target.value)"
-                                                class="text-xs rounded border-surface-200 py-1 pl-2 pr-8 focus:ring-brand-500 focus:border-brand-500 bg-surface-50">
+                                                class="text-xs rounded border-surface-200 py-1.5 pl-2 pr-8 focus:ring-brand-500 focus:border-brand-500 bg-surface-50" :aria-label="$t('project.invite_role_label')">
                                             <option value="evaluator">{{ $t('workspace.role_evaluator') }}</option>
                                             <option value="observer">{{ $t('workspace.role_observer') }}</option>
                                         </select>
@@ -522,40 +485,40 @@ const revokePublication = () => {
 
                             <!-- Bug 2: Pending invitations only visible to the project owner -->
                             <div v-if="canManageMembers && project.invitations && project.invitations.length > 0" class="border-t border-surface-100 bg-surface-50/30">
-                                <h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wider px-6 py-3 bg-surface-50 border-b border-surface-100">{{ $t('project.pending_invitations') }}</h4>
+                                <h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wider py-3 border-b border-surface-100">{{ $t('project.pending_invitations') }}</h4>
                                 <ul class="divide-y divide-surface-100">
-                                    <li v-for="invitation in project.invitations" :key="invitation.id" class="py-3 flex items-center justify-between px-6 opacity-80 hover:opacity-100 transition-opacity">
-                                        <div class="flex items-center">
-                                            <div class="h-8 w-8 rounded-full bg-surface-100 border border-dashed border-surface-300 flex items-center justify-center text-surface-500 font-bold text-xs">
+                                    <li v-for="invitation in project.invitations" :key="invitation.id" class="py-3 flex items-center justify-between gap-3 opacity-90 hover:opacity-100 transition-opacity">
+                                        <div class="flex items-center min-w-0">
+                                            <div class="h-8 w-8 shrink-0 rounded-full bg-surface-100 border border-dashed border-surface-300 flex items-center justify-center text-surface-500 font-bold text-xs">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                                             </div>
-                                            <div class="ml-3 flex flex-col items-start gap-1">
+                                            <div class="ml-3 flex flex-col items-start gap-1 min-w-0">
                                                 <div class="flex items-center gap-2">
-                                                    <p class="text-xs font-medium text-surface-900 truncate max-w-[150px]">{{ invitation.email }}</p>
+                                                    <p class="text-xs font-medium text-surface-900 truncate max-w-[160px] sm:max-w-[200px]" :title="invitation.email">{{ invitation.email }}</p>
                                                     <div v-if="invitation.has_account" class="group relative flex items-center justify-center">
                                                         <svg class="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                        <div class="absolute bottom-full mb-1 min-w-[120px] bg-surface-800 text-white text-[10px] rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-center">
+                                                        <div class="absolute bottom-full mb-1 min-w-[120px] bg-surface-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-center">
                                                             {{ $t('project.user_has_account') }}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span class="text-[10px] text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-100">
+                                                <span class="text-xs text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-100">
                                                     {{ $t('project.invitation_sent_at', { date: formatDate(invitation.created_at) }) }}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="flex flex-col items-end gap-1">
-                                            <Badge variant="surface" class="!text-[10px]">
+                                        <div class="flex flex-col items-end gap-1 shrink-0">
+                                            <Badge variant="surface">
                                                 {{ translateRole(invitation.role) }}
                                             </Badge>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <button v-if="canManageMembers && new Date(invitation.expires_at) < new Date()" @click="resendInvitation(invitation.id)" class="text-[10px] text-brand-600 hover:text-brand-800 underline font-medium">
+                                                <button v-if="canManageMembers && new Date(invitation.expires_at) < new Date()" @click="resendInvitation(invitation.id)" class="text-xs text-brand-600 hover:text-brand-800 underline font-medium py-1">
                                                     {{ $t('project.resend') }}
                                                 </button>
-                                                <span v-if="new Date(invitation.expires_at) < new Date()" class="text-[10px] text-red-500 font-medium">
+                                                <span v-if="new Date(invitation.expires_at) < new Date()" class="text-xs text-red-500 font-medium">
                                                     {{ $t('project.expired') }}
                                                 </span>
-                                                <span v-else class="text-[10px] text-surface-400">
+                                                <span v-else class="text-xs text-surface-400">
                                                     {{ $t('project.pending') }}
                                                 </span>
                                             </div>
@@ -564,9 +527,9 @@ const revokePublication = () => {
                                 </ul>
                             </div>
                         </Card>
-                        
-                        <div v-if="project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between">
-                            <div class="text-sm">
+
+                        <div v-if="project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between gap-3">
+                            <div class="text-sm min-w-0">
                                 <span class="block font-medium text-surface-900">{{ $t('project.product_url') }}</span>
                                 <a :href="project.url" target="_blank" class="text-brand-600 hover:underline break-all block">
                                     {{ project.url }}
@@ -584,7 +547,7 @@ const revokePublication = () => {
                 <!-- Settings Tab Content (Only for owner/manage-enabled members) -->
                 <div v-if="activeTab === 'settings' && canManageMembers" class="max-w-3xl space-y-6">
                     <Card :title="$t('settings.title')">
-                        <div class="p-6 space-y-6">
+                        <div class="space-y-6">
                             <p class="text-sm text-surface-500">
                                 {{ $t('settings.description') }}
                             </p>
@@ -603,7 +566,7 @@ const revokePublication = () => {
                                             <input type="radio" value="owner_decides" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
                                             <div>
                                                 <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.owner_decides') }}</span>
-                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                <span class="block text-xs text-surface-500 mt-1">
                                                     {{ $t('settings.consensus_owner_decides_desc') }}
                                                 </span>
                                             </div>
@@ -612,7 +575,7 @@ const revokePublication = () => {
                                             <input type="radio" value="evaluator_convergence" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
                                             <div>
                                                 <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.evaluator_convergence') }}</span>
-                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                <span class="block text-xs text-surface-500 mt-1">
                                                     {{ $t('settings.consensus_convergence_desc') }}
                                                 </span>
                                             </div>
@@ -621,7 +584,7 @@ const revokePublication = () => {
                                             <input type="radio" value="majority_vote" v-model="settingsForm.consensus_model" class="mt-1 text-brand-600 focus:ring-brand-500" />
                                             <div>
                                                 <span class="block text-xs font-semibold text-surface-900">{{ $t('labels.consensus_model.majority_vote') }}</span>
-                                                <span class="block text-[10px] text-surface-500 mt-1">
+                                                <span class="block text-xs text-surface-500 mt-1">
                                                     {{ $t('settings.consensus_majority_vote_desc') }}
                                                 </span>
                                             </div>
@@ -745,57 +708,6 @@ const revokePublication = () => {
                     :placeholder="$t('project.round_name_placeholder')"
                     @keyup.enter="submitRoundCreate"
                 />
-            </div>
-        </template>
-    </ConfirmModal>
-
-    <!-- Modal de Publicação -->
-    <ConfirmModal
-        :show="isPublishingModalOpen"
-        :title="$t('publication.modal_title')"
-        :message="currentInspectionToPublish?.publication 
-            ? $t('publication.update_message') 
-            : $t('publication.create_inspection_message')"
-        :confirm-text="currentInspectionToPublish?.publication ? $t('publication.update_button') : $t('publication.publish_button')"
-        :cancel-text="$t('common.cancel')"
-        :confirm-variant="currentInspectionToPublish?.publication ? 'brand' : 'primary'"
-        @confirm="submitPublication"
-        @close="closePublishModal"
-    >
-        <template #default>
-            <div class="mt-4 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-surface-700 mb-2">{{ $t('publication.visibility_engagement') }}</label>
-                    <div class="space-y-2">
-                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'private'}">
-                            <input type="radio" value="private" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
-                            <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.private_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.private_members_description') }}</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'score_public'}">
-                            <input type="radio" value="score_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
-                            <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.score_short_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.score_short_description') }}</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'full_public'}">
-                            <input type="radio" value="full_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
-                            <div>
-                                <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.full_short_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.full_short_description') }}</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-                
-                <div v-if="currentInspectionToPublish?.publication" class="pt-4 border-t border-surface-100 flex justify-center">
-                    <button type="button" @click="revokePublication" class="text-xs text-red-600 hover:text-red-800 font-medium underline">
-                        {{ $t('publication.remove_link') }}
-                    </button>
-                </div>
             </div>
         </template>
     </ConfirmModal>

@@ -352,7 +352,7 @@ O sistema permite comparar resultados entre inspeções ou rodadas para acompanh
 
 ### Consultar o Diretório
 - Acesse `/tools` (sem necessidade de login).
-- **Filtros disponíveis**: medalha, ano, versão do questionário.
+- **Filtros disponíveis**: medalha e ano.
 - **Ordenação**: por score (crescente/decrescente) ou por data.
 - Clique em uma ferramenta para ver o relatório (sumário ou completo, conforme a visibilidade).
 

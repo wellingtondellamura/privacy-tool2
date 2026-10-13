@@ -18,7 +18,7 @@ class ConsolidatedResponseController extends Controller
         Gate::authorize('update', $round->project);
 
         if ($round->status !== 'review') {
-            return redirect()->back()->withErrors(['message' => 'Consolidation can only be done during the review phase.']);
+            return redirect()->back()->withErrors(['message' => __('messages.consolidation_review_only')]);
         }
 
         $validated = $request->validate([
@@ -38,7 +38,7 @@ class ConsolidatedResponseController extends Controller
             ]
         );
 
-        return redirect()->back()->with('success', 'Resposta final consolidada.');
+        return redirect()->back()->with('success', __('messages.consolidation_saved'));
     }
 
     /**
@@ -49,13 +49,13 @@ class ConsolidatedResponseController extends Controller
         Gate::authorize('update', $round->project);
 
         if ($round->status !== 'review') {
-            return redirect()->back()->withErrors(['message' => 'Consolidation can only be reset during the review phase.']);
+            return redirect()->back()->withErrors(['message' => __('messages.consolidation_review_only')]);
         }
 
         $round->consolidatedResponses()
             ->where('question_id', $questionId)
             ->delete();
 
-        return redirect()->back()->with('success', 'Consolidação reiniciada para a média.');
+        return redirect()->back()->with('success', __('messages.consolidation_reset'));
     }
 }

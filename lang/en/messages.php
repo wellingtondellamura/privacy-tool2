@@ -47,4 +47,26 @@ return [
 
     'no_projects_to_export' => 'You have no projects to export.',
     'zip_creation_failed' => 'Failed to create the ZIP file.',
+
+    // Melhorias de UX/regras
+    'consolidation_review_only' => 'Consolidation can only be done during the review phase.',
+    'consolidation_saved' => 'Final answer consolidated.',
+    'consolidation_reset' => 'Consolidation removed: the question uses the average again.',
+    'round_not_draft' => 'The round is not in draft.',
+    'review_started' => 'Review phase started. Members were notified by e-mail.',
+    'no_active_questionnaire' => 'No active questionnaire version is available.',
+    'already_member' => 'This user is already a member of the project.',
+    'invitation_invalid' => 'Invalid invitation.',
+    'invitation_already_accepted' => 'This invitation has already been accepted.',
+    'invitation_expired' => 'This invitation has expired. Ask the project owner to resend it.',
+    'invitation_login_required' => 'Sign in with the :email account to accept the invitation.',
+    'invitation_wrong_account' => 'This invitation was sent to :email. Sign in with that account to accept it.',
+    'inspection_not_active' => 'The inspection is not active. Responses cannot be submitted.',
+    'only_evaluators_respond' => 'Only evaluators can submit responses.',
+    'observers_cannot_inspect' => 'Observers cannot create inspections.',
+    'inspection_round_not_draft' => 'New inspections can only be created while the round is in draft.',
+    'comments_review_only' => 'Comments can only be posted during the review phase.',
+    'comment_sent' => 'Comment posted.',
+    'comment_deleted' => 'Comment deleted.',
+    'export_owner_only' => 'Only the project owner can export its data.',
 ];

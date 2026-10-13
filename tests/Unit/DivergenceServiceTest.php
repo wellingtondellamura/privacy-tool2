@@ -44,28 +44,49 @@ test('extreme variation gives high divergence', function () {
     expect($result['classification'])->toBe('high');
 });
 
-// Additional variance edge cases
-test('medium divergence classification', function () {
-    // Variance between 11 and 30
-    $scores = [100, 90]; // mean=95, var = ((5^2 + 5^2)/2) = 25
-    $result = DivergenceService::forQuestion($scores);
+// Classification uses the standard deviation (0–100 scale)
+test('one level apart gives medium divergence', function () {
+    // Suficiente (100) x Insuficiente (50): variance 625, σ = 25
+    $result = DivergenceService::forQuestion([100, 50]);
 
-    expect($result['variance'])->toBe(25.0);
+    expect($result['variance'])->toBe(625.0);
+    expect($result['std_dev'])->toBe(25.0);
     expect($result['classification'])->toBe('medium');
 });
 
-test('variance boundary at 10 is low', function () {
+test('opposite answers give high divergence', function () {
+    // Suficiente (100) x Inexistente (0): σ = 50
+    expect(DivergenceService::forQuestion([100, 0])['classification'])->toBe('high');
+});
+
+test('single dissenting evaluator weighs less as the team grows', function () {
+    // 9 x 100 and 1 x 50: σ = 15 → medium; 19 x 100 and 1 x 50: σ ≈ 10.9 → medium
+    expect(DivergenceService::forQuestion([...array_fill(0, 9, 100), 50])['classification'])->toBe('medium');
+    expect(DivergenceService::forQuestion([...array_fill(0, 30, 100), 50])['classification'])->toBe('low');
+});
+
+test('not applicable answers are ignored in divergence', function () {
+    expect(DivergenceService::forQuestion([100, null, 100])['classification'])->toBe('low');
+});
+
+test('small variation gives low divergence', function () {
+    $result = DivergenceService::forQuestion([100, 90]); // σ = 5
+    expect($result['variance'])->toBe(25.0);
+    expect($result['classification'])->toBe('low');
+});
+
+test('standard deviation boundary at 10 is low', function () {
     expect(DivergenceService::classify(10))->toBe('low');
 });
 
-test('variance boundary at 11 is medium', function () {
+test('standard deviation boundary at 11 is medium', function () {
     expect(DivergenceService::classify(11))->toBe('medium');
 });
 
-test('variance boundary at 30 is medium', function () {
+test('standard deviation boundary at 30 is medium', function () {
     expect(DivergenceService::classify(30))->toBe('medium');
 });
 
-test('variance boundary at 31 is high', function () {
+test('standard deviation boundary at 31 is high', function () {
     expect(DivergenceService::classify(31))->toBe('high');
 });

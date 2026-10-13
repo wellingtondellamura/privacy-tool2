@@ -11,7 +11,6 @@ use App\Http\Controllers\EvaluationRoundController;
 use App\Http\Controllers\EvaluationRoundPublicationController;
 use App\Http\Controllers\RoundBadgeController;
 use App\Http\Controllers\PublicDirectoryController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,8 +18,6 @@ Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
 });
 

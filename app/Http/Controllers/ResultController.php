@@ -46,6 +46,11 @@ class ResultController extends Controller
     {
         Gate::authorize('view', $inspection->project);
 
+        // Golden rule: evaluators only see results of their own inspection.
+        if ($inspection->project->getMemberRole(Auth::user()) === 'evaluator' && $inspection->user_id !== Auth::id()) {
+            return redirect()->back()->withErrors(['access' => __('messages.evaluator_own_inspection_only')]);
+        }
+
         if (!$inspection->isClosed()) {
             return redirect()->back()->withErrors(['results' => __('messages.inspection_must_be_closed')]);
         }

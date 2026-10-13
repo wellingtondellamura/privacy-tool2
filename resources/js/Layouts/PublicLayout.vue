@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { Link, Head } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Button from '@/Components/Button.vue';
@@ -6,27 +7,29 @@ import LocaleSwitcher from '@/Components/LocaleSwitcher.vue';
 
 defineProps({
     title: String,
-    laravelVersion: String,
-    phpVersion: String,
 });
+
+// Page links collapse into a menu on phones
+const menuOpen = ref(false);
 </script>
 
 <template>
     <Head :title="title" />
-    
+
     <div class="min-h-screen bg-surface-50 flex flex-col font-sans selection:bg-brand-500 selection:text-white">
-        
+
         <!-- Navigation -->
-        <header class="w-full px-6 py-4 flex justify-between items-center bg-white border-b border-surface-200 shrink-0 sticky top-0 z-50 shadow-sm">
-            <div class="flex items-center gap-3">
+        <header class="w-full bg-white border-b border-surface-200 shrink-0 sticky top-0 z-50 shadow-sm">
+          <div class="px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-3 shrink-0">
                 <Link href="/">
                     <ApplicationLogo class="h-8 w-auto text-brand-600 fill-current" />
                 </Link>
             </div>
-            <nav class="flex items-center gap-4">
+            <nav class="flex items-center gap-3 sm:gap-4 min-w-0">
                 <Link
                     :href="route('metodo.mitra')"
-                    class="text-sm font-medium transition-colors"
+                    class="hidden sm:block text-sm font-medium transition-colors whitespace-nowrap"
                     :class="route().current('metodo.mitra') ? 'text-brand-600' : 'text-surface-500 hover:text-brand-600'"
                 >
                     {{ $t('nav.mitra_method') }}
@@ -45,10 +48,10 @@ defineProps({
                 >
                     {{ $t('nav.public_directory') }}
                 </Link>
-                
+
                 <div class="w-px h-4 bg-surface-200 hidden md:block mx-2"></div>
 
-                <LocaleSwitcher />
+                <LocaleSwitcher class="hidden sm:block" />
 
                 <Link
                     v-if="$page.props.auth.user"
@@ -61,7 +64,7 @@ defineProps({
                 <template v-else>
                     <Link
                         :href="route('login')"
-                        class="text-sm font-medium text-surface-600 hover:text-brand-600 transition-colors duration-smooth"
+                        class="text-sm font-medium text-surface-600 hover:text-brand-600 transition-colors duration-smooth whitespace-nowrap"
                     >
                         {{ $t('nav.login') }}
                     </Link>
@@ -70,10 +73,34 @@ defineProps({
                         :href="route('register')"
                         class="hidden sm:block"
                     >
-                        <Button variant="primary" size="sm" class="shadow-sm">{{ $t('nav.register') }}</Button>
+                        <Button variant="primary" size="sm" class="shadow-sm whitespace-nowrap">{{ $t('nav.register') }}</Button>
                     </Link>
                 </template>
+
+                <button
+                    type="button"
+                    class="md:hidden -mr-1 p-2 rounded-lg text-surface-600 hover:bg-surface-100"
+                    :aria-label="$t('welcome.menu')"
+                    :aria-expanded="menuOpen"
+                    aria-controls="public-mobile-menu"
+                    @click="menuOpen = !menuOpen"
+                >
+                    <svg v-if="!menuOpen" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </nav>
+          </div>
+
+          <!-- Phone menu -->
+          <nav v-if="menuOpen" id="public-mobile-menu" class="md:hidden border-t border-surface-100 px-4 py-3 space-y-1" @click="menuOpen = false">
+              <Link :href="route('metodo.mitra')" class="block rounded-lg px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-50">{{ $t('nav.mitra_method') }}</Link>
+              <Link :href="route('manual')" class="block rounded-lg px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-50">{{ $t('nav.manual') }}</Link>
+              <Link :href="route('public.tools.index')" class="block rounded-lg px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-50">{{ $t('nav.public_directory') }}</Link>
+              <Link v-if="!$page.props.auth.user" :href="route('register')" class="block rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-surface-50 sm:hidden">{{ $t('nav.register') }}</Link>
+              <div class="px-3 pt-2 sm:hidden" @click.stop>
+                  <LocaleSwitcher />
+              </div>
+          </nav>
         </header>
 
         <!-- Page Content -->
@@ -87,7 +114,7 @@ defineProps({
                 <div class="grid md:grid-cols-2 gap-8 items-center mb-8">
                     <div>
                         <div class="flex items-center gap-3 mb-6">
-                            <ApplicationLogo class="h-6 w-auto text-brand-400 fill-current" />                            
+                            <ApplicationLogo class="h-6 w-auto text-brand-400 fill-current" />
                         </div>
                         <p class="text-sm max-w-sm leading-relaxed text-surface-400">
                             {{ $t('footer.description') }}

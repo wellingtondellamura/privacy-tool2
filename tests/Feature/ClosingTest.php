@@ -151,3 +151,37 @@ test('closing via API generates snapshots', function () {
     $response->assertStatus(302);
     expect(ResultSnapshot::where('inspection_id', $inspection->id)->count())->toBeGreaterThanOrEqual(2);
 });
+
+test('not applicable answers do not lower the score (MANUAL 9.4)', function () {
+    $version = QuestionnaireVersion::getActive();
+    $inspection = Inspection::create([
+        'project_id' => $this->project->id,
+        'user_id' => $this->owner->id,
+        'questionnaire_version_id' => $version->id,
+        'status' => 'active',
+        'started_at' => now(),
+    ]);
+
+    // Answer every question: "Suficiente", except the first of each category = "Não se aplica"
+    $version->load('sections.categories.questions');
+    foreach ($version->sections as $section) {
+        foreach ($section->categories as $category) {
+            foreach ($category->questions as $index => $question) {
+                Response::create([
+                    'inspection_id' => $inspection->id,
+                    'question_id' => $question->id,
+                    'user_id' => $this->owner->id,
+                    'answer' => $index === 0 ? 'other' : 'high',
+                ]);
+            }
+        }
+    }
+
+    app(CloseInspectionAction::class)->execute($inspection);
+
+    $payload = ResultSnapshot::where(['inspection_id' => $inspection->id, 'user_id' => null])->first()->payload_json;
+
+    expect($payload['global_score'])->toBe(100);
+    expect($payload['medal']['name'])->toBe('gold');
+    expect($payload['sections'][0]['categories'][0]['questions'][0]['score'])->toBeNull();
+});

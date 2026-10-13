@@ -119,7 +119,7 @@ class EvaluationRoundController extends Controller
         Gate::authorize('update', $round->project);
 
         if ($round->status !== 'draft') {
-            return redirect()->back()->withErrors(['status' => 'Round is not in draft state.']);
+            return redirect()->back()->withErrors(['status' => __('messages.round_not_draft')]);
         }
 
         $round->update([
@@ -130,7 +130,7 @@ class EvaluationRoundController extends Controller
             \Illuminate\Support\Facades\Mail::to($participant)->send(new \App\Mail\RoundReviewStarted($round, $participant));
         }
 
-        return redirect()->route('rounds.show', $round->id)->with('success', 'Fase de revisão/sensemaking iniciada.');
+        return redirect()->route('rounds.show', $round->id)->with('success', __('messages.review_started'));
     }
 
     /**
@@ -184,6 +184,6 @@ class EvaluationRoundController extends Controller
 
         $round->update($validated);
 
-        return redirect()->back()->with('success', __('messages.round_updated') ?? 'Rodada atualizada com sucesso.');
+        return redirect()->back()->with('success', __('messages.round_updated'));
     }
 }

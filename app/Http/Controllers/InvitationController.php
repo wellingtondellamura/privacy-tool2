@@ -31,7 +31,7 @@ class InvitationController extends Controller
         // Check if user is already a member
         $existingUser = User::where('email', $validated['email'])->first();
         if ($existingUser && $project->hasMember($existingUser)) {
-            return redirect()->back()->withErrors(['email' => 'User is already a member of this project.']);
+            return redirect()->back()->withErrors(['email' => __('messages.already_member')]);
         }
 
         $invitation = Invitation::create([
@@ -55,21 +55,33 @@ class InvitationController extends Controller
         $invitation = Invitation::where('token', $token)->first();
 
         if (!$invitation) {
-            return redirect()->route('dashboard')->withErrors(['token' => 'Invalid invitation token.']);
+            return redirect()->route('dashboard')->withErrors(['token' => __('messages.invitation_invalid')]);
         }
 
         if ($invitation->isAccepted()) {
-            return redirect()->route('dashboard')->withErrors(['token' => 'Invitation has already been accepted.']);
+            return redirect()->route('dashboard')->withErrors(['token' => __('messages.invitation_already_accepted')]);
         }
 
         if ($invitation->isExpired()) {
-            return redirect()->route('dashboard')->withErrors(['token' => 'Invitation has expired.']);
+            return redirect()->route('dashboard')->withErrors(['token' => __('messages.invitation_expired')]);
         }
 
         // Find or create user
         $user = User::where('email', $invitation->email)->first();
 
-        if (!$user) {
+        if ($user) {
+            // The token is never a substitute for the password: an existing account
+            // must be signed in (as itself) to accept.
+            if (!Auth::check()) {
+                return redirect()->route('login')
+                    ->with('status', __('messages.invitation_login_required', ['email' => $invitation->email]));
+            }
+
+            if (Auth::id() !== $user->id) {
+                return redirect()->route('dashboard')
+                    ->withErrors(['token' => __('messages.invitation_wrong_account', ['email' => $invitation->email])]);
+            }
+        } else {
             // Scenario: Accept invitation with new account
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -88,10 +100,6 @@ class InvitationController extends Controller
             session(['locale' => $locale]);
             
             Auth::login($user);
-        } else {
-            if (!Auth::check()) {
-                Auth::login($user);
-            }
         }
 
         // Add user to project

@@ -55,4 +55,26 @@ return [
     // DataExportController
     'no_projects_to_export' => 'Você não possui projetos para exportar.',
     'zip_creation_failed' => 'Não foi possível criar o arquivo ZIP.',
+
+    // Melhorias de UX/regras
+    'consolidation_review_only' => 'A consolidação só pode ser feita durante a fase de revisão.',
+    'consolidation_saved' => 'Resposta final consolidada.',
+    'consolidation_reset' => 'Consolidação removida: a questão volta a usar a média.',
+    'round_not_draft' => 'A rodada não está em rascunho.',
+    'review_started' => 'Fase de revisão iniciada. Os membros foram avisados por e-mail.',
+    'no_active_questionnaire' => 'Nenhuma versão ativa do questionário está disponível.',
+    'already_member' => 'Este usuário já é membro do projeto.',
+    'invitation_invalid' => 'Convite inválido.',
+    'invitation_already_accepted' => 'Este convite já foi aceito.',
+    'invitation_expired' => 'Este convite expirou. Peça ao dono do projeto para reenviá-lo.',
+    'invitation_login_required' => 'Entre com a conta :email para aceitar o convite.',
+    'invitation_wrong_account' => 'Este convite foi enviado para :email. Entre com essa conta para aceitá-lo.',
+    'inspection_not_active' => 'A inspeção não está ativa. Não é possível enviar respostas.',
+    'only_evaluators_respond' => 'Apenas avaliadores podem enviar respostas.',
+    'observers_cannot_inspect' => 'Observadores não podem criar inspeções.',
+    'inspection_round_not_draft' => 'Novas inspeções só podem ser criadas enquanto a rodada está em rascunho.',
+    'comments_review_only' => 'Comentários só podem ser feitos durante a fase de revisão.',
+    'comment_sent' => 'Comentário enviado.',
+    'comment_deleted' => 'Comentário excluído.',
+    'export_owner_only' => 'Apenas o dono do projeto pode exportar os dados.',
 ];
