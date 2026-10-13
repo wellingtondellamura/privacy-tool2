@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useResultFormat } from '@/composables/useResultFormat';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
+const { formatScore, medalLabel } = useResultFormat();
 
 const getMedalVariant = (medal) => {
     if (!medal) return 'neutral';
@@ -29,7 +31,7 @@ const getMedalImage = (medal) => {
     if (name.includes('ouro') || name.includes('gold')) return `/images/badges-gold_${loc}.png`;
     if (name.includes('prata') || name.includes('silver')) return `/images/badges-silver_${loc}.png`;
     if (name.includes('bronze')) return `/images/badges-bronze_${loc}.png`;
-    
+
     return null;
 };
 
@@ -43,15 +45,15 @@ const getConsensusModelLabel = (model) => {
     <PublicLayout :title="t('directory.summary_page_title', { name: tool.name })">
         <div class="py-12 bg-surface-50 min-h-screen">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-                
+
                 <!-- Hero Section -->
                 <div class="relative py-14 px-6 sm:px-10 rounded-[40px] bg-surface-900 border border-surface-700/80 shadow-2xl overflow-hidden text-center">
                     <div class="absolute inset-0 bg-gradient-to-br from-brand-900/40 via-surface-900 to-surface-950"></div>
                     <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500 rounded-full blur-[120px] opacity-20 -mr-32 -mt-32"></div>
-                    
+
                     <div class="relative z-10 space-y-8">
                         <div class="flex flex-col items-center">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-[10px] font-bold uppercase tracking-widest mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-200 text-xs font-bold uppercase tracking-widest mb-4">
                                 {{ $t('directory.summary_badge') }}
                             </div>
                             <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-tight">{{ tool.name }}</h1>
@@ -59,24 +61,24 @@ const getConsensusModelLabel = (model) => {
 
                         <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
                             <div class="text-center group">
-                                <div class="text-6xl md:text-7xl font-black text-white mb-1 group-hover:scale-105 transition-transform duration-500">{{ tool.score }}%</div>
-                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold">{{ $t('directory.summary_score') }}</div>
+                                <div class="text-6xl md:text-7xl font-black text-white mb-1 group-hover:scale-105 transition-transform duration-500">{{ formatScore(tool.score) }}</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-xs font-bold">{{ $t('directory.summary_score') }}</div>
                             </div>
-                            
+
                             <div class="h-16 w-px bg-surface-700/80 hidden md:block"></div>
-                            
+
                             <div class="text-center flex flex-col items-center" v-if="tool.medal">
                                 <div class="flex flex-col items-center">
-                                    <img v-if="getMedalImage(tool.medal)" 
-                                         :src="getMedalImage(tool.medal)" 
-                                         class="w-28 h-28 md:w-32 md:h-32 object-contain drop-shadow-2xl mb-2 transform hover:scale-105 transition-transform duration-500" 
-                                         :alt="tool.medal.name || tool.medal" />
-                                         
+                                    <img v-if="getMedalImage(tool.medal)"
+                                         :src="getMedalImage(tool.medal)"
+                                         class="w-28 h-28 md:w-32 md:h-32 object-contain drop-shadow-2xl mb-2 transform hover:scale-105 transition-transform duration-500"
+                                         :alt="medalLabel(tool.medal)" />
+
                                     <Badge v-else :variant="getMedalVariant(tool.medal)" size="lg" class="px-8 py-2 text-sm uppercase tracking-widest shadow-lg mb-2">
-                                        {{ tool.medal.name || tool.medal }}
+                                        {{ medalLabel(tool.medal) }}
                                     </Badge>
                                 </div>
-                                <div class="text-surface-300 uppercase tracking-[0.2em] text-[10px] font-bold mt-1">{{ $t('directory.summary_classification') }}</div>
+                                <div class="text-surface-300 uppercase tracking-[0.2em] text-xs font-bold mt-1">{{ $t('directory.summary_classification') }}</div>
                             </div>
                         </div>
 
@@ -89,7 +91,7 @@ const getConsensusModelLabel = (model) => {
                                 </svg>
                                 {{ tool.user_count_total }} {{ tool.user_count_total === 1 ? $t('directory.evaluator_singular', 'Avaliador') : $t('directory.evaluator_plural', 'Avaliadores') }}
                             </div>
-                            
+
                             <!-- Internal/External -->
                             <div class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
                                 <svg v-if="tool.is_self_assessment" class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,7 +102,7 @@ const getConsensusModelLabel = (model) => {
                                 </svg>
                                 {{ tool.is_self_assessment ? $t('directory.provenance_self', 'Autoavaliação') : $t('directory.provenance_external', 'Auditoria Externa') }}
                             </div>
-                            
+
                             <!-- Consensus Model -->
                             <div v-if="tool.consensus_model" class="bg-surface-800/80 px-4 py-2 rounded-full border border-surface-700/80 flex items-center gap-2 shadow-inner">
                                 <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +131,7 @@ const getConsensusModelLabel = (model) => {
                                 <div class="absolute bottom-1 right-4 text-surface-200 text-6xl font-serif select-none pointer-events-none">”</div>
                             </Card>
                         </div>
-                        
+
                         <div :class="tool.diagnosis ? 'md:col-span-1' : 'md:col-span-3'" class="space-y-3 flex flex-col">
                             <h2 class="text-lg font-extrabold text-surface-900 flex items-center gap-2">
                                  <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
@@ -161,11 +163,11 @@ const getConsensusModelLabel = (model) => {
                                     <span class="font-bold text-surface-800 text-lg group-hover:text-brand-700 transition-colors">{{ section.name }}</span>
                                     <div class="flex items-center gap-6">
                                         <Badge v-if="section.medal" :variant="getMedalVariant(section.medal)" size="sm" class="hidden sm:inline-flex">
-                                            {{ section.medal }}
+                                            {{ medalLabel(section.medal) }}
                                         </Badge>
                                         <div class="flex flex-col items-end">
                                             <span class="text-[8px] font-bold text-surface-400 uppercase leading-none mb-0.5">Score</span>
-                                            <span class="text-2xl font-black text-brand-600 leading-none">{{ section.score }}%</span>
+                                            <span class="text-2xl font-black text-brand-600 leading-none">{{ formatScore(section.score) }}</span>
                                         </div>
                                     </div>
                                 </div>

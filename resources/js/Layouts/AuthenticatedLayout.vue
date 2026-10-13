@@ -28,69 +28,48 @@ const closeFlash = () => {
     flashModal.value.show = false;
 };
 
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        flashModal.value = {
-            show: true,
-            title: t('common.success'),
-            message: flash.success,
-            variant: 'success'
-        };
-    } else if (flash.error) {
-        flashModal.value = {
-            show: true,
-            title: t('common.error'),
-            message: flash.error,
-            variant: 'danger'
-        };
+// Success/info messages are shown as a toast that disappears by itself;
+// errors and warnings keep the modal, since they need attention.
+const toast = ref({ show: false, message: '', variant: 'success' });
+let toastTimer = null;
+
+const showToast = (message, variant) => {
+    toast.value = { show: true, message, variant };
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (toast.value.show = false), 4000);
+};
+
+// Server errors that are not tied to a form field (e.g. "round already closed")
+// were silently dropped before; field errors stay with their forms.
+const GENERAL_ERROR_KEYS = ['status', 'message', 'token', 'access', 'inspection', 'questionnaire', 'evaluation_round_id', 'results', 'comparison', 'publication', 'role'];
+
+const showFlash = (flash) => {
+    if (!flash) return;
+    if (flash.error) {
+        flashModal.value = { show: true, title: t('common.error'), message: flash.error, variant: 'danger' };
     } else if (flash.warning) {
-        flashModal.value = {
-            show: true,
-            title: t('common.warning'),
-            message: flash.warning,
-            variant: 'warning'
-        };
+        flashModal.value = { show: true, title: t('common.warning'), message: flash.warning, variant: 'warning' };
+    } else if (flash.success) {
+        showToast(flash.success, 'success');
     } else if (flash.info) {
-        flashModal.value = {
-            show: true,
-            title: t('common.info'),
-            message: flash.info,
-            variant: 'primary'
-        };
+        showToast(flash.info, 'info');
     }
-}, { deep: true });
+};
+
+const showGeneralErrors = (errors) => {
+    const key = GENERAL_ERROR_KEYS.find((k) => errors?.[k]);
+    if (key) {
+        flashModal.value = { show: true, title: t('common.error'), message: errors[key], variant: 'danger' };
+    }
+};
+
+watch(() => page.props.flash, showFlash, { deep: true });
+watch(() => page.props.errors, showGeneralErrors, { deep: true });
 
 // Check on mount for initial flash
 onMounted(() => {
-    if (page.props.flash?.success) {
-        flashModal.value = {
-            show: true,
-            title: t('common.success'),
-            message: page.props.flash.success,
-            variant: 'success'
-        };
-    } else if (page.props.flash?.error) {
-        flashModal.value = {
-            show: true,
-            title: t('common.error'),
-            message: page.props.flash.error,
-            variant: 'danger'
-        };
-    } else if (page.props.flash?.warning) {
-        flashModal.value = {
-            show: true,
-            title: t('common.warning'),
-            message: page.props.flash.warning,
-            variant: 'warning'
-        };
-    } else if (page.props.flash?.info) {
-        flashModal.value = {
-            show: true,
-            title: t('common.info'),
-            message: page.props.flash.info,
-            variant: 'primary'
-        };
-    }
+    showFlash(page.props.flash);
+    showGeneralErrors(page.props.errors);
 });
 </script>
 
@@ -304,7 +283,7 @@ onMounted(() => {
             class="bg-white shadow-sm border-b border-surface-100"
             v-if="$slots.header"
         >
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
                 <slot name="header" />
             </div>
         </header>
@@ -313,6 +292,28 @@ onMounted(() => {
         <main>
             <slot />
         </main>
+        <!-- Toast (success / info) -->
+        <transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="toast.show"
+                role="status"
+                aria-live="polite"
+                class="fixed z-50 inset-x-4 bottom-4 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:max-w-sm flex items-start gap-3 rounded-xl px-4 py-3 shadow-lg text-sm font-medium"
+                :class="toast.variant === 'success' ? 'bg-emerald-600 text-white' : 'bg-surface-900 text-white'"
+            >
+                <svg v-if="toast.variant === 'success'" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span class="flex-1">{{ toast.message }}</span>
+                <button type="button" class="shrink-0 opacity-80 hover:opacity-100" :aria-label="$t('common.close')" @click="toast.show = false">&times;</button>
+            </div>
+        </transition>
+
         <!-- Flash Alert Modal -->
         <AlertModal
             :show="flashModal.show"

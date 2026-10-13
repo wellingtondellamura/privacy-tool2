@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ScoreExplanation from '@/Components/ScoreExplanation.vue';
+import { useResultFormat } from '@/composables/useResultFormat';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -19,6 +21,8 @@ const props = defineProps({
         required: true,
     }
 });
+
+const { formatScore, medalLabel } = useResultFormat();
 
 const { t, locale } = useI18n();
 
@@ -82,21 +86,21 @@ const getMedalImage = (medalName) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0">
                     <Breadcrumbs :items="[
                         { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: inspection.project.name, url: route('projects.show', inspection.project.id) },
                         { label: inspection.evaluation_round.name, url: route('rounds.show', inspection.evaluation_round.id) },
                         { label: $t('results.individual_title') }
                     ]" />
-                    <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight mt-1">
                         {{ $t('results.individual_title') }}
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">{{ $t('results.individual_subtitle', { id: inspection.sequential_id, round: inspection.evaluation_round.name }) }}</p>
                 </div>
-                
-                <div class="flex items-center gap-2">
+
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <Button variant="outline" @click="$inertia.get(route('rounds.show', inspection.evaluation_round.id))">
                         {{ $t('results.back_to_round') }}
                     </Button>
@@ -109,29 +113,34 @@ const getMedalImage = (medalName) => {
             </div>
         </template>
 
-        <div class="py-12">
+        <div class="py-6 sm:py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
 
                 <!-- Global Score -->
                 <Card class="bg-gradient-to-br from-brand-50 to-white border-brand-100 py-12">
-                    <div class="flex items-center justify-center gap-12">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
                         <!-- Medal on the left -->
-                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)" 
-                             :src="getMedalImage(snapshot.medal.name)" 
-                             class="w-48 h-48 object-contain drop-shadow-lg" 
-                             :alt="snapshot.medal.name" />
-                        
+                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)"
+                             :src="getMedalImage(snapshot.medal.name)"
+                             class="w-32 h-32 sm:w-48 sm:h-48 object-contain drop-shadow-lg"
+                             :alt="medalLabel(snapshot.medal)" />
+
                         <!-- Score and label on the right -->
                         <div class="flex flex-col items-center">
-                            <div class="text-[100px] font-bold text-brand-600 leading-none">
+                            <div class="text-7xl sm:text-[100px] font-bold text-brand-600 leading-none">
                                 {{ snapshot.global_score }}
                             </div>
                             <div class="mt-4 text-xs font-bold text-surface-400 uppercase tracking-[0.2em]">
                                 {{ $t('results.global_score') }}
                             </div>
+                            <div v-if="snapshot.medal" class="mt-2 text-sm font-semibold text-surface-600">
+                                {{ medalLabel(snapshot.medal) }}
+                            </div>
                         </div>
                     </div>
                 </Card>
+
+                <ScoreExplanation />
 
                 <!-- Sections -->
                 <div class="space-y-6">
@@ -141,18 +150,18 @@ const getMedalImage = (medalName) => {
                             <template #header>
                                 <div class="flex justify-between items-center">
                                     <h4 class="font-medium text-surface-900 truncate pr-4" :title="section.name">{{ toRoman(sIndex + 1) }}. {{ section.name }}</h4>
-                                    <span class="text-xl font-bold text-brand-600">{{ section.score }}</span>
+                                    <span class="text-xl font-bold text-brand-600">{{ formatScore(section.score, '') }}</span>
                                 </div>
                             </template>
-                            
+
                             <div class="space-y-4">
                                 <div v-for="(cat, cIndex) in section.categories" :key="cat.id" class="flex items-center justify-between text-sm">
                                     <span class="text-surface-600 truncate mr-4">{{ toAlpha(cIndex) }}. {{ cat.name }}</span>
                                     <div class="flex items-center gap-3">
                                         <div class="w-24 bg-surface-200 rounded-full h-1.5 hidden sm:block">
-                                            <div class="bg-brand-400 h-1.5 rounded-full" :style="`width: ${(cat.score / 100) * 100}%`"></div>
+                                            <div class="bg-brand-400 h-1.5 rounded-full" :style="`width: ${cat.score ?? 0}%`"></div>
                                         </div>
-                                        <span class="font-medium text-surface-900 w-8 text-right">{{ cat.score }}</span>
+                                        <span class="font-medium text-surface-900 w-8 text-right">{{ formatScore(cat.score, '') }}</span>
                                     </div>
                                 </div>
                             </div>

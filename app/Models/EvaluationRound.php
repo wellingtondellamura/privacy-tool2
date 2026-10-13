@@ -52,6 +52,11 @@ class EvaluationRound extends Model
         return $this->hasMany(RoundSnapshot::class);
     }
 
+    public function latestSnapshot(): HasOne
+    {
+        return $this->hasOne(RoundSnapshot::class)->latestOfMany();
+    }
+
     public function reviewComments(): HasMany
     {
         return $this->hasMany(ReviewComment::class);

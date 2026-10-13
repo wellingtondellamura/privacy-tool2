@@ -30,9 +30,8 @@ const form = useForm({
 });
 
 const selectAnswer = (ans) => {
-    console.log("SELECT ANSWER CLICKED:", ans, "questionId:", props.questionId, "roundId:", props.roundId, "canManage:", props.canManage);
     if (!props.canManage) return;
-    
+
     form.question_id = props.questionId;
     form.final_answer = ans;
     form.post(route('rounds.consolidate.store', props.roundId), {
@@ -42,7 +41,7 @@ const selectAnswer = (ans) => {
 
 const resetConsolidation = () => {
     if (!props.canManage) return;
-    
+
     router.delete(route('rounds.consolidate.destroy', { round: props.roundId, questionId: props.questionId }), {
         preserveScroll: true,
         onSuccess: () => {
@@ -59,8 +58,8 @@ const resetConsolidation = () => {
                 {{ t('review.resolution_model_owner', 'Resolução: Decisão do Dono') }}
             </h4>
             <p class="text-[11px] text-surface-400">
-                {{ canManage 
-                    ? t('review.resolution_owner_instructions', 'Como dono do projeto, você tem o poder de decidir a nota final para esta questão.') 
+                {{ canManage
+                    ? t('review.resolution_owner_instructions', 'Como dono do projeto, você tem o poder de decidir a nota final para esta questão.')
                     : t('review.resolution_owner_nonowner_info', 'O dono do projeto definirá a resposta consolidada final.') }}
             </p>
         </div>
@@ -111,7 +110,7 @@ const resetConsolidation = () => {
             </svg>
             <div class="text-[11px]">
                 <span class="font-bold text-surface-700 block">
-                    {{ consolidatedAnswer 
+                    {{ consolidatedAnswer
                         ? t('review.resolution_already_decided', 'Nota definida pelo Dono:') + ' ' + t(`labels.answer_level.${consolidatedAnswer}`, consolidatedAnswer)
                         : t('review.resolution_pending', 'Aguardando decisão final do Dono.') }}
                 </span>

@@ -41,50 +41,40 @@ class ComparisonService
 
     /**
      * Logic to calculate delta between two payloads.
+     * Sections, categories and questions are matched by id (falling back to position
+     * for legacy payloads). A null score means "Não se aplica"/no data; the delta is
+     * then null as well.
      */
     public static function comparePayloads(array $baselinePayload, array $comparisonPayload): array
     {
         $baselineSections = $baselinePayload['sections'] ?? [];
-        $comparisonSections = $comparisonPayload['sections'] ?? [];
 
         $sections = [];
 
-        foreach ($comparisonSections as $index => $compSection) {
-            $baseSection = $baselineSections[$index] ?? null;
-            $baseScore = $baseSection['score'] ?? 0;
-            $compScore = $compSection['score'] ?? 0;
+        foreach ($comparisonPayload['sections'] ?? [] as $index => $compSection) {
+            $baseSection = static::match($baselineSections, $compSection, 'id', $index);
+            $baseCategories = $baseSection['categories'] ?? [];
 
             $categories = [];
-            $compCategories = $compSection['categories'] ?? [];
-
-            foreach ($compCategories as $cIndex => $compCat) {
-                $baseCat = $baseSection['categories'][$cIndex] ?? null;
-                $baseCatScore = $baseCat['score'] ?? 0;
-                $compCatScore = $compCat['score'] ?? 0;
+            foreach ($compSection['categories'] ?? [] as $cIndex => $compCat) {
+                $baseCat = static::match($baseCategories, $compCat, 'id', $cIndex);
+                $baseQuestions = $baseCat['questions'] ?? [];
 
                 $questions = [];
-                $compQuestions = $compCat['questions'] ?? [];
-
-                foreach ($compQuestions as $qIndex => $compQuestion) {
-                    $baseQuestion = $baseCat['questions'][$qIndex] ?? null;
-                    $baseQuestionScore = $baseQuestion['score'] ?? 0;
-                    $compQuestionScore = $compQuestion['score'] ?? 0;
+                foreach ($compCat['questions'] ?? [] as $qIndex => $compQuestion) {
+                    $baseQuestion = static::match($baseQuestions, $compQuestion, 'question_id', $qIndex);
 
                     $questions[] = [
                         'question_id' => $compQuestion['question_id'] ?? null,
                         'question_text' => $compQuestion['question_text'] ?? '',
-                        'baseline_score' => $baseQuestionScore,
-                        'comparison_score' => $compQuestionScore,
-                        'delta' => $compQuestionScore - $baseQuestionScore,
+                        ...static::scores($baseQuestion, $compQuestion),
                     ];
                 }
 
                 $categories[] = [
                     'id' => $compCat['id'] ?? null,
                     'name' => $compCat['name'] ?? '',
-                    'baseline_score' => $baseCatScore,
-                    'comparison_score' => $compCatScore,
-                    'delta' => $compCatScore - $baseCatScore,
+                    ...static::scores($baseCat, $compCat),
                     'questions' => $questions,
                 ];
             }
@@ -92,13 +82,42 @@ class ComparisonService
             $sections[] = [
                 'id' => $compSection['id'] ?? null,
                 'name' => $compSection['name'] ?? '',
-                'baseline_score' => $baseScore,
-                'comparison_score' => $compScore,
-                'delta' => $compScore - $baseScore,
+                ...static::scores($baseSection, $compSection),
                 'categories' => $categories,
             ];
         }
 
         return ['sections' => $sections];
+    }
+
+    private static function scores(?array $base, array $comparison): array
+    {
+        // A missing counterpart is not a zero: "Não se aplica" and absent items
+        // must not invent a delta against 0.
+        $baseScore = $base === null ? null : ($base['score'] ?? null);
+        $compScore = $comparison['score'] ?? null;
+
+        return [
+            'baseline_score' => $baseScore,
+            'comparison_score' => $compScore,
+            'delta' => ($baseScore === null || $compScore === null) ? null : $compScore - $baseScore,
+        ];
+    }
+
+    /**
+     * Find the baseline counterpart of an item: same id when present in the baseline
+     * (same questionnaire version), otherwise the item at the same position.
+     */
+    private static function match(array $baselineItems, array $item, string $idKey, int|string $index): ?array
+    {
+        if (isset($item[$idKey])) {
+            foreach ($baselineItems as $baselineItem) {
+                if (($baselineItem[$idKey] ?? null) === $item[$idKey]) {
+                    return $baselineItem;
+                }
+            }
+        }
+
+        return $baselineItems[$index] ?? null;
     }
 }

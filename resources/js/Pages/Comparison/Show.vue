@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useResultFormat } from '@/composables/useResultFormat';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -49,17 +50,35 @@ const getDeltaColor = (delta) => {
 };
 
 const formatDelta = (delta) => {
+    if (delta === null || delta === undefined) return '—';
     if (delta > 0) return `+${delta}`;
     if (delta < 0) return `${delta}`;
     return '=';
 };
 
-// Extracted metrics for high-level overview
-const totalBaseScore = props.comparison.sections.reduce((acc, curr) => acc + curr.baseline_score, 0);
-const totalCompScore = props.comparison.sections.reduce((acc, curr) => acc + curr.comparison_score, 0);
-const globalDelta = totalCompScore - totalBaseScore;
+// Headline totals ignore sections where either side is null. Adding null as 0
+// made "Não se aplica" look like a score of zero.
+const comparableSections = computed(() => props.comparison.sections.filter((section) =>
+    section.baseline_score !== null && section.baseline_score !== undefined
+    && section.comparison_score !== null && section.comparison_score !== undefined
+));
+
+const totalBaseScore = computed(() => comparableSections.value.length === 0
+    ? null
+    : comparableSections.value.reduce((acc, section) => acc + section.baseline_score, 0));
+
+const totalCompScore = computed(() => comparableSections.value.length === 0
+    ? null
+    : comparableSections.value.reduce((acc, section) => acc + section.comparison_score, 0));
+
+const globalDelta = computed(() => (
+    totalBaseScore.value === null || totalCompScore.value === null
+        ? null
+        : totalCompScore.value - totalBaseScore.value
+));
 
 const { t } = useI18n();
+const { formatScore } = useResultFormat();
 </script>
 
 <template>
@@ -67,14 +86,14 @@ const { t } = useI18n();
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between w-full">
-                <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+                <div class="min-w-0">
                     <Breadcrumbs :items="[
                         { label: t('common.workspace'), url: route('projects.index') },
                         { label: project?.name, url: route('projects.show', project?.id) },
                         { label: t('comparison.breadcrumb_evolution') }
                     ]" />
-                    <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight mt-1">
                         {{ $t('comparison.title') }}
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">
@@ -88,14 +107,14 @@ const { t } = useI18n();
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-                
+
                 <!-- Global Metrics Comparison -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card class="text-center py-6">
                         <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">{{ baseLabel }}</h4>
-                        <div class="text-4xl font-bold text-surface-800">{{ totalBaseScore }}</div>
+                        <div class="text-4xl font-bold text-surface-800">{{ formatScore(totalBaseScore, '') }}</div>
                     </Card>
-                    
+
                     <Card class="text-center py-6 bg-brand-50 border-brand-100 flex flex-col justify-center items-center">
                         <h4 class="text-sm text-brand-700 tracking-wider uppercase mb-2">{{ $t('comparison.global_variation') }}</h4>
                         <div :class="['text-4xl', getDeltaColor(globalDelta)]">
@@ -105,7 +124,7 @@ const { t } = useI18n();
 
                     <Card class="text-center py-6">
                         <h4 class="text-sm text-surface-500 tracking-wider uppercase mb-2">{{ otherLabel }}</h4>
-                        <div class="text-4xl font-bold text-surface-800">{{ totalCompScore }}</div>
+                        <div class="text-4xl font-bold text-surface-800">{{ formatScore(totalCompScore, '') }}</div>
                     </Card>
                 </div>
 
@@ -116,18 +135,18 @@ const { t } = useI18n();
                     </h3>
 
                     <div v-for="section in comparison.sections" :key="section.id" class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden">
-                        
+
                         <!-- Section Header -->
                         <div class="px-6 py-4 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
                             <h4 class="font-medium text-lg text-surface-900">{{ section.name }}</h4>
                             <div class="flex items-center gap-6">
                                 <div class="text-sm">
                                     <span class="text-surface-500 pr-1">{{ $t('comparison.base_label') }}</span>
-                                    <span class="font-bold text-surface-800">{{ section.baseline_score }}</span>
+                                    <span class="font-bold text-surface-800">{{ formatScore(section.baseline_score, '') }}</span>
                                 </div>
                                 <div class="text-sm">
                                     <span class="text-surface-500 pr-1">{{ $t('comparison.current_label') }}</span>
-                                    <span class="font-bold text-surface-800">{{ section.comparison_score }}</span>
+                                    <span class="font-bold text-surface-800">{{ formatScore(section.comparison_score, '') }}</span>
                                 </div>
                                 <div :class="['text-base w-16 text-center', getDeltaColor(section.delta)]">
                                     {{ formatDelta(section.delta) }}
@@ -138,16 +157,16 @@ const { t } = useI18n();
                         <!-- Categories & Questions inside Section -->
                         <div class="p-6 space-y-6">
                             <div v-for="cat in section.categories" :key="cat.id" class="border border-surface-100 rounded-lg overflow-hidden">
-                                
+
                                 <!-- Category Summary -->
                                 <div class="px-4 py-3 bg-surface-50/50 flex justify-between items-center border-b border-surface-100">
                                     <h5 class="text-surface-700 font-medium">{{ cat.name }}</h5>
                                     <div class="flex items-center gap-4 text-sm">
-                                        <span class="text-surface-500">{{ cat.baseline_score }} → <span class="text-surface-900 font-semibold">{{ cat.comparison_score }}</span></span>
+                                        <span class="text-surface-500">{{ formatScore(cat.baseline_score, '') }} → <span class="text-surface-900 font-semibold">{{ formatScore(cat.comparison_score, '') }}</span></span>
                                         <span :class="['w-10 text-right', getDeltaColor(cat.delta)]">{{ formatDelta(cat.delta) }}</span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Questions (Only showing if there is a delta to keep UI clean, or all) -->
                                 <ul class="divide-y divide-surface-100 p-2">
                                     <template v-for="q in cat.questions" :key="q.question_id">
@@ -156,9 +175,9 @@ const { t } = useI18n();
                                                 {{ q.question_text }}
                                             </div>
                                             <div class="flex items-center gap-4 shrink-0 font-medium">
-                                                <span class="text-surface-500 w-16 text-right">{{ q.baseline_score }} pt</span>
+                                                <span class="text-surface-500 w-16 text-right">{{ formatScore(q.baseline_score, ' pt') }}</span>
                                                 <span class="text-surface-300">→</span>
-                                                <span class="text-surface-900 w-16 font-semibold">{{ q.comparison_score }} pt</span>
+                                                <span class="text-surface-900 w-16 font-semibold">{{ formatScore(q.comparison_score, ' pt') }}</span>
                                                 <span :class="['w-12 text-center', getDeltaColor(q.delta)]">{{ formatDelta(q.delta) }}</span>
                                             </div>
                                         </li>

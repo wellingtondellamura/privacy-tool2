@@ -33,6 +33,16 @@ class InspectionController extends Controller
             return redirect()->back()->withErrors(['status' => __('messages.cannot_add_to_closed_round')]);
         }
 
+        // Same rules the round screen already applies: only while the round is in
+        // draft (legacy rounds use 'active'), and never by observers (they cannot answer).
+        if (!in_array($round->status, ['draft', 'active'], true)) {
+            return redirect()->back()->withErrors(['status' => __('messages.inspection_round_not_draft')]);
+        }
+
+        if ($project->getMemberRole(Auth::user()) === 'observer') {
+            return redirect()->back()->withErrors(['inspection' => __('messages.observers_cannot_inspect')]);
+        }
+
         // Rule: only one inspection per member per round.
         $alreadyExists = Inspection::where('evaluation_round_id', $round->id)
             ->where('user_id', Auth::id())
@@ -45,14 +55,14 @@ class InspectionController extends Controller
         $activeVersion = QuestionnaireVersion::getActive();
 
         if (!$activeVersion) {
-            return redirect()->back()->withErrors(['questionnaire' => 'No active questionnaire version available.']);
+            return redirect()->back()->withErrors(['questionnaire' => __('messages.no_active_questionnaire')]);
         }
 
         $inspection = Inspection::create([
             'project_id' => $project->id,
             'user_id' => Auth::id(),
             'questionnaire_version_id' => $activeVersion->id,
-            'evaluation_round_id' => $evaluationRoundId ?? null,
+            'evaluation_round_id' => $round->id,
             'status' => 'draft',
         ]);
 

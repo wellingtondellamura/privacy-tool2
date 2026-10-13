@@ -1,12 +1,14 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InspectionLayout from '@/Layouts/InspectionLayout.vue';
 import QuestionCard from '@/Components/QuestionCard.vue';
 import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import StatusBadge from '@/Components/StatusBadge.vue';
+import { useResultFormat } from '@/composables/useResultFormat';
 
 const props = defineProps({
     inspection: {
@@ -42,16 +44,50 @@ const activeCategory = computed(() => {
 
 const calculateCategoryProgress = (category) => {
     if (!category.questions || category.questions.length === 0) return 0;
-    
+
     let answered = 0;
     category.questions.forEach(q => {
         if (responseMap.value[q.id]?.answer) {
             answered++;
         }
     });
-    
+
     return Math.round((answered / category.questions.length) * 100);
 };
+
+// All categories in questionnaire order, for previous/next navigation
+const flatCategories = computed(() => sections.value.flatMap(s => s.categories));
+const activeFlatIndex = computed(() => flatCategories.value.findIndex(c => c.id === activeCategoryId.value));
+const previousCategory = computed(() => flatCategories.value[activeFlatIndex.value - 1] || null);
+const nextCategory = computed(() => flatCategories.value[activeFlatIndex.value + 1] || null);
+
+const scrollToTop = () => {
+    nextTick(() => {
+        document.getElementById('inspection-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+};
+
+const goToCategory = (categoryId, close = null) => {
+    activeCategoryId.value = categoryId;
+    if (close) close();
+    scrollToTop();
+};
+
+const unansweredCount = computed(() => {
+    let count = 0;
+    sections.value.forEach(s => s.categories.forEach(c => c.questions.forEach(q => {
+        if (!responseMap.value[q.id]?.answer) count++;
+    })));
+    return count;
+});
+
+const goToFirstUnanswered = () => {
+    const category = flatCategories.value.find(c => c.questions.some(q => !responseMap.value[q.id]?.answer));
+    if (category) goToCategory(category.id);
+};
+
+const { formatScore } = useResultFormat();
 
 const calculateGlobalProgress = () => {
     let totalQuestions = 0;
@@ -147,7 +183,7 @@ const activeCategoryIndex = computed(() => {
     <InspectionLayout>
 
         <!-- Sidebar Navigation -->
-        <template #sidebar>
+        <template #sidebar="{ close }">
             <div>
                 <!-- Project & Round info -->
                 <div class="mb-4 pb-4 border-b border-surface-100">
@@ -172,17 +208,18 @@ const activeCategoryIndex = computed(() => {
                         <button
                             v-for="(cat, cIndex) in section.categories"
                             :key="cat.id"
-                            @click="activeCategoryId = cat.id"
+                            @click="goToCategory(cat.id, close)"
+                            :aria-current="activeCategoryId === cat.id ? 'page' : undefined"
                             :class="[
                                 'w-full flex flex-col px-3 py-2 rounded-lg text-sm transition-colors text-left',
-                                activeCategoryId === cat.id 
-                                    ? 'bg-brand-50 text-brand-700 font-medium' 
+                                activeCategoryId === cat.id
+                                    ? 'bg-brand-50 text-brand-700 font-medium'
                                     : 'text-surface-600 hover:bg-surface-100 hover:text-surface-900'
                             ]"
                         >
                             <div class="flex justify-between items-center w-full">
                                 <span class="truncate pr-2">{{ toAlpha(cIndex) }}. {{ cat.name }}</span>
-                                <span v-if="calculateCategoryProgress(cat) === 100" class="text-brand-600">
+                                <span v-if="calculateCategoryProgress(cat) === 100" class="text-brand-600 shrink-0" :title="$t('inspection.category_complete')">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                                 </span>
                             </div>
@@ -202,10 +239,10 @@ const activeCategoryIndex = computed(() => {
                 <div class="min-w-0 flex-1">
                     <!-- Compact breadcrumb: Workspace > Project > Round -->
                     <nav class="flex items-center gap-1 text-xs text-surface-400 mb-1 overflow-hidden" aria-label="Breadcrumb">
-                        <Link :href="route('projects.index')" class="hover:text-brand-600 transition-colors shrink-0">
+                        <Link :href="route('projects.index')" class="hidden sm:inline hover:text-brand-600 transition-colors shrink-0">
                             {{ $t('nav.workspace') }}
                         </Link>
-                        <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="hidden sm:block w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         <Link :href="route('projects.show', inspection.project.id)"
                             class="font-semibold text-brand-600 hover:text-brand-700 transition-colors truncate max-w-[120px] sm:max-w-[180px]"
                             :title="inspection.project.name">
@@ -224,9 +261,7 @@ const activeCategoryIndex = computed(() => {
 
 
                 <div class="flex items-center gap-2 shrink-0">
-                    <Badge :variant="isActive ? 'brand' : (isClosed ? 'success' : 'surface')">
-                        {{ isActive ? $t('inspection.status.active') : (isClosed ? $t('inspection.status.closed') : $t('inspection.status.draft')) }}
-                    </Badge>
+                    <StatusBadge :status="inspection.status" />
                 </div>
             </div>
         </template>
@@ -243,11 +278,11 @@ const activeCategoryIndex = computed(() => {
                 </div>
 
                 <hr class="border-surface-200" />
-                
+
                 <!-- Status Actions -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-medium text-surface-900">{{ $t('inspection.actions') }}</h3>
-                    
+
                     <template v-if="isDraft">
                         <p v-if="isResponsible" class="text-xs text-surface-600 mb-3">
                             {{ $t('inspection.draft_message') }}
@@ -267,10 +302,13 @@ const activeCategoryIndex = computed(() => {
                         <div class="w-full bg-surface-200 rounded-full h-2 mb-4">
                             <div class="bg-brand-500 h-2 rounded-full transition-all duration-500" :style="`width: ${calculateGlobalProgress()}%`"></div>
                         </div>
+                        <Button v-if="isResponsible && unansweredCount > 0" variant="outline" size="sm" class="w-full mb-2" @click="goToFirstUnanswered">
+                            {{ $t('inspection.go_to_unanswered', { count: unansweredCount }) }}
+                        </Button>
                         <Button v-if="isResponsible" variant="danger" size="sm" class="w-full" @click="openCloseConfirm" :disabled="closeForm.processing">
                             {{ $t('inspection.close_button') }}
                         </Button>
-                        <p v-else class="text-[10px] text-surface-500 text-center italic">
+                        <p v-else class="text-xs text-surface-500 text-center italic">
                             {{ $t('inspection.only_responsible_prefix') }} (<span class="font-medium text-surface-700">{{ inspection.user?.name }}</span>) {{ $t('inspection.only_responsible_suffix') }}
                         </p>
                     </div>
@@ -300,7 +338,7 @@ const activeCategoryIndex = computed(() => {
                     </p>
                     <p v-if="isClosed && inspection.result_snapshots?.length > 0" class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">{{ $t('inspection.score_label') }} </span>
-                        <span class="text-brand-600 font-bold">{{ inspection.result_snapshots[0].payload_json.global_score }}%</span>
+                        <span class="text-brand-600 font-bold">{{ formatScore(inspection.result_snapshots[0].payload_json.global_score) }}</span>
                     </p>
                     <p class="text-xs text-surface-500">
                         <span class="font-medium text-surface-700">{{ $t('inspection.status_label') }} </span>
@@ -333,13 +371,25 @@ const activeCategoryIndex = computed(() => {
                 <p class="text-xs font-semibold text-surface-400 uppercase tracking-wider mb-1">
                     {{ toRoman(activeSectionIndex + 1) }}. {{ activeSection?.name }}
                 </p>
-                <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight">
                     {{ toAlpha(activeCategoryIndex) }}. {{ activeCategory.name }}
                 </h2>
+                <p class="text-xs text-surface-500 mt-1">
+                    {{ $t('inspection.category_position', { current: activeFlatIndex + 1, total: flatCategories.length }) }}
+                </p>
 
-                <p class="text-surface-500 mt-2">
+                <p class="text-sm sm:text-base text-surface-500 mt-2">
                     {{ $t('inspection.instructions') }}
                 </p>
+                <details class="mt-3 text-sm text-surface-600 bg-white border border-surface-200 rounded-lg px-4 py-3">
+                    <summary class="cursor-pointer font-medium text-surface-800">{{ $t('inspection.scale_help_title') }}</summary>
+                    <ul class="mt-2 space-y-1 list-disc pl-5">
+                        <li>{{ $t('inspection.scale_help_high') }}</li>
+                        <li>{{ $t('inspection.scale_help_medium') }}</li>
+                        <li>{{ $t('inspection.scale_help_low') }}</li>
+                        <li>{{ $t('inspection.scale_help_na') }}</li>
+                    </ul>
+                </details>
                 <div v-if="isDraft" class="mt-4 p-3 bg-yellow-50 text-yellow-800 text-sm border border-yellow-200 rounded-md">
                     {{ $t('inspection.draft_alert') }}
                 </div>
@@ -356,9 +406,9 @@ const activeCategoryIndex = computed(() => {
             </div>
 
             <div class="space-y-6">
-                <transition-group 
-                    enter-active-class="transition duration-300 ease-out" 
-                    enter-from-class="opacity-0 translate-y-4" 
+                <transition-group
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="opacity-0 translate-y-4"
                     enter-to-class="opacity-100 translate-y-0"
                     leave-active-class="hidden"
                 >
@@ -376,13 +426,43 @@ const activeCategoryIndex = computed(() => {
                     />
                 </transition-group>
             </div>
+
+            <!-- Category navigation -->
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-2">
+                <Button v-if="previousCategory" variant="outline" @click="goToCategory(previousCategory.id)">
+                    ← {{ $t('inspection.previous_category') }}
+                </Button>
+                <span v-else></span>
+                <Button v-if="nextCategory" variant="primary" @click="goToCategory(nextCategory.id)">
+                    {{ $t('inspection.next_category') }}: {{ nextCategory.name }} →
+                </Button>
+            </div>
         </div>
+
+        <template v-if="isActive && isResponsible" #mobile-bar>
+            <div class="flex items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-surface-600">{{ $t('inspection.global_progress') }} {{ calculateGlobalProgress() }}%</p>
+                    <div class="w-full bg-surface-200 rounded-full h-1.5 mt-1">
+                        <div class="bg-brand-500 h-1.5 rounded-full transition-all duration-500" :style="`width: ${calculateGlobalProgress()}%`"></div>
+                    </div>
+                </div>
+                <Button v-if="nextCategory" size="sm" variant="primary" @click="goToCategory(nextCategory.id)">
+                    {{ $t('inspection.next_category') }} →
+                </Button>
+                <Button v-else size="sm" variant="danger" @click="openCloseConfirm" :disabled="closeForm.processing">
+                    {{ $t('inspection.close_button') }}
+                </Button>
+            </div>
+        </template>
 
         <!-- Modals -->
         <ConfirmModal
             :show="showCloseConfirm"
             :title="$t('inspection.close_modal_title')"
-            :message="$t('inspection.close_modal_message')"
+            :message="unansweredCount > 0
+                ? $t('inspection.close_modal_message_unanswered', { count: unansweredCount }) + ' ' + $t('inspection.close_modal_message')
+                : $t('inspection.close_modal_message')"
             :confirm-text="$t('inspection.close_confirm')"
             :cancel-text="$t('common.cancel')"
             confirm-variant="danger"

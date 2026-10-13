@@ -29,14 +29,46 @@ test('other maps to null', function () {
 test('category score is calculated correctly', function () {
     // 4 questions, total score 300 → round((300/400)*100) = 75
     $scores = [100, 100, 50, 50]; // sum = 300
-    expect(AggregationService::categoryScore($scores, 4))->toBe(75);
+    expect(AggregationService::categoryScore($scores))->toBe(75);
 });
 
 test('category score from feature: 300/400', function () {
     // Scenario: Category score calculation — 4 questions, total 300
     // round((300/400)*100) = round(75) = 75
     $scores = [100, 50, 100, 50]; // sum = 300
-    expect(AggregationService::categoryScore($scores, 4))->toBe(75);
+    expect(AggregationService::categoryScore($scores))->toBe(75);
+});
+
+test('not applicable answers are left out of the category score', function () {
+    // 3 x Suficiente + 1 x Não se aplica → 300 / (3 * 100) = 100 (MANUAL §9.4)
+    expect(AggregationService::categoryScore([100, 100, 100, null]))->toBe(100);
+    expect(AggregationService::categoryScore([100, 50, null, null]))->toBe(75);
+});
+
+test('category score only divides by answered questions', function () {
+    // 2 of 4 questions answered, both Suficiente → 100
+    expect(AggregationService::categoryScore([100, 100]))->toBe(100);
+});
+
+test('category without applicable answers has no score', function () {
+    expect(AggregationService::categoryScore([null, null]))->toBeNull();
+    expect(AggregationService::categoryScore([]))->toBeNull();
+});
+
+test('section and global scores ignore categories without data', function () {
+    expect(AggregationService::sectionScore([80, null, 60]))->toBe(70);
+    expect(AggregationService::sectionScore([null]))->toBeNull();
+    expect(AggregationService::globalScore([90, null]))->toBe(90);
+    expect(AggregationService::globalScore([null, null]))->toBe(0);
+});
+
+test('question average ignores not applicable answers', function () {
+    expect(AggregationService::averageScore([100, null, 50]))->toBe(75);
+    expect(AggregationService::averageScore([null]))->toBeNull();
+});
+
+test('null score gives no_data medal', function () {
+    expect(AggregationService::medalForScore(null))->toBe('no_data');
 });
 
 // RN-03 — Category percentage

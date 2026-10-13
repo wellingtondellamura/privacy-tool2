@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ScoreExplanation from '@/Components/ScoreExplanation.vue';
+import { useResultFormat } from '@/composables/useResultFormat';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
@@ -19,6 +21,8 @@ const props = defineProps({
         required: true,
     }
 });
+
+const { formatScore, medalLabel } = useResultFormat();
 
 const { t, locale } = useI18n();
 
@@ -64,20 +68,20 @@ const getMedalImage = (medalName) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0">
                     <Breadcrumbs :items="[
                         { label: t('common.workspace'), url: route('projects.index') },
                         { label: round.project.name, url: route('projects.show', round.project.id) },
                         { label: round.name, url: route('rounds.show', round.id) },
                         { label: t('results.round_title') }
                     ]" />
-                    <h2 class="text-2xl font-semibold text-surface-900 tracking-tight mt-1">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight mt-1">
                         {{ $t('results.round_title') }}
                     </h2>
                     <p class="text-sm text-surface-500 mt-1">{{ $t('results.round_subtitle', { round: round.name, project: round.project.name }) }}</p>
                 </div>
-                
+
                 <div>
                     <Button variant="outline" @click="$inertia.get(route('rounds.show', round.id))">
                         {{ $t('results.back_to_round') }}
@@ -86,7 +90,7 @@ const getMedalImage = (medalName) => {
             </div>
         </template>
 
-        <div class="py-12">
+        <div class="py-6 sm:py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
 
                 <!-- Diagnosis/Comment Analysis (New for Round Results) -->
@@ -103,34 +107,39 @@ const getMedalImage = (medalName) => {
                 <!-- Global Score -->
                 <Card class="bg-gradient-to-br from-surface-50 to-white border-surface-200 py-10 shadow-sm relative overflow-hidden">
                     <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-300 to-brand-600"></div>
-                    <div class="flex items-center justify-center gap-12">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
                         <!-- Medal on the left -->
-                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)" 
-                             :src="getMedalImage(snapshot.medal.name)" 
-                             class="w-48 h-48 object-contain drop-shadow-lg" 
-                             :alt="snapshot.medal.name" />
-                        
+                        <img v-if="snapshot.medal && getMedalImage(snapshot.medal.name)"
+                             :src="getMedalImage(snapshot.medal.name)"
+                             class="w-32 h-32 sm:w-48 sm:h-48 object-contain drop-shadow-lg"
+                             :alt="medalLabel(snapshot.medal)" />
+
                         <!-- Score column on the right -->
                         <div class="flex flex-col items-center">
-                            <div class="text-[100px] font-bold text-surface-800 leading-none">
+                            <div class="text-7xl sm:text-[100px] font-bold text-surface-800 leading-none">
                                 {{ snapshot.global_score }}
                             </div>
                             <div class="mt-4 text-xs font-bold text-surface-400 uppercase tracking-[0.2em]">
                                 {{ $t('results.global_avg_score') }}
                             </div>
+                            <div v-if="snapshot.medal" class="mt-2 text-sm font-semibold text-surface-600">
+                                {{ medalLabel(snapshot.medal) }}
+                            </div>
                         </div>
                     </div>
                 </Card>
 
+                <ScoreExplanation />
+
                 <!-- Sections -->
                 <div class="space-y-6">
                     <h3 class="text-lg font-semibold text-surface-900 border-b border-surface-200 pb-2">{{ $t('results.section_avg_performance') }}</h3>
-                    
+
                     <div class="space-y-8">
                         <section v-for="(section, sIndex) in snapshot.sections" :key="section.id" class="bg-white rounded-xl shadow-tactile border border-surface-100 overflow-hidden">
                             <div class="px-6 py-4 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
                                 <h4 class="font-medium text-lg text-surface-900">{{ toRoman(sIndex + 1) }}. {{ section.name }}</h4>
-                                <span class="text-xl font-bold text-brand-600">{{ section.score }}%</span>
+                                <span class="text-xl font-bold text-brand-600">{{ formatScore(section.score) }}</span>
                             </div>
 
                             <div class="p-6 space-y-8">
@@ -139,26 +148,26 @@ const getMedalImage = (medalName) => {
                                         <h5 class="text-surface-700 font-medium text-sm">{{ toAlpha(cIndex) }}. {{ cat.name }}</h5>
                                         <div class="flex items-center gap-4">
                                             <div class="w-32 bg-surface-100 rounded-full h-1.5 hidden sm:block">
-                                                <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score}%`"></div>
+                                                <div class="bg-brand-500 h-1.5 rounded-full" :style="`width: ${cat.score ?? 0}%`"></div>
                                             </div>
-                                            <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ cat.score }}%</span>
+                                            <span class="text-sm font-bold text-surface-900 w-8 text-right">{{ formatScore(cat.score) }}</span>
                                         </div>
                                     </div>
 
                                     <!-- Questions and Divergences (If present in snapshot) -->
                                     <ul v-if="cat.questions" class="space-y-3 pl-4 border-l-2 border-surface-100">
                                         <li v-for="q in cat.questions" :key="q.question_id" class="flex flex-col sm:flex-row sm:items-center justify-between bg-surface-50 rounded p-3 gap-3">
-                                            <span class="text-sm text-surface-700 truncate max-w-lg" :title="q.question_text">
+                                            <span class="text-sm text-surface-700 line-clamp-2 sm:line-clamp-1 sm:max-w-lg" :title="q.question_text">
                                                 {{ q.question_text }}
                                             </span>
-                                            
+
                                             <div class="flex items-center gap-4 shrink-0 justify-end">
-                                                <div class="text-sm font-semibold text-surface-900 w-12 text-right">
-                                                    Score: {{ q.score }}
+                                                <div class="text-sm font-semibold text-surface-900 whitespace-nowrap text-right">
+                                                    Score: {{ formatScore(q.score, '') }}
                                                 </div>
                                                 <div class="flex items-center gap-2 shrink-0">
                                                     <DivergenceBadge v-slot="slotProps" v-if="q.classification" :classification="q.classification" />
-                                                    <span class="text-[10px] text-surface-400 font-medium shrink-0">Var: {{ q.variance }}</span>
+                                                    <span class="text-xs text-surface-400 font-medium shrink-0" :title="$t('results.std_dev_hint')">σ {{ q.std_dev ?? Math.round(Math.sqrt(q.variance || 0)) }}</span>
                                                 </div>
                                             </div>
                                         </li>

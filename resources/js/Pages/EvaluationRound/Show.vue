@@ -9,6 +9,9 @@ import Badge from '@/Components/Badge.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Input from '@/Components/Input.vue';
+import StatusBadge from '@/Components/StatusBadge.vue';
+import RoundStepper from '@/Components/RoundStepper.vue';
+import { useResultFormat } from '@/composables/useResultFormat';
 
 const props = defineProps({
     round: {
@@ -45,6 +48,7 @@ const updateRound = () => {
 
 const user = usePage().props.auth.user;
 const { t } = useI18n();
+const { formatScore, medalLabel } = useResultFormat();
 const canManage = props.round.project.owner_id === user.id;
 
 // Bug 4 & 5: role-based computed flags
@@ -84,9 +88,29 @@ const createInspection = () => {
     });
 };
 
+const isStartReviewOpen = ref(false);
+const startingReview = ref(false);
+
 const startReview = () => {
-    router.post(route('rounds.enter-review', props.round.id));
+    router.post(route('rounds.enter-review', props.round.id), {}, {
+        onStart: () => (startingReview.value = true),
+        onFinish: () => {
+            startingReview.value = false;
+            isStartReviewOpen.value = false;
+        },
+    });
 };
+
+// The current user's own closed inspection (results are personal for evaluators)
+const myClosedInspection = computed(() =>
+    props.round.inspections.find(i => i.user?.id === user.id && i.status === 'closed')
+);
+
+const closedCount = computed(() => props.round.inspections.filter(i => i.status === 'closed').length);
+const pendingCount = computed(() => props.round.inspections.length - closedCount.value);
+
+const visibilityLabel = (visibility) => t(`labels.visibility.${visibility}`);
+const latestSnapshot = computed(() => props.round.snapshots?.[0]?.payload_json);
 
 const closeForm = useForm({});
 
@@ -148,9 +172,12 @@ const submitRevocation = () => {
     });
 };
 
+const copied = ref(false);
+
 const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-        alert(t('round.copied_clipboard'));
+        copied.value = true;
+        setTimeout(() => (copied.value = false), 2500);
     });
 };
 
@@ -161,29 +188,27 @@ const copyToClipboard = (text) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-start gap-4">
-                <div class="flex-grow">
+            <div class="flex flex-col lg:flex-row lg:items-start gap-4">
+                <div class="flex-grow min-w-0">
                     <Breadcrumbs :items="[
                         { label: $t('nav.workspace'), url: route('projects.index') },
                         { label: round.project.name, url: route('projects.show', round.project.id) },
                         { label: round.name }
                     ]" />
-                    
+
                     <div v-if="!isEditing">
-                        <div class="flex items-center gap-3">
-                            <h2 class="text-2xl font-semibold text-surface-900 tracking-tight">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <h2 class="text-xl sm:text-2xl font-semibold text-surface-900 tracking-tight break-words">
                                 {{ round.name }}
                             </h2>
-                            <button v-if="canManage && !isClosed" @click="toggleEdit" class="text-surface-400 hover:text-brand-600 transition-colors">
+                            <button v-if="canManage && !isClosed" @click="toggleEdit" class="p-1 text-surface-400 hover:text-brand-600 transition-colors" :title="$t('round.edit_name')" :aria-label="$t('round.edit_name')">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                 </svg>
                             </button>
-                             <Badge :variant="isClosed ? 'success' : (isReviewing ? 'warning' : (round.status === 'active' ? 'brand' : 'surface'))">
-                                 {{ isClosed ? $t('round.status_closed') : (isReviewing ? $t('round.status_review') : (round.status === 'active' ? $t('round.status_active') : $t('round.status_draft'))) }}
-                             </Badge>
-                            <Badge v-if="round.public_directory" variant="primary">
-                                {{ $t('round.published_badge', { visibility: round.public_directory.visibility }) }}
+                            <StatusBadge :status="round.status" />
+                            <Badge v-if="round.public_directory && round.public_directory.visibility !== 'private'" variant="primary">
+                                {{ $t('round.published_badge', { visibility: visibilityLabel(round.public_directory.visibility) }) }}
                             </Badge>
                         </div>
                         <p class="text-xs text-surface-500 mt-1 font-semibold flex items-center gap-1.5">
@@ -224,15 +249,15 @@ const copyToClipboard = (text) => {
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 mt-2">
+                <div class="flex flex-wrap items-center gap-2 lg:mt-2 lg:justify-end lg:shrink-0">
                     <!-- Draft state buttons -->
                     <Button v-if="canCreateInspection" variant="primary" @click="createInspection">
                         {{ $t('round.new_inspection') }}
                     </Button>
-                    <Button v-if="isDraft && canManage && round.inspections.some(i => i.status === 'closed')" variant="warning" @click="startReview">
+                    <Button v-if="isDraft && canManage && closedCount > 0" variant="warning" @click="isStartReviewOpen = true">
                         {{ $t('round.start_review') }}
                     </Button>
-                    <Button v-if="isDraft && canManage" variant="warning" @click="$inertia.get(route('rounds.review', round.id))">
+                    <Button v-if="isDraft && canManage" variant="outline" @click="$inertia.get(route('rounds.review', round.id))" :title="$t('round.close_round_hint')">
                         {{ $t('round.close_round') }}
                     </Button>
 
@@ -252,12 +277,13 @@ const copyToClipboard = (text) => {
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-                
+        <div class="py-6 sm:py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="md:col-span-2 space-y-6">
+                <RoundStepper :status="round.status" />
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <div class="lg:col-span-2 space-y-6 min-w-0">
                         <Card :title="$t('round.inspections_title')">
                             <div v-if="round.inspections.length === 0" class="py-12 text-center text-surface-500">
                                 {{ $t('round.no_inspections') }}
@@ -270,15 +296,19 @@ const copyToClipboard = (text) => {
                                     {{ $t('round.observer_no_action') }}
                                 </p>
                             </div>
-                            
+
                             <div v-if="round.inspections.length > 0">
+                            <p class="text-xs text-surface-500 mb-2">
+                                {{ $t('round.progress_summary', { closed: closedCount, total: round.inspections.length }) }}
+                                <span v-if="!isClosed && pendingCount > 0"> · {{ $t('round.pending_hint', { count: pendingCount }) }}</span>
+                            </p>
                             <ul class="divide-y divide-surface-100">
-                                    <li v-for="inspection in round.inspections" :key="inspection.id" 
-                                        class="py-4 flex justify-between items-center px-4 -mx-4 rounded-lg transition-colors"
+                                    <li v-for="inspection in round.inspections" :key="inspection.id"
+                                        class="py-4 flex flex-wrap sm:flex-nowrap justify-between items-center gap-3 px-4 -mx-4 rounded-lg transition-colors"
                                         :class="canViewInspection(inspection) ? 'hover:bg-surface-50 cursor-pointer group' : 'opacity-75'"
                                     >
-                                        <div 
-                                            class="flex-grow"
+                                        <div
+                                            class="flex-grow min-w-0"
                                             :class="canViewInspection(inspection) ? 'cursor-pointer' : 'cursor-default'"
                                             @click="canViewInspection(inspection) && $inertia.get(route('inspections.show', inspection.id))"
                                         >
@@ -290,20 +320,7 @@ const copyToClipboard = (text) => {
                                             </p>
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <!-- Status Badge with semantic color -->
-                                            <Badge :variant="inspection.status">
-                                                <span class="flex items-center gap-1">
-                                                    <!-- dot indicator -->
-                                                    <span class="w-1.5 h-1.5 rounded-full"
-                                                        :class="{
-                                                            'bg-slate-400': inspection.status === 'draft',
-                                                            'bg-blue-500': inspection.status === 'active',
-                                                            'bg-emerald-500': inspection.status === 'closed',
-                                                        }"
-                                                    ></span>
-                                                    {{ translateStatus(inspection.status) }}
-                                                </span>
-                                            </Badge>
+                                            <StatusBadge :status="inspection.status" />
                                             <!-- Owner / Observer: always see [Ver] -->
                                             <button
                                                 v-if="canViewInspection(inspection)"
@@ -318,7 +335,7 @@ const copyToClipboard = (text) => {
                                                 {{ $t('common.view') }}
                                             </button>
                                             <!-- Evaluator viewing someone else's inspection: restricted indicator -->
-                                            <span v-else class="inline-flex items-center gap-1 text-[10px] font-medium text-surface-400 bg-surface-100 rounded-full px-2 py-0.5">
+                                            <span v-else class="inline-flex items-center gap-1 text-xs font-medium text-surface-400 bg-surface-100 rounded-full px-2 py-0.5">
                                                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
@@ -328,12 +345,12 @@ const copyToClipboard = (text) => {
                                     </li>
                                 </ul>
 
-                                <div v-if="round.inspections.some(i => i.status === 'closed')" class="mt-6 pt-6 border-t border-surface-100 flex justify-end">
-                                    <Button 
-                                        variant="info" 
-                                        @click="$inertia.get(route('results.team', round.inspections.filter(i => i.status === 'closed').sort((a,b) => b.id - a.id)[0].id))"
+                                <div v-if="myClosedInspection" class="mt-6 pt-6 border-t border-surface-100 flex justify-end">
+                                    <Button
+                                        variant="info"
+                                        @click="$inertia.get(route('results.individual', myClosedInspection.id))"
                                     >
-                                        {{ $t('round.team_result') }}
+                                        {{ $t('round.my_result') }}
                                     </Button>
                                 </div>
                             </div>
@@ -341,7 +358,7 @@ const copyToClipboard = (text) => {
 
                         <!-- Diagnosis Card (Moved) -->
                         <Card v-if="round.diagnosis" class="border-brand-100 shadow-sm overflow-hidden" :title="$t('round.diagnosis_title')">
-                            <div class="p-6 text-sm text-surface-700 prose prose-brand max-w-none whitespace-pre-wrap">{{ round.diagnosis }}</div>
+                            <div class="text-sm text-surface-700 prose prose-brand max-w-none whitespace-pre-wrap">{{ round.diagnosis }}</div>
                         </Card>
 
 
@@ -349,7 +366,7 @@ const copyToClipboard = (text) => {
 
                     <div class="space-y-6">
                         <Card :title="$t('round.info_title')">
-                            <div class="space-y-4 px-6 py-4">
+                            <div class="space-y-4">
                                 <div>
                                     <span class="block text-xs font-semibold text-surface-500 uppercase">{{ $t('round.project_label') }}</span>
                                     <Link :href="route('projects.show', round.project.id)" class="text-brand-600 hover:underline text-sm">
@@ -374,17 +391,17 @@ const copyToClipboard = (text) => {
                         <!-- Project Members Card -->
                         <Card :title="$t('project.members_title')">
                             <ul class="divide-y divide-surface-100">
-                                <li v-for="member in round.project.members" :key="member.id" class="py-3 flex items-center justify-between px-6">
-                                    <div class="flex items-center">
-                                        <div class="h-8 w-8 rounded-full bg-surface-200 flex items-center justify-center text-surface-600 font-bold text-xs ring-2 ring-white">
+                                <li v-for="member in round.project.members" :key="member.id" class="py-3 flex items-center justify-between gap-3">
+                                    <div class="flex items-center min-w-0">
+                                        <div class="h-8 w-8 shrink-0 rounded-full bg-surface-200 flex items-center justify-center text-surface-600 font-bold text-xs ring-2 ring-white">
                                             {{ member.user.name.charAt(0) }}
                                         </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-surface-900">{{ member.user.name }}</p>
-                                            <p class="text-xs text-surface-500">{{ member.user.email }}</p>
+                                        <div class="ml-3 min-w-0">
+                                            <p class="text-sm font-medium text-surface-900 truncate">{{ member.user.name }}</p>
+                                            <p class="text-xs text-surface-500 truncate" :title="member.user.email">{{ member.user.email }}</p>
                                         </div>
                                     </div>
-                                    <Badge :variant="member.role === 'owner' ? 'brand' : 'surface'">
+                                    <Badge class="shrink-0" :variant="member.role === 'owner' ? 'brand' : 'surface'">
                                         {{ member.role === 'owner' ? $t('workspace.role_owner') : (member.role === 'evaluator' ? $t('workspace.role_evaluator') : $t('workspace.role_observer')) }}
                                     </Badge>
                                 </li>
@@ -392,8 +409,8 @@ const copyToClipboard = (text) => {
                         </Card>
 
                         <!-- Product URL -->
-                        <div v-if="round.project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between">
-                            <div class="text-sm">
+                        <div v-if="round.project.url" class="p-4 bg-white rounded-xl border border-surface-200 shadow-sm flex items-center justify-between gap-3">
+                            <div class="text-sm min-w-0">
                                 <span class="block font-medium text-surface-900">{{ $t('project.product_url') }}</span>
                                 <a :href="round.project.url" target="_blank" class="text-brand-600 hover:underline break-all block">
                                     {{ round.project.url }}
@@ -407,11 +424,15 @@ const copyToClipboard = (text) => {
 
                         <!-- Selo Embeddable Card (RN-BADGE-01) -->
                         <Card v-if="isClosed" :title="$t('round.badge_title')">
-                            <div class="space-y-4 px-6 py-4">
-                                <div v-if="round.public_directory?.visibility === 'private'" class="p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700">
+                            <div class="space-y-4">
+                                <div v-if="!round.public_directory" class="p-3 bg-surface-50 border border-surface-200 rounded-lg text-xs text-surface-600">
+                                    {{ $t('round.badge_publish_first') }}
+                                </div>
+
+                                <div v-else-if="round.public_directory.visibility === 'private'" class="p-3 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700">
                                     {{ $t('round.badge_private_warning') }}
                                 </div>
-                                
+
                                 <div v-else-if="!round.badge" class="space-y-4">
                                     <p class="text-xs text-surface-500">
                                         {{ $t('round.badge_description') }}
@@ -424,20 +445,20 @@ const copyToClipboard = (text) => {
                                 <div v-else class="space-y-4">
                                     <!-- Preview Visual -->
                                     <div class="p-4 bg-surface-50 border border-surface-200 rounded-lg flex flex-col items-center">
-                                        <span class="text-[10px] text-surface-400 mb-2 uppercase font-bold">{{ $t('round.badge_preview') }}</span>
-                                        
+                                        <span class="text-xs text-surface-400 mb-2 uppercase font-bold">{{ $t('round.badge_preview') }}</span>
+
                                         <!-- Mini Mockup of Badge -->
                                         <div class="bg-white border border-surface-200 rounded-lg p-3 shadow-sm text-center min-w-[140px]">
-                                            <div class="text-[10px] text-surface-500">{{ round.project.name }}</div>
-                                            <div class="font-bold text-sm text-surface-900">{{ round.snapshots[0]?.payload_json?.medal?.name }}</div>
-                                            <div class="text-[10px] text-surface-400">Score: {{ round.snapshots[0]?.payload_json?.global_score }}%</div>
+                                            <div class="text-xs text-surface-500">{{ round.project.name }}</div>
+                                            <div class="font-bold text-sm text-surface-900">{{ medalLabel(latestSnapshot?.medal) }}</div>
+                                            <div class="text-xs text-surface-400">Score: {{ formatScore(latestSnapshot?.global_score) }}</div>
                                         </div>
                                     </div>
 
                                     <!-- Estilo -->
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-surface-500 uppercase mb-1">{{ $t('round.badge_style_label') }}</label>
-                                        <select 
+                                        <label class="block text-xs font-semibold text-surface-500 uppercase mb-1">{{ $t('round.badge_style_label') }}</label>
+                                        <select
                                             class="w-full text-xs rounded-md border-surface-300 focus:border-brand-500 focus:ring-brand-500"
                                             :value="round.badge.style"
                                             @change="(e) => $inertia.put(route('badges.style.update', round.badge.id), { style: e.target.value })"
@@ -450,31 +471,34 @@ const copyToClipboard = (text) => {
 
                                     <!-- Código Embed -->
                                     <div>
-                                        <label class="block text-[10px] font-semibold text-surface-500 uppercase mb-1">{{ $t('round.badge_code_label') }}</label>
+                                        <label class="block text-xs font-semibold text-surface-500 uppercase mb-1">{{ $t('round.badge_code_label') }}</label>
                                         <div class="relative group">
-                                            <pre class="bg-surface-900 text-surface-100 text-[10px] p-2 rounded overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;script src="{{ $page.props.app_url }}/badge/{{ round.badge.public_token }}.js"&gt;&lt;/script&gt;</pre>
-                                            <button 
-                                                class="absolute top-1 right-1 p-1 bg-surface-700 hover:bg-surface-600 rounded text-white transition-colors"
+                                            <pre class="bg-surface-900 text-surface-100 text-xs p-2 pt-9 rounded overflow-x-auto whitespace-pre-wrap leading-relaxed">&lt;script src="{{ $page.props.app_url }}/badge/{{ round.badge.public_token }}.js"&gt;&lt;/script&gt;</pre>
+                                            <button
+                                                type="button"
+                                                class="absolute top-1 right-1 inline-flex items-center gap-1 px-2 py-1 bg-surface-700 hover:bg-surface-600 rounded text-white text-xs transition-colors"
+                                                :aria-label="$t('round.copy_code')"
                                                 @click="copyToClipboard(`<script src='${$page.props.app_url}/badge/${round.badge.public_token}.js'></script>`)"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                 </svg>
+                                                <span>{{ copied ? $t('round.copied_short') : $t('round.copy_code') }}</span>
                                             </button>
                                         </div>
                                     </div>
 
                                     <div class="pt-2 border-t border-surface-100">
-                                        <button 
+                                        <button
                                             v-if="!round.badge.is_active"
-                                            class="text-[10px] text-brand-600 hover:underline font-medium"
+                                            class="text-xs text-brand-600 hover:underline font-medium"
                                             @click="$inertia.post(route('rounds.badge.store', round.id))"
                                         >
                                             {{ $t('round.reactivate') }}
                                         </button>
-                                        <button 
+                                        <button
                                             v-else
-                                            class="text-[10px] text-red-600 hover:underline font-medium"
+                                            class="text-xs text-red-600 hover:underline font-medium"
                                             @click="confirmRevocation"
                                         >
                                             {{ $t('round.revoke_badge') }}
@@ -493,8 +517,8 @@ const copyToClipboard = (text) => {
     <ConfirmModal
         :show="isPublishingModalOpen"
         :title="$t('round.publish_round_title')"
-        :message="round.public_directory 
-            ? $t('publication.update_message') 
+        :message="round.public_directory
+            ? $t('publication.update_message')
             : $t('publication.create_message')"
         :confirm-text="round.public_directory ? $t('publication.update_button') : $t('publication.publish_button')"
         :cancel-text="$t('common.cancel')"
@@ -511,26 +535,26 @@ const copyToClipboard = (text) => {
                             <input type="radio" value="private" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
                                 <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.private_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.private_description') }}</span>
+                                <span class="block text-xs text-surface-500 mt-1">{{ $t('publication.private_description') }}</span>
                             </div>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'score_public'}">
                             <input type="radio" value="score_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
                                 <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.score_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.score_description') }}</span>
+                                <span class="block text-xs text-surface-500 mt-1">{{ $t('publication.score_description') }}</span>
                             </div>
                         </label>
                         <label class="flex items-start gap-3 p-3 rounded-lg border border-surface-200 hover:bg-surface-50 cursor-pointer transition-colors" :class="{'bg-brand-50 border-brand-200': publishForm.visibility === 'full_public'}">
                             <input type="radio" value="full_public" v-model="publishForm.visibility" class="mt-1 text-brand-600 focus:ring-brand-500" />
                             <div>
                                 <span class="block text-xs font-semibold text-surface-900 leading-none">{{ $t('publication.full_label') }}</span>
-                                <span class="block text-[10px] text-surface-500 mt-1">{{ $t('publication.full_description') }}</span>
+                                <span class="block text-xs text-surface-500 mt-1">{{ $t('publication.full_description') }}</span>
                             </div>
                         </label>
                     </div>
                 </div>
-                
+
                 <div v-if="round.public_directory" class="pt-4 border-t border-surface-100 flex justify-center">
                     <button type="button" @click="revokePublication" class="text-xs text-red-600 hover:text-red-800 font-medium underline">
                         {{ $t('publication.remove_link') }}
@@ -539,6 +563,17 @@ const copyToClipboard = (text) => {
             </div>
         </template>
     </ConfirmModal>
+
+    <ConfirmModal
+        :show="isStartReviewOpen"
+        :title="$t('round.start_review_modal_title')"
+        :message="$t('round.start_review_modal_message', { pending: pendingCount })"
+        :confirm-text="$t('round.start_review')"
+        confirm-variant="warning"
+        :processing="startingReview"
+        @confirm="startReview"
+        @close="isStartReviewOpen = false"
+    />
 
     <ConfirmModal
         :show="isRevokingModalOpen"

@@ -8,6 +8,7 @@ class AggregationService
 {
     /**
      * RN-01 — Convert answer to numeric score using canonical enum.
+     * "Não se aplica" (other) maps to null and is excluded from every average.
      */
     public static function scoreForAnswer(AnswerLevel $answer): ?int
     {
@@ -16,19 +17,22 @@ class AggregationService
 
     /**
      * RN-02 — Score da categoria.
-     * scoreCategoria = round((sum(pontos) / (totalPerguntasCategoria * 100)) * 100)
+     * scoreCategoria = round((sum(pontos) / (totalRespondidasAplicaveis * 100)) * 100)
      *
-     * @param int[] $scores  Array of numeric scores for each answered question
-     * @param int   $totalQuestions  Total number of questions in the category
+     * Only applicable answered questions count: null scores ("Não se aplica")
+     * and unanswered questions are left out of the denominator (MANUAL §9.4).
+     * Returns null when the category has no applicable answer.
+     *
+     * @param array<int|null> $scores  Scores of the answered questions
      */
-    public static function categoryScore(array $scores, int $totalQuestions): int
+    public static function categoryScore(array $scores): ?int
     {
-        if ($totalQuestions === 0) {
-            return 0;
+        $applicable = self::applicable($scores);
+        if (count($applicable) === 0) {
+            return null;
         }
 
-        $sum = array_sum($scores);
-        return (int) round(($sum / ($totalQuestions * 100)) * 100);
+        return (int) round((array_sum($applicable) / (count($applicable) * 100)) * 100);
     }
 
     /**
@@ -47,17 +51,44 @@ class AggregationService
     /**
      * RN-04 — Score da seção.
      * scoreSecao = round(sum(categoryScores) / totalCategories)
+     * Categories without applicable answers (null) are ignored.
      *
-     * @param int[] $categoryScores
+     * @param array<int|null> $categoryScores
      */
-    public static function sectionScore(array $categoryScores): int
+    public static function sectionScore(array $categoryScores): ?int
     {
-        $count = count($categoryScores);
-        if ($count === 0) {
-            return 0;
+        $applicable = self::applicable($categoryScores);
+        if (count($applicable) === 0) {
+            return null;
         }
 
-        return (int) round(array_sum($categoryScores) / $count);
+        return (int) round(array_sum($applicable) / count($applicable));
+    }
+
+    /**
+     * Score global = round(sum(sectionScores) / totalSections), ignoring sections
+     * without applicable answers.
+     *
+     * @param array<int|null> $sectionScores
+     */
+    public static function globalScore(array $sectionScores): int
+    {
+        return self::sectionScore($sectionScores) ?? 0;
+    }
+
+    /**
+     * Average of the applicable scores of a single question across evaluators.
+     *
+     * @param array<int|null> $scores
+     */
+    public static function averageScore(array $scores): ?int
+    {
+        $applicable = self::applicable($scores);
+        if (count($applicable) === 0) {
+            return null;
+        }
+
+        return (int) round(array_sum($applicable) / count($applicable));
     }
 
     /**
@@ -82,10 +113,12 @@ class AggregationService
      * 61–90  → Prata
      * 41–60  → Bronze
      * 0–40   → Incipiente
+     * null   → Sem dados (nothing applicable to evaluate)
      */
-    public static function medalForScore(int $score): string
+    public static function medalForScore(?int $score): string
     {
         return match (true) {
+            $score === null => 'no_data',
             $score >= 91 => 'gold',
             $score >= 61 => 'silver',
             $score >= 41 => 'bronze',
@@ -99,5 +132,14 @@ class AggregationService
     public static function medalLabel(string $medal): string
     {
         return __('labels.medals.' . $medal);
+    }
+
+    /**
+     * @param array<int|null> $scores
+     * @return int[]
+     */
+    private static function applicable(array $scores): array
+    {
+        return array_values(array_filter($scores, fn($s) => $s !== null));
     }
 }

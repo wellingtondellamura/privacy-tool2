@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use ZipArchive;
@@ -14,9 +15,13 @@ class DataExportController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Full project export: owner only, since it contains every member's e-mail,
+     * answers and observations (evaluator independence rule).
+     */
     public function exportProject(Project $project)
     {
-        $this->authorize('view', $project);
+        $this->authorize('update', $project);
 
         $data = $this->transformProjectData($project);
 
@@ -47,7 +52,11 @@ class DataExportController extends Controller
         }
 
         foreach ($projects as $project) {
-            $data = $this->transformProjectData($project);
+            // Owned projects are exported in full; in other projects the user only
+            // gets their own data (personal data portability).
+            $data = $project->getMemberRole($user) === 'owner'
+                ? $this->transformProjectData($project)
+                : $this->transformProjectData($project, $user);
             $fileName = Str::slug($project->name) . '.json';
             $zip->addFromString($fileName, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
@@ -57,7 +66,7 @@ class DataExportController extends Controller
         return Response::download($tempFile, $zipFileName)->deleteFileAfterSend(true);
     }
 
-    private function transformProjectData(Project $project): array
+    private function transformProjectData(Project $project, ?User $onlyFor = null): array
     {
         $project->load([
             'evaluationRounds.inspections.responses.question.category.section',
@@ -66,6 +75,8 @@ class DataExportController extends Controller
             'members.user'
         ]);
 
+        $restricted = $onlyFor !== null;
+
         return [
             'id' => $project->id,
             'name' => $project->name,
@@ -73,9 +84,13 @@ class DataExportController extends Controller
             'url' => $project->url,
             'owner' => [
                 'name' => $project->owner->name,
-                'email' => $project->owner->email,
+                // A non-owner export is personal portability, not a copy of the roster.
+                'email' => (!$restricted || $project->owner_id === $onlyFor->id) ? $project->owner->email : null,
             ],
-            'members' => $project->members->map(fn($member) => [
+            'members' => $project->members
+                ->filter(fn($member) => !$restricted || $member->user_id === $onlyFor->id)
+                ->values()
+                ->map(fn($member) => [
                 'name' => $member->user->name,
                 'email' => $member->user->email,
                 'role' => $member->role,
@@ -84,16 +99,22 @@ class DataExportController extends Controller
                 'id' => $round->id,
                 'name' => $round->name,
                 'status' => $round->status,
-                'diagnosis' => $round->diagnosis,
+                'diagnosis' => $restricted ? null : $round->diagnosis,
                 'started_at' => $round->started_at?->toIso8601String(),
                 'closed_at' => $round->closed_at?->toIso8601String(),
-                'inspections' => $round->inspections->map(fn($inspection) => [
+                'inspections' => $round->inspections
+                    ->filter(fn($inspection) => !$restricted || $inspection->user_id === $onlyFor->id)
+                    ->values()
+                    ->map(fn($inspection) => [
                     'id' => $inspection->id,
                     'sequential_id' => $inspection->sequential_id,
                     'status' => $inspection->status,
                     'started_at' => $inspection->started_at?->toIso8601String(),
                     'closed_at' => $inspection->closed_at?->toIso8601String(),
-                    'responses' => $inspection->responses->map(fn($response) => [
+                    'responses' => $inspection->responses
+                        ->filter(fn($response) => !$restricted || $response->user_id === $onlyFor->id)
+                        ->values()
+                        ->map(fn($response) => [
                         'question' => $response->question->text,
                         'category' => $response->question->category->name,
                         'section' => $response->question->category->section->name,

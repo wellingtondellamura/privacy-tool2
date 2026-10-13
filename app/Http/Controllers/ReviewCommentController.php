@@ -19,7 +19,7 @@ class ReviewCommentController extends Controller
 
         // Only allowed if the round is in the 'review' status
         if ($round->status !== 'review') {
-            return redirect()->back()->withErrors(['message' => 'Comments can only be posted during the review phase.']);
+            return redirect()->back()->withErrors(['message' => __('messages.comments_review_only')]);
         }
 
         $validated = $request->validate([
@@ -33,7 +33,7 @@ class ReviewCommentController extends Controller
             'body' => $validated['body'],
         ]);
 
-        return redirect()->back()->with('success', 'Comentário enviado.');
+        return redirect()->back()->with('success', __('messages.comment_sent'));
     }
 
     /**
@@ -52,11 +52,11 @@ class ReviewCommentController extends Controller
         }
 
         if ($round->status !== 'review') {
-            return redirect()->back()->withErrors(['message' => 'Comments can only be deleted during the review phase.']);
+            return redirect()->back()->withErrors(['message' => __('messages.comments_review_only')]);
         }
 
         $comment->delete();
 
-        return redirect()->back()->with('success', 'Comentário excluído.');
+        return redirect()->back()->with('success', __('messages.comment_deleted'));
     }
 }

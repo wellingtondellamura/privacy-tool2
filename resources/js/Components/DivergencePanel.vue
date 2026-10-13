@@ -4,8 +4,10 @@ import { useI18n } from 'vue-i18n';
 import Card from '@/Components/Card.vue';
 import Button from '@/Components/Button.vue';
 import DivergenceBadge from '@/Components/DivergenceBadge.vue';
+import { useResultFormat } from '@/composables/useResultFormat';
 
 const { t } = useI18n();
+const { formatScore } = useResultFormat();
 
 const props = defineProps({
     sections: {
@@ -254,7 +256,7 @@ const getCategoryDivergenceCounts = (cat) => {
                                     </span>
                                 </div>
                                 <span class="text-xs bg-surface-200 text-surface-800 font-semibold px-2 py-0.5 rounded-full">
-                                    {{ $t('divergence.avg_score') }}: {{ category.score }}%
+                                    {{ $t('divergence.avg_score') }}: {{ formatScore(category.score) }}
                                 </span>
                             </div>
                         </div>
@@ -279,7 +281,7 @@ const getCategoryDivergenceCounts = (cat) => {
 
                                 <div class="flex items-center gap-3 mt-3 sm:mt-0 shrink-0">
                                     <span class="text-xs bg-surface-100 text-surface-800 font-medium px-2 py-1 rounded">
-                                        Média: <span class="font-bold">{{ q.score }}</span>
+                                        Média: <span class="font-bold">{{ formatScore(q.score, '') }}</span>
                                     </span>
                                     <DivergenceBadge :classification="q.classification" />
                                     

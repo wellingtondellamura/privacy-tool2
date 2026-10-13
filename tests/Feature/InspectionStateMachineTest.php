@@ -117,3 +117,24 @@ test('state machine rejects invalid transitions at model level', function () {
     expect(fn () => $inspection->transitionTo('draft'))
         ->toThrow(\InvalidArgumentException::class);
 });
+
+test('observer cannot create an inspection', function () {
+    $observer = User::factory()->create();
+    ProjectMember::create(['project_id' => $this->project->id, 'user_id' => $observer->id, 'role' => 'observer']);
+
+    $this->actingAs($observer)
+        ->post("/projects/{$this->project->id}/inspections", ['evaluation_round_id' => $this->round->id])
+        ->assertSessionHasErrors('inspection');
+
+    expect(Inspection::count())->toBe(0);
+});
+
+test('inspection cannot be created once the round is in review', function () {
+    $this->round->update(['status' => 'review']);
+
+    $this->actingAs($this->owner)
+        ->post("/projects/{$this->project->id}/inspections", ['evaluation_round_id' => $this->round->id])
+        ->assertSessionHasErrors('status');
+
+    expect(Inspection::count())->toBe(0);
+});

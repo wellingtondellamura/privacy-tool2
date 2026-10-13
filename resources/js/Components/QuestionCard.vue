@@ -45,7 +45,9 @@ const emit = defineEmits(['saved']);
 const answer = ref(props.existingResponse?.answer || null);
 const observation = ref(props.existingResponse?.observation || '');
 const isSaving = ref(false);
+const justSaved = ref(false);
 const saveError = ref(null);
+let savedTimeout = null;
 
 let saveTimeout = null;
 
@@ -66,8 +68,11 @@ const saveResponse = async () => {
             answer: answer.value,
             observation: observation.value,
         });
-        
+
         emit('saved', response.data);
+        justSaved.value = true;
+        clearTimeout(savedTimeout);
+        savedTimeout = setTimeout(() => (justSaved.value = false), 2000);
     } catch (error) {
         saveError.value = error.response?.data?.message || t('common.save_error');
     } finally {
@@ -83,7 +88,7 @@ const triggerSave = () => {
 const selectAnswer = (val) => {
     if (props.disabled) return;
     if (answer.value === val) return;
-    
+
     answer.value = val;
     if (saveTimeout) clearTimeout(saveTimeout);
     saveResponse();
@@ -101,7 +106,7 @@ const getButtonClass = (optValue) => {
     const cfg = colorConfig[optValue] || colorConfig.other;
     const isSelected = answer.value === optValue;
     return [
-        'relative flex flex-col flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-left',
+        'relative flex flex-col flex-1 min-h-[48px] px-3 sm:px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 text-left',
         isSelected ? cfg.selected : `border-surface-200 bg-white ${cfg.hover}`,
         props.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
     ];
@@ -121,20 +126,26 @@ const getDescClass = (optValue) => {
 <template>
     <Card class="relative">
         <!-- Saving Indicator -->
-        <div v-if="isSaving" class="absolute top-4 right-4 flex items-center gap-2">
+        <div v-if="isSaving" class="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 bg-white/90 rounded-full px-2" role="status">
             <span class="relative flex h-3 w-3">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
             </span>
             <span class="text-xs text-brand-500 font-medium">{{ $t('common.saving') }}</span>
         </div>
+        <div v-else-if="justSaved" class="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 text-xs font-medium text-emerald-600 bg-white/90 rounded-full px-2" role="status">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+            {{ $t('common.saved') }}
+        </div>
 
-        <h4 class="text-lg font-medium text-surface-900 leading-relaxed pr-24 flex items-center gap-2">
+        <h4 class="text-base sm:text-lg font-medium text-surface-900 leading-relaxed pr-16 sm:pr-24 flex items-start gap-2">
             <span>{{ index }}. {{ question.text }}</span>
-            <button 
-                type="button" 
-                @click="isTooltipOpen = !isTooltipOpen" 
-                class="transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full shrink-0"
+            <button
+                type="button"
+                @click="isTooltipOpen = !isTooltipOpen"
+                class="transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-full shrink-0 p-0.5 mt-0.5"
+                :aria-label="$t('tooltip.specialist_guide')"
+                :aria-expanded="isTooltipOpen"
                 :class="isTooltipOpen
                     ? 'text-brand-700 bg-brand-100 ring-2 ring-brand-300 ring-offset-1'
                     : 'text-brand-400 hover:text-brand-600 hover:bg-brand-50'"
@@ -146,11 +157,13 @@ const getDescClass = (optValue) => {
             </button>
         </h4>
 
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <button 
-                v-for="opt in options" 
+        <div class="mt-4 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3" role="radiogroup" :aria-label="question.text">
+            <button
+                v-for="opt in options"
                 :key="opt.value"
                 type="button"
+                role="radio"
+                :aria-checked="answer === opt.value"
                 @click="selectAnswer(opt.value)"
                 :disabled="disabled"
                 :class="getButtonClass(opt.value)"
@@ -189,7 +202,7 @@ const getDescClass = (optValue) => {
         </transition>
 
         <!-- Inline Specialist Guide accordion panel -->
-        <KnowledgeTooltip 
+        <KnowledgeTooltip
             :show="isTooltipOpen"
             :question="question"
             :index="index"

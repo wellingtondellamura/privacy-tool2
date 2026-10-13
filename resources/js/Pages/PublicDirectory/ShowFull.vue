@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useResultFormat } from '@/composables/useResultFormat';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import Card from '@/Components/Card.vue';
 import Badge from '@/Components/Badge.vue';
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
+const { formatScore, medalLabel } = useResultFormat();
 
 const toRoman = (num) => {
     if (isNaN(num)) return '';
@@ -26,6 +28,7 @@ const toRoman = (num) => {
 };
 
 const getClassificationColor = (score) => {
+    if (score === null || score === undefined) return 'text-surface-500 bg-surface-50 border-surface-200';
     if (score >= 90) return 'text-success-600 bg-success-50 border-success-100';
     if (score >= 70) return 'text-brand-600 bg-brand-50 border-brand-100';
     if (score >= 50) return 'text-warning-600 bg-warning-50 border-warning-100';
@@ -49,7 +52,7 @@ const getMedalImage = (medal) => {
     if (name.includes('ouro') || name.includes('gold')) return `/images/badges-gold_${loc}.png`;
     if (name.includes('prata') || name.includes('silver')) return `/images/badges-silver_${loc}.png`;
     if (name.includes('bronze')) return `/images/badges-bronze_${loc}.png`;
-    
+
     return null;
 };
 </script>
@@ -58,7 +61,7 @@ const getMedalImage = (medal) => {
     <PublicLayout :title="t('directory.full_page_title', { name: tool.name })">
         <div class="py-12 bg-surface-50 min-h-screen">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-                
+
                 <!-- Back Link & Header -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div class="flex items-center gap-4">
@@ -70,17 +73,17 @@ const getMedalImage = (medal) => {
                             <p class="text-xs text-surface-500 font-medium mt-1">
                                 {{ $t('directory.full_inspection_date', { date: tool.inspection_date }) }}
                             </p>
-                            <a 
-                                :href="tool.url" 
-                                target="_blank" 
+                            <a
+                                :href="tool.url"
+                                target="_blank"
                                 class="text-xs text-brand-600 hover:text-brand-700 transition-colors underline underline-offset-2 break-all"
                             >{{ tool.url }}</a>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center gap-4 bg-white p-2 pl-6 rounded-2xl shadow-sm border border-surface-200">
                         <div class="text-right">
-                            <p class="text-[10px] font-bold text-surface-400 uppercase tracking-tighter">{{ $t('directory.full_consolidated_score') }}</p>
+                            <p class="text-xs font-bold text-surface-400 uppercase tracking-tighter">{{ $t('directory.full_consolidated_score') }}</p>
                             <p class="text-2xl font-black text-surface-900 leading-none">{{ tool.report.global_score }}%</p>
                         </div>
 
@@ -90,15 +93,15 @@ const getMedalImage = (medal) => {
                 <!-- Medal, Summary & Provenance -->
                 <div class="grid md:grid-cols-3 gap-6">
                     <Card class="md:col-span-1 p-8 flex flex-col items-center justify-center text-center space-y-4">
-                        <div class="text-[10px] font-bold text-surface-400 uppercase tracking-widest">{{ $t('directory.full_classification') }}</div>
+                        <div class="text-xs font-bold text-surface-400 uppercase tracking-widest">{{ $t('directory.full_classification') }}</div>
                         <div v-if="tool.report.medal" class="flex flex-col items-center gap-2 font-medium">
-                            <img v-if="getMedalImage(tool.report.medal)" 
-                                 :src="getMedalImage(tool.report.medal)" 
-                                 class="w-32 h-32 object-contain drop-shadow-md mb-1" 
-                                 :alt="tool.report.medal.name || tool.report.medal" />
-                            
+                            <img v-if="getMedalImage(tool.report.medal)"
+                                 :src="getMedalImage(tool.report.medal)"
+                                 class="w-32 h-32 object-contain drop-shadow-md mb-1"
+                                 :alt="medalLabel(tool.report.medal)" />
+
                             <Badge v-else :variant="getMedalVariant(tool.report.medal)" size="lg" class="px-6 py-2 text-sm uppercase tracking-widest shadow-sm">
-                                {{ tool.report.medal.name || tool.report.medal }}
+                                {{ medalLabel(tool.report.medal) }}
                             </Badge>
                             <p class="text-xs text-surface-400 font-medium mt-1 italic">{{ $t('directory.full_achieved_through', { count: tool.report.inspection_count || tool.inspection_count }) }}</p>
                         </div>
@@ -116,7 +119,7 @@ const getMedalImage = (medal) => {
                         </div>
                     </Card>
 
-                    <ProvenanceBadge 
+                    <ProvenanceBadge
                         :is-self-assessment="tool.is_self_assessment"
                         :software-version="tool.software_version"
                         :user-count="tool.user_count_total || tool.user_count || 0"
@@ -133,7 +136,7 @@ const getMedalImage = (medal) => {
                         <h2 class="text-2xl font-bold text-surface-900 tracking-tight whitespace-nowrap">{{ $t('directory.full_dimension_detail') }}</h2>
                         <div class="h-px bg-surface-200 w-full"></div>
                     </div>
-                    
+
                     <div v-for="(section, sIndex) in tool.report.sections" :key="section.id" class="group">
                         <div class="bg-white rounded-3xl border border-surface-200 overflow-hidden shadow-sm hover:shadow-tactile transition-all duration-smooth">
                             <div class="px-8 py-5 bg-surface-50/80 border-b border-surface-200 flex justify-between items-center group-hover:bg-surface-50 transition-colors">
@@ -143,15 +146,15 @@ const getMedalImage = (medal) => {
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <Badge v-if="section.medal" :variant="getMedalVariant(section.medal)" size="sm" class="hidden sm:block">
-                                        {{ section.medal }}
+                                        {{ medalLabel(section.medal) }}
                                     </Badge>
                                     <div class="flex flex-col items-end">
                                         <span class="text-[8px] font-bold text-surface-400 uppercase leading-none mb-0.5">Score</span>
-                                        <span class="text-2xl font-black text-brand-600 leading-none">{{ section.score }}%</span>
+                                        <span class="text-2xl font-black text-brand-600 leading-none">{{ formatScore(section.score) }}</span>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="divide-y divide-surface-100">
                                 <div v-for="category in section.categories" :key="category.id" class="p-8">
                                     <div class="flex justify-between items-center mb-6">
@@ -159,14 +162,14 @@ const getMedalImage = (medal) => {
                                             <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
                                             {{ category.name }}
                                         </h4>
-                                        <span class="px-3 py-1 bg-surface-50 rounded-lg border border-surface-100 text-sm font-black text-surface-600">{{ category.score }}%</span>
+                                        <span class="px-3 py-1 bg-surface-50 rounded-lg border border-surface-100 text-sm font-black text-surface-600">{{ formatScore(category.score) }}</span>
                                     </div>
-                                    
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div v-for="question in category.questions" :key="question.question_id" class="p-4 bg-surface-50/50 rounded-2xl border border-surface-100 flex justify-between items-center gap-6 group/item hover:bg-white hover:border-brand-200 transition-all shadow-sm shadow-black/[0.02]">
                                             <span class="text-xs text-surface-700 leading-tight font-medium">{{ question.question_text }}</span>
-                                            <span class="shrink-0 px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm" :class="getClassificationColor(question.score)">
-                                                {{ question.score }}%
+                                            <span class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border shadow-sm" :class="getClassificationColor(question.score)">
+                                                {{ formatScore(question.score) }}
                                             </span>
                                         </div>
                                     </div>

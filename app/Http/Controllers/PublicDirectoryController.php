@@ -16,7 +16,7 @@ class PublicDirectoryController extends Controller
     {
         $query = RoundPublication::query()
             ->where('visibility', '!=', Visibility::PRIVATE)
-            ->with(['evaluationRound.project', 'evaluationRound.inspections.questionnaireVersion']);
+            ->with(['evaluationRound.project', 'evaluationRound.latestSnapshot']);
 
         // Filter by Medal
         if ($request->filled('medal')) {
@@ -43,7 +43,7 @@ class PublicDirectoryController extends Controller
         };
 
         $publications = $query->paginate(15)->withQueryString()->through(function ($pub) {
-            $latestSnapshot = $pub->evaluationRound->snapshots()->latest()->first();
+            $latestSnapshot = $pub->evaluationRound->latestSnapshot;
             $payload = $latestSnapshot ? $latestSnapshot->payload_json : [];
             
             $score = ($pub->score && $pub->score > 0) ? $pub->score : ($payload['global_score'] ?? 0);
@@ -100,7 +100,7 @@ class PublicDirectoryController extends Controller
                         'medal' => $s['medal'],
                     ]),
                     'inspection_date' => $publication->evaluationRound->closed_at?->format('d/m/Y'),
-                    'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
+                    'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion?->version_number,
                     'user_count' => $payload['user_count'] ?? 0,
                     'diagnosis' => $publication->evaluationRound->diagnosis,
                     'is_self_assessment' => (bool) ($payload['is_self_assessment'] ?? $project->is_self_assessment),
@@ -124,7 +124,7 @@ class PublicDirectoryController extends Controller
                 'url' => $project->url,
                 'report' => $safePayload,
                 'inspection_date' => $publication->evaluationRound->closed_at?->format('d/m/Y'),
-                'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion->version,
+                'version' => $publication->evaluationRound->inspections()->first()?->questionnaireVersion?->version_number,
                 'is_self_assessment' => (bool) ($payload['is_self_assessment'] ?? $project->is_self_assessment),
                 'software_version' => $payload['software_version'] ?? $publication->evaluationRound->software_version,
                 'user_count_total' => $payload['user_count_total'] ?? $payload['user_count'] ?? 0,

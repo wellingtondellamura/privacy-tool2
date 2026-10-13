@@ -122,3 +122,37 @@ test('comparison rejects different projects', function () {
     expect(fn () => ComparisonService::compare($baseline, $comparison))
         ->toThrow(\InvalidArgumentException::class);
 });
+
+test('null or missing scores do not become a delta against zero', function () {
+    $result = ComparisonService::comparePayloads(
+        [
+            'sections' => [
+                ['id' => 1, 'name' => 'Section 1', 'score' => null, 'categories' => [
+                    ['id' => 1, 'name' => 'Cat 1', 'score' => null, 'questions' => [
+                        ['question_id' => 1, 'score' => null],
+                    ]],
+                ]],
+            ],
+        ],
+        [
+            'sections' => [
+                ['id' => 1, 'name' => 'Section 1', 'score' => 80, 'categories' => [
+                    ['id' => 1, 'name' => 'Cat 1', 'score' => 80, 'questions' => [
+                        ['question_id' => 1, 'score' => 80],
+                        ['question_id' => 2, 'score' => 50],
+                    ]],
+                ]],
+                ['id' => 2, 'name' => 'No baseline section', 'score' => 50, 'categories' => []],
+            ],
+        ],
+    );
+
+    expect($result['sections'][0]['baseline_score'])->toBeNull();
+    expect($result['sections'][0]['delta'])->toBeNull();
+    expect($result['sections'][0]['categories'][0]['delta'])->toBeNull();
+    expect($result['sections'][0]['categories'][0]['questions'][0]['delta'])->toBeNull();
+    expect($result['sections'][0]['categories'][0]['questions'][1]['baseline_score'])->toBeNull();
+    expect($result['sections'][0]['categories'][0]['questions'][1]['delta'])->toBeNull();
+    expect($result['sections'][1]['baseline_score'])->toBeNull();
+    expect($result['sections'][1]['delta'])->toBeNull();
+});
