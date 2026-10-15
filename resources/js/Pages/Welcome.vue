@@ -399,6 +399,7 @@ const menuOpen = ref(false);
 
                 <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-surface-500">
                     <p>&copy; {{ new Date().getFullYear() }} Mitra Tool. {{ $t('welcome.footer_rights') }}</p>
+                    <Link :href="route('credits')" class="mt-2 sm:mt-0 hover:text-surface-300 transition-colors">{{ $t('footer.credits_link') }}</Link>
                 </div>
             </div>
         </footer>

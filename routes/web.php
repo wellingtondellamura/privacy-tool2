@@ -30,12 +30,16 @@ Route::get('/manual', function () {
 })->name('manual');
 
 Route::get('/terms-of-use', function () {
-    return Inertia::render('TermsOfUse');
+    return Inertia::render('TermsOfUse', ['legal' => config('legal')]);
 })->name('terms.use');
 
 Route::get('/privacy-policy', function () {
-    return Inertia::render('PrivacyPolicy');
+    return Inertia::render('PrivacyPolicy', ['legal' => config('legal')]);
 })->name('privacy.policy');
+
+Route::get('/creditos', function () {
+    return Inertia::render('Credits', ['credits' => config('credits')]);
+})->name('credits');
 
 
 Route::get('/dashboard', function () {
