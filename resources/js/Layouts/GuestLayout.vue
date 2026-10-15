@@ -104,7 +104,10 @@ defineProps({
                 <!-- Footer info -->
                 <div class="relative z-10 pt-4 mt-4 border-t border-white/10 text-[10px] text-brand-200 flex justify-between items-center">
                     <span>{{ $t('results.footer.developed_with') }}</span>
-                    <span>v1.0</span>
+                    <span class="flex items-center gap-2">
+                        <Link :href="route('credits')" class="hover:text-white transition-colors">{{ $t('footer.credits_link') }}</Link>
+                        <span>v1.0</span>
+                    </span>
                 </div>
             </div>
 
